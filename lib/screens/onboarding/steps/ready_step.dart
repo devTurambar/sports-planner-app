@@ -128,7 +128,7 @@ class _PreviewRow extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              planned ? 'Session planned' : 'Rest',
+              planned ? 'Session planned' : 'Open',
               style: KText.bodySm.copyWith(
                 color: planned ? colors.fgPrimary : colors.fgTertiary,
                 fontWeight: planned ? FontWeight.w500 : FontWeight.w400,

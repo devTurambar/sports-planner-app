@@ -34,7 +34,7 @@ lib/
     home/                 # Shell (IndexedStack + bottom nav)
     week/                 # Week view + day card
     month/                # Month grid + selected-day detail
-    day_detail/           # Modal bottom sheet for editing a day
+    day_detail/           # Day overview sheet + add/edit form sheet
     empty/                # Empty state
     settings/             # Settings screen
 ```
@@ -59,9 +59,68 @@ lib/
 - **Today**: read "today" from `TodayScope.of(context)`, not
   `DateTime.now()` directly, so widgets rebuild on app resume / date
   rollover.
+- **DayStatus has four values**: `empty | planned | today | done`. There
+  is no `rest` — empty days *are* rest days. The dead
+  `colors.statusRest*` tokens still live in `kadence_colors.dart` but
+  are unused; safe to ignore or delete.
+- **Multiple activities per day**: `PlanController` stores
+  `Map<String, List<Activity>>` — each date can hold N entries. APIs:
+  - `forDate(date) → Activity` returns the *primary* (priority order:
+    today > planned > done, then insertion order). Falls back to a
+    synthetic empty placeholder.
+  - `activitiesFor(date) → List<Activity>` returns all entries.
+  - `extrasFor(date) → int` is the count beyond the primary (used for
+    "+N more" badges in the week view).
+  - `save({date, id?, ...})`: pass `id` to update an existing entry,
+    omit it to append a new one.
+  - `toggleDone(date, {id})`: toggles a single activity. `id` optional —
+    when omitted, the day's primary is toggled.
+  - `toggleAllDone(date)`: lockstep flip across every activity on the
+    day. If all are done, marks them planned/today; otherwise marks
+    them all done. Used by the week view's parent check button so
+    "checking the parent" cascades to all children.
+- **Parent ↔ child check sync**: the week-view DayCard's check button
+  toggles every activity on the day (`toggleAllDone`). The auto-up
+  direction (children all done → parent visibly done) works for free
+  because `_pickPrimary` ranks `today > planned > done`: done only
+  wins when nothing else is left.
 - **Status promotion**: an empty day that equals today should render as
-  `DayStatus.today`, not `empty`. This is handled in `PlanController`
-  and in Month grid cell build logic.
+  `DayStatus.today`, not `empty`. Stored `planned` activities are also
+  surfaced as `today` at read time when the date matches today (see
+  `_withSyncedTodayStatus`) — handled inside `PlanController`, callers
+  shouldn't reapply this themselves.
+- **Recurrence**: defined in `day_detail_sheet.dart` as
+  `RecurrenceRule { none, daily, weekly, weekdays, weekends }`. On
+  save it `expand`s into a list of dates and the sheet calls
+  `plan.save(...)` for each. Recurrence creates independent
+  activities — editing one does not propagate to siblings. Hidden
+  when the sheet is in edit mode (`_isEditable == true`).
+- **Two distinct sheets** in `lib/screens/day_detail/`:
+  - `day_overview_sheet.dart` (`showDayOverviewSheet`) — lists every
+    activity on a day, with per-row check + edit and an "Add session"
+    button at the bottom. Opened by tapping a non-empty day card in
+    the week view, or via the "Add" button on the month view's
+    selected-day card.
+  - `day_detail_sheet.dart` (`showDayDetailSheet`) — the form for
+    creating or editing a single activity. Reached from the overview
+    sheet's row tap / Add button, and directly from an empty day
+    card in the week view (fast path: empty → straight to the form).
+- **Shared activity row**: `lib/widgets/k_activity_card.dart` exports
+  `KActivityCard` — a bordered tile with name + status chip + meta
+  + trailing affordance (check button when `onCheckTap` is provided,
+  otherwise a chevron). Used by both `day_overview_sheet.dart` and
+  the month view's `selected_day_card.dart`. Don't duplicate this
+  layout; extend `KActivityCard` instead.
+- **Bottom sheets and the gesture/safe area**: pad the inner
+  scrolling content with `MediaQuery.paddingOf(context).bottom` so
+  controls don't sit under the Android gesture bar (see
+  `day_detail_sheet.dart`). Flutter's `useSafeArea: true` alone is
+  inconsistent across versions for the bottom inset.
+- **Hit testing for nested tap targets**: when an interactive control
+  (e.g. the check-button circle in `day_card.dart`) sits inside a row
+  that itself is `InkWell`-tappable, use `Material + InkWell` on both,
+  not a `GestureDetector` for the inner element. Mixed
+  GestureDetector/InkWell can let the outer tap win.
 - **Icons**: Lucide names are camelCase in `lucide_icons_flutter`
   (`LucideIcons.chevronLeft`). If the package version differs, the
   compile error will be obvious — adjust casing.
@@ -99,6 +158,16 @@ without discussion.
   `MediaQuery.viewInsetsOf(context).bottom`. Don't wrap the sheet in
   `SingleChildScrollView` at the top level — the inner list handles
   scrolling.
+- **Week view navigation**: `WeekView` is a `StatefulWidget` whose
+  state class is exported (`WeekViewState`) so the parent shell can
+  reach it via a `GlobalKey<WeekViewState>` and call `jumpToToday()`.
+  The "Today" button in `KTopBar` from `home_screen.dart` is wired
+  this way. `_cursor` is a date *inside* the displayed week — null
+  means "show today's week".
+- **Hot reload vs hot restart**: changing a const class's constructor
+  shape (renaming/adding/removing fields) is rejected by hot reload
+  with "Const class cannot remove fields". Press `R` (capital — hot
+  restart) instead of `r` after that kind of edit.
 
 ## Not done yet
 

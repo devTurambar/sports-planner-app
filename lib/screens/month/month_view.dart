@@ -112,8 +112,6 @@ class _MonthViewState extends State<MonthView> {
     final plannedCount = monthStatuses
         .where((s) => s == DayStatus.planned || s == DayStatus.today)
         .length;
-    final restCount =
-        monthStatuses.where((s) => s == DayStatus.rest).length;
 
     return ListView(
       controller: _scroll,
@@ -147,10 +145,6 @@ class _MonthViewState extends State<MonthView> {
                 label: 'Planned',
               ),
             ),
-            const SizedBox(width: KSpace.s1 + 2),
-            Expanded(
-              child: KStatCard(value: restCount.toString(), label: 'Rest'),
-            ),
           ],
         ),
         const SizedBox(height: KSpace.s2 + 2),
@@ -170,13 +164,16 @@ class _MonthViewState extends State<MonthView> {
             key: _detailKey,
             child: _AnimatedDetail(
               child: SelectedDayCard(
-                activity: plan.forDate(_selected!),
+                date: _selected!,
+                activities: plan.activitiesFor(_selected!),
                 onClose: () => setState(() => _selected = null),
-                onEdit: () => showDayDetailSheet(
+                onEditActivity: (activity) => showDayDetailSheet(
                   context: context,
                   date: _selected!,
-                  existing: plan.forDate(_selected!),
+                  existing: activity,
                 ),
+                onToggleActivity: (activity) =>
+                    plan.toggleDone(_selected!, id: activity.id),
                 onAdd: () => showDayDetailSheet(
                   context: context,
                   date: _selected!,
@@ -347,17 +344,6 @@ class _Legend extends StatelessWidget {
           decoration: BoxDecoration(
             color: colors.accent,
             borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-      ),
-      _LegendItem(
-        label: 'Rest',
-        icon: Container(
-          width: 11,
-          height: 2,
-          decoration: BoxDecoration(
-            color: colors.fgDisabled,
-            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ),

@@ -56,9 +56,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
   int _weeks = 4;
 
   bool get _isEditable =>
-      widget.existing != null &&
-      widget.existing!.status != DayStatus.empty &&
-      widget.existing!.status != DayStatus.rest;
+      widget.existing != null && widget.existing!.status != DayStatus.empty;
 
   bool get _hasName => _name.text.trim().isNotEmpty;
 
@@ -80,21 +78,34 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
   void _save() {
     if (!_hasName) return;
     final plan = context.read<PlanController>();
-    final dates = _recurrence.expand(widget.date, _weeks);
     final duration =
         _duration.text.trim().isEmpty ? null : _duration.text.trim();
     final intensity =
         _intensity.text.trim().isEmpty ? null : _intensity.text.trim();
     final notes = _notes.text.trim().isEmpty ? null : _notes.text.trim();
-    for (final date in dates) {
+
+    if (_isEditable) {
       plan.save(
-        date: date,
+        date: widget.date,
+        id: widget.existing!.id,
         name: _name.text,
         type: _type,
         duration: duration,
         intensity: intensity,
         notes: notes,
       );
+    } else {
+      final dates = _recurrence.expand(widget.date, _weeks);
+      for (final date in dates) {
+        plan.save(
+          date: date,
+          name: _name.text,
+          type: _type,
+          duration: duration,
+          intensity: intensity,
+          notes: notes,
+        );
+      }
     }
     Navigator.of(context).pop();
   }

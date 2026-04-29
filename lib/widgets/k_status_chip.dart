@@ -37,19 +37,6 @@ class KStatusChip extends StatelessWidget {
         label = 'Planned';
         icon = _Dot(size: 6, color: colors.statusPlanned, filled: false);
         break;
-      case DayStatus.rest:
-        bg = colors.statusRestBg;
-        fg = colors.fgTertiary;
-        label = 'Rest';
-        icon = Container(
-          width: 8,
-          height: 1.5,
-          decoration: BoxDecoration(
-            color: colors.fgDisabled,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        );
-        break;
       case DayStatus.empty:
         bg = colors.bgSubtle;
         fg = colors.fgTertiary;

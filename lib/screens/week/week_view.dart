@@ -10,6 +10,7 @@ import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/k_stat_card.dart';
 import '../day_detail/day_detail_sheet.dart';
+import '../day_detail/day_overview_sheet.dart';
 import '../empty/empty_state_view.dart';
 import 'widgets/day_card.dart';
 
@@ -48,9 +49,8 @@ class WeekViewState extends State<WeekView> {
       KDate.mondayOfWeek(today),
     );
 
-    final countable = week
-        .where((a) => a.status != DayStatus.empty && a.status != DayStatus.rest)
-        .length;
+    final countable =
+        week.where((a) => a.status != DayStatus.empty).length;
     final done = week.where((a) => a.status == DayStatus.done).length;
     final planned = week
         .where((a) =>
@@ -60,7 +60,8 @@ class WeekViewState extends State<WeekView> {
     if (isCurrentWeek && countable == 0 && done == 0) {
       // Current week is fully empty — show the empty state.
       return EmptyStateView(
-        onAdd: () => _openDetail(context, today, isNew: true),
+        onAdd: () =>
+            showDayDetailSheet(context: context, date: today, existing: null),
       );
     }
 
@@ -108,7 +109,8 @@ class WeekViewState extends State<WeekView> {
         for (final item in week) ...<Widget>[
           DayCard(
             activity: item,
-            onTap: () => _openDetail(context, item.date, item: item),
+            extras: plan.extrasFor(item.date),
+            onTap: () => _handleRowTap(context, item),
             onCheckTap: () => _handleCheck(context, item),
           ),
           const SizedBox(height: KSpace.s2),
@@ -117,28 +119,31 @@ class WeekViewState extends State<WeekView> {
     );
   }
 
+  void _handleRowTap(BuildContext context, Activity item) {
+    if (item.status == DayStatus.empty) {
+      // Empty day: skip the overview, go straight to the add form.
+      showDayDetailSheet(context: context, date: item.date, existing: null);
+    } else {
+      showDayOverviewSheet(context: context, date: item.date);
+    }
+  }
+
   void _handleCheck(BuildContext context, Activity item) {
     final plan = context.read<PlanController>();
     switch (item.status) {
       case DayStatus.planned:
       case DayStatus.today:
       case DayStatus.done:
-        plan.toggleDone(item.date);
+        plan.toggleAllDone(item.date);
         break;
       case DayStatus.empty:
-      case DayStatus.rest:
-        _openDetail(context, item.date, item: item);
+        showDayDetailSheet(
+          context: context,
+          date: item.date,
+          existing: null,
+        );
         break;
     }
-  }
-
-  void _openDetail(BuildContext context, DateTime date,
-      {Activity? item, bool isNew = false}) {
-    showDayDetailSheet(
-      context: context,
-      date: date,
-      existing: isNew ? null : item,
-    );
   }
 }
 

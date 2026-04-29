@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 /// A day is always in exactly one state. `today` is a convenience flag used
 /// by the week view — it means "active day not yet done" and lives
 /// alongside `planned` to highlight where the user currently stands.
-enum DayStatus { empty, planned, today, done, rest }
+enum DayStatus { empty, planned, today, done }
 
 /// Sport / activity category. The values match the design bundle's pills
 /// so copy stays aligned end-to-end.

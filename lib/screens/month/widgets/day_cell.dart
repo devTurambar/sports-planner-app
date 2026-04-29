@@ -29,7 +29,6 @@ class MonthDayCell extends StatelessWidget {
     final isToday = status == DayStatus.today;
     final isDone = status == DayStatus.done;
     final isPlan = status == DayStatus.planned;
-    final isRest = status == DayStatus.rest;
 
     Color? bg;
     Border? border;
@@ -41,8 +40,6 @@ class MonthDayCell extends StatelessWidget {
     } else if (isDone) {
       bg = colors.accentLight;
       numberColor = colors.accent;
-    } else if (isRest) {
-      numberColor = colors.fgDisabled;
     }
 
     if (selected) {
@@ -59,8 +56,6 @@ class MonthDayCell extends StatelessWidget {
       indicator = _Shape.ring(color: colors.fgTertiary);
     } else if (isToday) {
       indicator = _Shape.dot(color: colors.accentFg.withValues(alpha: 0.7));
-    } else if (isRest) {
-      indicator = _Shape.dash(color: colors.fgDisabled);
     }
 
     return Material(
@@ -117,10 +112,6 @@ class _Shape extends StatelessWidget {
       : _variant = _ShapeVariant.ring,
         size = 5;
 
-  const _Shape.dash({required this.color})
-      : _variant = _ShapeVariant.dash,
-        size = 8;
-
   final Color color;
   final double size;
   final _ShapeVariant _variant;
@@ -143,17 +134,8 @@ class _Shape extends StatelessWidget {
             border: Border.all(color: color, width: 1.5),
           ),
         );
-      case _ShapeVariant.dash:
-        return Container(
-          width: size,
-          height: 1.5,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(1),
-          ),
-        );
     }
   }
 }
 
-enum _ShapeVariant { dot, ring, dash }
+enum _ShapeVariant { dot, ring }

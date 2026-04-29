@@ -13,12 +13,17 @@ class DayCard extends StatelessWidget {
     required this.activity,
     required this.onTap,
     required this.onCheckTap,
+    this.extras = 0,
     super.key,
   });
 
   final Activity activity;
   final VoidCallback onTap;
   final VoidCallback onCheckTap;
+
+  /// Count of additional activities on the same day, beyond [activity].
+  /// When greater than 0 a "+N" badge is shown.
+  final int extras;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +32,6 @@ class DayCard extends StatelessWidget {
 
     final isToday = status == DayStatus.today;
     final isDone = status == DayStatus.done;
-    final isRest = status == DayStatus.rest;
     final isEmpty = status == DayStatus.empty;
 
     final borderColor = isToday
@@ -45,11 +49,8 @@ class DayCard extends StatelessWidget {
             ? Colors.transparent
             : colors.bgElevated;
 
-    final dotColor = isToday || isDone
-        ? colors.accent
-        : isRest
-            ? colors.border
-            : colors.fgDisabled;
+    final dotColor =
+        isToday || isDone ? colors.accent : colors.fgDisabled;
 
     return Material(
       color: Colors.transparent,
@@ -92,7 +93,7 @@ class DayCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: KSpace.s3 + 2),
-                  Expanded(child: _Content(activity: activity)),
+                  Expanded(child: _Content(activity: activity, extras: extras)),
                   const SizedBox(width: KSpace.s2),
                   _CheckButton(activity: activity, onTap: onCheckTap),
                 ],
@@ -145,9 +146,10 @@ class _DayStamp extends StatelessWidget {
 }
 
 class _Content extends StatelessWidget {
-  const _Content({required this.activity});
+  const _Content({required this.activity, this.extras = 0});
 
   final Activity activity;
+  final int extras;
 
   @override
   Widget build(BuildContext context) {
@@ -165,24 +167,31 @@ class _Content extends StatelessWidget {
     }
 
     final isDone = status == DayStatus.done;
-    final isRest = status == DayStatus.rest;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          activity.name ?? '—',
-          style: KText.body.copyWith(
-            fontWeight: isRest ? FontWeight.w400 : FontWeight.w500,
-            color: isDone
-                ? colors.accentMuted
-                : isRest
-                    ? colors.fgTertiary
-                    : colors.fgPrimary,
-            decoration:
-                isDone ? TextDecoration.lineThrough : TextDecoration.none,
-            decorationColor: colors.accentMuted,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Flexible(
+              child: Text(
+                activity.name ?? '—',
+                style: KText.body.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: isDone ? colors.accentMuted : colors.fgPrimary,
+                  decoration: isDone
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
+                  decorationColor: colors.accentMuted,
+                ),
+              ),
+            ),
+            if (extras > 0) ...<Widget>[
+              const SizedBox(width: 6),
+              _MoreBadge(count: extras),
+            ],
+          ],
         ),
         if (activity.meta != null) ...<Widget>[
           const SizedBox(height: 2),
@@ -196,6 +205,32 @@ class _Content extends StatelessWidget {
           _TypePill(type: activity.type!),
         ],
       ],
+    );
+  }
+}
+
+class _MoreBadge extends StatelessWidget {
+  const _MoreBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      decoration: BoxDecoration(
+        color: colors.accentLight,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '+$count more',
+        style: KText.caption.copyWith(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: colors.accent,
+        ),
+      ),
     );
   }
 }
@@ -238,24 +273,19 @@ class _CheckButton extends StatelessWidget {
     final status = activity.status;
     final isDone = status == DayStatus.done;
     final isToday = status == DayStatus.today;
-    final isRest = status == DayStatus.rest;
     final isEmpty = status == DayStatus.empty;
 
     final bg = isDone
         ? colors.accent
         : isToday
             ? colors.accentLight
-            : isRest
-                ? colors.statusRestBg
-                : colors.bgSubtle;
+            : colors.bgSubtle;
 
     final fg = isDone
         ? colors.accentFg
         : isToday
             ? colors.accent
-            : isRest
-                ? colors.fgTertiary
-                : colors.fgDisabled;
+            : colors.fgDisabled;
 
     final IconData icon;
     if (isDone) {
