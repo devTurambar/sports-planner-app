@@ -73,15 +73,19 @@ class KActivityCard extends StatelessWidget {
                         _StatusChip(label: chipLabel, bg: chipBg, fg: chipFg),
                       ],
                     ),
-                    if (activity.meta != null) ...<Widget>[
-                      const SizedBox(height: 3),
-                      Text(
-                        activity.meta!,
+                    const SizedBox(height: 3),
+                    Visibility(
+                      visible: activity.meta != null,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: Text(
+                        activity.meta ?? '',
                         style: KText.caption.copyWith(
                           color: colors.fgSecondary,
                         ),
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),

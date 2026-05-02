@@ -11,7 +11,6 @@ import '../../utils/date_utils.dart';
 import '../../widgets/k_stat_card.dart';
 import '../day_detail/day_detail_sheet.dart';
 import '../day_detail/day_overview_sheet.dart';
-import '../empty/empty_state_view.dart';
 import 'widgets/day_card.dart';
 
 /// Week view — the default home screen.
@@ -49,25 +48,18 @@ class WeekViewState extends State<WeekView> {
       KDate.mondayOfWeek(today),
     );
 
-    final countable =
-        week.where((a) => a.status != DayStatus.empty).length;
-    final done = week.where((a) => a.status == DayStatus.done).length;
-    final planned = week
-        .where((a) =>
-            a.status == DayStatus.planned || a.status == DayStatus.today)
-        .length;
-
-    if (isCurrentWeek && countable == 0 && done == 0) {
-      // Current week is fully empty — show the empty state.
-      return EmptyStateView(
-        onAdd: () =>
-            showDayDetailSheet(context: context, date: today, existing: null),
-      );
+    var planned = 0;
+    var done = 0;
+    for (final item in week) {
+      for (final a in plan.activitiesFor(item.date)) {
+        planned++;
+        if (a.status == DayStatus.done) done++;
+      }
     }
 
-    final onTrack = countable == 0
+    final onTrack = planned == 0
         ? 0
-        : ((done / countable) * 100).round().clamp(0, 100);
+        : ((done / planned) * 100).round().clamp(0, 100);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(

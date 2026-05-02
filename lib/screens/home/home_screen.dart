@@ -11,11 +11,12 @@ import '../../widgets/k_top_bar.dart';
 import '../day_detail/day_detail_sheet.dart';
 import '../month/month_view.dart';
 import '../settings/settings_screen.dart';
+import '../stats/stats_view.dart';
 import '../week/week_view.dart';
 
-/// App shell with three tabs (Week / Month / Settings), a floating
-/// action button that opens the add-session sheet, and a top bar that
-/// swaps title and leading based on the active tab.
+/// App shell with four tabs (Week / Month / Stats / Settings), a
+/// floating action button that opens the add-session sheet, and a top
+/// bar that swaps title and leading based on the active tab.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final String title = switch (_tab) {
       HomeTab.week => '${today.shortMonth} ${today.year}',
       HomeTab.month => '${today.fullMonth} ${today.year}',
+      HomeTab.stats => 'Stats',
       HomeTab.settings => 'Settings',
     };
 
@@ -69,10 +71,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: <Widget>[
           WeekView(key: _weekKey),
           const MonthView(),
+          const StatsView(),
           const SettingsScreen(),
         ],
       ),
-      floatingActionButton: _tab == HomeTab.settings
+      floatingActionButton:
+          _tab == HomeTab.settings || _tab == HomeTab.stats
           ? null
           : _KadenceFab(
               onPressed: () => showDayDetailSheet(

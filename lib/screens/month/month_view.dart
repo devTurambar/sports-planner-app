@@ -103,15 +103,15 @@ class _MonthViewState extends State<MonthView> {
         }),
     ];
 
-    final monthStatuses = List<DayStatus>.generate(totalDays, (i) {
-      final d = DateTime(_cursor.year, _cursor.month, i + 1);
-      return plan.forDate(d).status;
-    });
-    final doneCount =
-        monthStatuses.where((s) => s == DayStatus.done).length;
-    final plannedCount = monthStatuses
-        .where((s) => s == DayStatus.planned || s == DayStatus.today)
-        .length;
+    var doneCount = 0;
+    var plannedCount = 0;
+    for (var i = 1; i <= totalDays; i++) {
+      final d = DateTime(_cursor.year, _cursor.month, i);
+      for (final a in plan.activitiesFor(d)) {
+        plannedCount++;
+        if (a.status == DayStatus.done) doneCount++;
+      }
+    }
 
     return ListView(
       controller: _scroll,

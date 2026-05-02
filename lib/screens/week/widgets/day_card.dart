@@ -5,6 +5,7 @@ import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
+import '../../../utils/date_utils.dart';
 
 /// A row in the week list. Structure: day/date column, status dot,
 /// activity block, and a tappable check/action circle on the right.
@@ -157,8 +158,10 @@ class _Content extends StatelessWidget {
     final status = activity.status;
 
     if (status == DayStatus.empty) {
+      final today = TodayScope.of(context);
+      final isPast = activity.date.isBefore(KDate.startOfDay(today));
       return Text(
-        'Nothing planned',
+        isPast ? 'Rest day' : 'No session',
         style: KText.body.copyWith(
           color: colors.fgDisabled,
           fontSize: 14,

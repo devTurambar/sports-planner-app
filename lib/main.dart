@@ -21,6 +21,7 @@ Future<void> main() async {
   );
 
   final prefs = await SharedPreferences.getInstance();
+  final planController = await PlanController.create();
 
   runApp(
     MultiProvider(
@@ -31,8 +32,8 @@ Future<void> main() async {
         ChangeNotifierProvider<OnboardingController>(
           create: (_) => OnboardingController(prefs),
         ),
-        ChangeNotifierProvider<PlanController>(
-          create: (_) => PlanController(),
+        ChangeNotifierProvider<PlanController>.value(
+          value: planController,
         ),
       ],
       child: const KadenceApp(),

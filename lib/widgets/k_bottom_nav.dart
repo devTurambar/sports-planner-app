@@ -4,8 +4,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_text_styles.dart';
 
-/// The three main home destinations.
-enum HomeTab { week, month, settings }
+/// The four main home destinations.
+enum HomeTab { week, month, stats, settings }
 
 /// Bottom nav bar for the app shell.
 class KBottomNav extends StatelessWidget {
@@ -42,6 +42,13 @@ class KBottomNav extends StatelessWidget {
               tab: HomeTab.month,
               label: 'Month',
               icon: LucideIcons.layoutGrid,
+              current: current,
+              onSelect: onSelect,
+            ),
+            _NavItem(
+              tab: HomeTab.stats,
+              label: 'Stats',
+              icon: LucideIcons.chartColumn,
               current: current,
               onSelect: onSelect,
             ),
