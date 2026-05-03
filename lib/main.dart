@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 import 'app.dart';
+import 'state/calendar_service.dart';
 import 'state/onboarding_controller.dart';
 import 'state/plan_controller.dart';
 import 'state/theme_controller.dart';
@@ -20,7 +22,9 @@ Future<void> main() async {
     ),
   );
 
+  tz.initializeTimeZones();
   final prefs = await SharedPreferences.getInstance();
+  await CalendarService.init(prefs);
   final planController = await PlanController.create();
 
   runApp(

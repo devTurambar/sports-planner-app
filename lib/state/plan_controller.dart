@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/activity.dart';
 import '../utils/date_utils.dart';
 import 'activity_db.dart';
+import 'calendar_service.dart';
 
 class PlanController extends ChangeNotifier {
   PlanController._({required DateTime today}) : _today = today;
@@ -66,9 +67,13 @@ class PlanController extends ChangeNotifier {
 
     if (trimmed.isEmpty) {
       if (id != null) {
+        final removed = list.where((a) => a.id == id).toList();
         list.removeWhere((a) => a.id == id);
         if (list.isEmpty) _byDate.remove(key);
         ActivityDb.deleteById(id);
+        for (final a in removed) {
+          CalendarService.deleteEvent(a);
+        }
         notifyListeners();
       }
       return;
@@ -86,6 +91,7 @@ class PlanController extends ChangeNotifier {
         );
         list[index] = updated;
         ActivityDb.upsert(updated);
+        CalendarService.updateEvent(updated);
         notifyListeners();
         return;
       }
@@ -103,7 +109,21 @@ class PlanController extends ChangeNotifier {
     );
     list.add(activity);
     ActivityDb.upsert(activity);
+    _syncNewEvent(activity, key, list.length - 1);
     notifyListeners();
+  }
+
+  void _syncNewEvent(Activity activity, String key, int index) {
+    CalendarService.createEvent(activity).then((eventId) {
+      if (eventId != null) {
+        final list = _byDate[key];
+        if (list != null && index < list.length && list[index].id == activity.id) {
+          final updated = list[index].copyWith(calendarEventId: eventId);
+          list[index] = updated;
+          ActivityDb.upsert(updated);
+        }
+      }
+    });
   }
 
   void toggleDone(DateTime date, {String? id}) {
@@ -145,7 +165,11 @@ class PlanController extends ChangeNotifier {
 
   void clear(DateTime date) {
     final key = KDate.keyFor(date);
-    if (_byDate.remove(key) != null) {
+    final removed = _byDate.remove(key);
+    if (removed != null) {
+      for (final a in removed) {
+        CalendarService.deleteEvent(a);
+      }
       ActivityDb.deleteByDate(key);
       notifyListeners();
     }
@@ -155,18 +179,26 @@ class PlanController extends ChangeNotifier {
     final key = KDate.keyFor(date);
     final list = _byDate[key];
     if (list == null) return;
-    final removed = list.length;
+    final target = list.where((a) => a.id == id).toList();
     list.removeWhere((a) => a.id == id);
     if (list.isEmpty) {
       _byDate.remove(key);
     }
-    if (list.length != removed) {
+    if (target.isNotEmpty) {
       ActivityDb.deleteById(id);
+      for (final a in target) {
+        CalendarService.deleteEvent(a);
+      }
       notifyListeners();
     }
   }
 
   void clearAll() {
+    for (final list in _byDate.values) {
+      for (final a in list) {
+        CalendarService.deleteEvent(a);
+      }
+    }
     _byDate.clear();
     ActivityDb.deleteAll();
     notifyListeners();

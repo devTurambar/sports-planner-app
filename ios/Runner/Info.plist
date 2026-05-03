@@ -49,6 +49,10 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Kadence syncs your planned sessions to your calendar so you never miss a workout.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Kadence syncs your planned sessions to your calendar so you never miss a workout.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

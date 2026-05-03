@@ -17,7 +17,7 @@ class ActivityDb {
     final dbPath = join(await getDatabasesPath(), 'kadence.db');
     _db = await openDatabase(
       dbPath,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE activities (
@@ -28,9 +28,17 @@ class ActivityDb {
             type TEXT,
             duration TEXT,
             intensity TEXT,
-            notes TEXT
+            notes TEXT,
+            calendar_event_id TEXT
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE activities ADD COLUMN calendar_event_id TEXT',
+          );
+        }
       },
     );
     return _db!;
@@ -106,6 +114,7 @@ class ActivityDb {
         'duration': a.duration,
         'intensity': a.intensity,
         'notes': a.notes,
+        'calendar_event_id': a.calendarEventId,
       };
 
   static Activity _fromRow(Map<String, Object?> row) {
@@ -125,6 +134,7 @@ class ActivityDb {
       duration: row['duration'] as String?,
       intensity: row['intensity'] as String?,
       notes: row['notes'] as String?,
+      calendarEventId: row['calendar_event_id'] as String?,
     );
   }
 }
