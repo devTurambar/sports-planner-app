@@ -75,6 +75,61 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
     super.dispose();
   }
 
+  void _confirmDelete() {
+    final colors = context.colors;
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KRadius.md),
+        ),
+        title: Text(
+          'Delete session?',
+          style: KText.h3.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: colors.fgPrimary,
+          ),
+        ),
+        content: Text(
+          'This can\'t be undone.',
+          style: KText.bodySm.copyWith(color: colors.fgSecondary),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w500,
+                color: colors.fgSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Delete',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFB5443A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && mounted) {
+        context.read<PlanController>().delete(
+              date: widget.date,
+              id: widget.existing!.id,
+            );
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
   void _save() {
     if (!_hasName) return;
     final plan = context.read<PlanController>();
@@ -250,6 +305,24 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                       label: 'Save session',
                       onPressed: _hasName ? _save : null,
                     ),
+                    if (_isEditable) ...<Widget>[
+                      const SizedBox(height: KSpace.s2),
+                      Center(
+                        child: TextButton(
+                          onPressed: _confirmDelete,
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFFB5443A),
+                          ),
+                          child: Text(
+                            'Delete session',
+                            style: KText.bodySm.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFFB5443A),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

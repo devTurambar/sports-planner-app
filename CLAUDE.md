@@ -248,3 +248,40 @@ without discussion.
   backend with authentication will sync per-user data.
 - No localization — copy is hardcoded English.
 - No integration tests; only one smoke test in `test/widget_test.dart`.
+
+## Roadmap
+
+### Calendar sync (next up)
+- Use `device_calendar` plugin to read/write native calendar events
+  (CalendarKit on iOS, CalendarProvider on Android).
+- No auth needed — the OS handles cloud sync (Google/iCloud)
+  transparently.
+- Request runtime calendar permissions (read + write).
+- Let the user pick which device calendar to sync to; persist the
+  choice in SharedPreferences.
+- On activity save/update/delete, create/update/delete matching
+  calendar events.
+- Store the calendar event ID on the `Activity` model so updates and
+  deletes can target the right event.
+
+### Authentication + cloud sync (after calendar)
+- Add a backend (Firebase Auth or Supabase) for user accounts.
+- Login/signup screens (email + social providers).
+- Sync local SQLite data to the cloud so activities persist across
+  devices.
+- Required foundation for Strava integration (need a backend to
+  securely store OAuth tokens and handle callbacks).
+
+### Strava integration (after auth)
+- **Read from Strava**: poll for completed Strava activities via
+  `GET /api/v3/athlete/activities`. Match by date + activity type
+  against planned sessions and auto-mark them as done.
+- **Write to Strava**: when a manual activity is marked done, offer
+  an optional "Send to Strava" action. Creates a manual entry via
+  `POST /api/v3/activities` (name, type, start time, duration).
+- Both directions require Strava OAuth2 (`activity:read_all` +
+  `activity:write` scopes). User authorizes once; refresh token
+  stored locally.
+- Garmin Connect has no public API for individual devs — most Garmin
+  users sync to Strava anyway, so Strava covers the majority of
+  devices (Garmin, Apple Watch, Polar, Wahoo, etc.).

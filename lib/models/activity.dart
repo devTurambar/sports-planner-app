@@ -44,6 +44,7 @@ class Activity {
     this.duration,
     this.intensity,
     this.notes,
+    this.calendarEventId,
   });
 
   final String id;
@@ -54,6 +55,7 @@ class Activity {
   final String? duration;
   final String? intensity;
   final String? notes;
+  final String? calendarEventId;
 
   /// Meta string shown in the week card: "45 min · Zone 2".
   String? get meta {
@@ -71,6 +73,7 @@ class Activity {
     String? duration,
     String? intensity,
     String? notes,
+    String? calendarEventId,
   }) {
     return Activity(
       id: id,
@@ -81,6 +84,7 @@ class Activity {
       duration: duration ?? this.duration,
       intensity: intensity ?? this.intensity,
       notes: notes ?? this.notes,
+      calendarEventId: calendarEventId ?? this.calendarEventId,
     );
   }
 }
