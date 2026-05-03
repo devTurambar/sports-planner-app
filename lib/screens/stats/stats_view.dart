@@ -12,7 +12,6 @@ import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
 
-const int _kWeekCount = 26;
 const double _kBarWidth = 20;
 const double _kBarSpacing = 6;
 const double _kChartHeight = 180;
@@ -139,9 +138,18 @@ class _StatsData {
       return !a.date.isBefore(weekStart) && a.date.isBefore(end);
     }
 
+    final earliest = done.isEmpty
+        ? mondayThis
+        : done.map((a) => a.date).reduce((a, b) => a.isBefore(b) ? a : b);
+    final mondayFirst = KDate.mondayOfWeek(earliest);
+    final daysDiff = DateTime.utc(mondayThis.year, mondayThis.month, mondayThis.day)
+        .difference(DateTime.utc(mondayFirst.year, mondayFirst.month, mondayFirst.day))
+        .inDays;
+    final weekCount = daysDiff ~/ 7 + 1;
+
     final weekBuckets = <_WeekBucket>[];
     final weekTypeCounts = <List<_TypeBucket>>[];
-    for (var i = _kWeekCount - 1; i >= 0; i--) {
+    for (var i = weekCount - 1; i >= 0; i--) {
       final weekStart = mondayThis.subtract(Duration(days: 7 * i));
       final weekDone = done.where((a) => inWeek(a, weekStart)).toList();
       weekBuckets.add(_WeekBucket(
@@ -297,7 +305,9 @@ class _SessionsChartState extends State<_SessionsChart> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Last $_kWeekCount weeks',
+                      buckets.length == 1
+                          ? 'This week'
+                          : 'Last ${buckets.length} weeks',
                       style: KText.caption.copyWith(
                         fontSize: 11,
                         color: colors.fgSecondary,
