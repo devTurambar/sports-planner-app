@@ -42,7 +42,7 @@ class Activity {
     this.name,
     this.type,
     this.duration,
-    this.intensity,
+    this.timeOfDay,
     this.notes,
     this.calendarEventId,
   });
@@ -53,15 +53,14 @@ class Activity {
   final String? name;
   final ActivityType? type;
   final String? duration;
-  final String? intensity;
+  final String? timeOfDay;
   final String? notes;
   final String? calendarEventId;
 
-  /// Meta string shown in the week card: "45 min · Zone 2".
   String? get meta {
     final parts = <String>[
+      if (timeOfDay != null && timeOfDay!.isNotEmpty) timeOfDay!,
       if (duration != null && duration!.isNotEmpty) duration!,
-      if (intensity != null && intensity!.isNotEmpty) intensity!,
     ];
     return parts.isEmpty ? null : parts.join(' · ');
   }
@@ -71,7 +70,7 @@ class Activity {
     String? name,
     ActivityType? type,
     String? duration,
-    String? intensity,
+    String? timeOfDay,
     String? notes,
     String? calendarEventId,
   }) {
@@ -82,7 +81,7 @@ class Activity {
       name: name ?? this.name,
       type: type ?? this.type,
       duration: duration ?? this.duration,
-      intensity: intensity ?? this.intensity,
+      timeOfDay: timeOfDay ?? this.timeOfDay,
       notes: notes ?? this.notes,
       calendarEventId: calendarEventId ?? this.calendarEventId,
     );

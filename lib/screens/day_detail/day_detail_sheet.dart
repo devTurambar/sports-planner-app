@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -42,18 +43,47 @@ class DayDetailSheet extends StatefulWidget {
 class _DayDetailSheetState extends State<DayDetailSheet> {
   late final TextEditingController _name =
       TextEditingController(text: _isEditable ? widget.existing?.name : '');
-  late final TextEditingController _duration =
-      TextEditingController(text: widget.existing?.duration ?? '');
-  late final TextEditingController _intensity =
-      TextEditingController(text: widget.existing?.intensity ?? '');
   late final TextEditingController _notes =
       TextEditingController(text: widget.existing?.notes ?? '');
 
-  late ActivityType _type =
-      widget.existing?.type ?? ActivityType.run;
+  late ActivityType? _type = widget.existing?.type;
+  late TimeOfDay? _selectedTime = _parseTimeOfDay(widget.existing?.timeOfDay);
+  late int? _durationMinutes = _parseDuration(widget.existing?.duration);
 
   RecurrenceRule _recurrence = RecurrenceRule.none;
   int _weeks = 4;
+
+  static TimeOfDay? _parseTimeOfDay(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    final m = RegExp(r'(\d{1,2}):(\d{2})').firstMatch(raw);
+    if (m == null) return null;
+    return TimeOfDay(
+      hour: int.parse(m.group(1)!),
+      minute: int.parse(m.group(2)!),
+    );
+  }
+
+  String _formatTimeForStorage(TimeOfDay t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  static int? _parseDuration(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    final digits = RegExp(r'\d+').firstMatch(raw)?.group(0);
+    if (digits == null) return null;
+    final n = int.tryParse(digits);
+    return (n != null && n > 0) ? n : null;
+  }
+
+  static String _formatDuration(int minutes) {
+    if (minutes < 60) return '$minutes min';
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (m == 0) return '$h h';
+    return '$h h $m min';
+  }
+
+  static String _formatDurationForStorage(int minutes) =>
+      '$minutes min';
 
   bool get _isEditable =>
       widget.existing != null && widget.existing!.status != DayStatus.empty;
@@ -69,8 +99,6 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
   @override
   void dispose() {
     _name.dispose();
-    _duration.dispose();
-    _intensity.dispose();
     _notes.dispose();
     super.dispose();
   }
@@ -130,13 +158,33 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
     });
   }
 
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? const TimeOfDay(hour: 8, minute: 0),
+    );
+    if (picked != null) setState(() => _selectedTime = picked);
+  }
+
+  Future<void> _pickDuration() async {
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _DurationPickerSheet(
+        initialMinutes: _durationMinutes ?? 45,
+      ),
+    );
+    if (picked != null) setState(() => _durationMinutes = picked);
+  }
+
   void _save() {
     if (!_hasName) return;
     final plan = context.read<PlanController>();
-    final duration =
-        _duration.text.trim().isEmpty ? null : _duration.text.trim();
-    final intensity =
-        _intensity.text.trim().isEmpty ? null : _intensity.text.trim();
+    final timeOfDay =
+        _selectedTime != null ? _formatTimeForStorage(_selectedTime!) : null;
+    final duration = _durationMinutes != null
+        ? _formatDurationForStorage(_durationMinutes!)
+        : null;
     final notes = _notes.text.trim().isEmpty ? null : _notes.text.trim();
 
     if (_isEditable) {
@@ -146,7 +194,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
         name: _name.text,
         type: _type,
         duration: duration,
-        intensity: intensity,
+        timeOfDay: timeOfDay,
         notes: notes,
       );
     } else {
@@ -157,7 +205,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
           name: _name.text,
           type: _type,
           duration: duration,
-          intensity: intensity,
+          timeOfDay: timeOfDay,
           notes: notes,
         );
       }
@@ -255,24 +303,31 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                     const SizedBox(height: KSpace.s3 + 2),
                     _TypeSelector(
                       value: _type,
-                      onChanged: (v) => setState(() => _type = v),
+                      onChanged: (v) => setState(() =>
+                          _type = (v == _type) ? null : v),
                     ),
                     const SizedBox(height: KSpace.s3 + 2),
                     Row(
                       children: <Widget>[
                         Expanded(
-                          child: KInputField(
-                            label: 'Duration',
-                            controller: _duration,
-                            placeholder: '45 min',
+                          child: _TimePickerField(
+                            value: _selectedTime,
+                            onTap: _pickTime,
+                            onClear: _selectedTime != null
+                                ? () => setState(() => _selectedTime = null)
+                                : null,
                           ),
                         ),
                         const SizedBox(width: KSpace.s2 + 2),
                         Expanded(
-                          child: KInputField(
-                            label: 'Intensity',
-                            controller: _intensity,
-                            placeholder: 'Zone 2',
+                          child: _DurationPickerField(
+                            value: _durationMinutes,
+                            formatDuration: _formatDuration,
+                            onTap: _pickDuration,
+                            onClear: _durationMinutes != null
+                                ? () =>
+                                    setState(() => _durationMinutes = null)
+                                : null,
                           ),
                         ),
                       ],
@@ -361,7 +416,7 @@ class _CloseButton extends StatelessWidget {
 class _TypeSelector extends StatelessWidget {
   const _TypeSelector({required this.value, required this.onChanged});
 
-  final ActivityType value;
+  final ActivityType? value;
   final ValueChanged<ActivityType> onChanged;
 
   @override
@@ -635,6 +690,353 @@ class _StepperButton extends StatelessWidget {
             color: enabled ? colors.fgSecondary : colors.fgDisabled,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _TimePickerField extends StatelessWidget {
+  const _TimePickerField({
+    required this.value,
+    required this.onTap,
+    this.onClear,
+  });
+
+  final TimeOfDay? value;
+  final VoidCallback onTap;
+  final VoidCallback? onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final hasValue = value != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Time',
+          style: KText.caption.copyWith(
+            fontWeight: FontWeight.w500,
+            color: colors.fgSecondary,
+          ),
+        ),
+        const SizedBox(height: KSpace.s1 + 1),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(KRadius.md),
+            child: AnimatedContainer(
+              duration: KMotion.base,
+              decoration: BoxDecoration(
+                color: colors.bgElevated,
+                borderRadius: BorderRadius.circular(KRadius.md),
+                border: Border.all(
+                  color: hasValue ? colors.accent : colors.border,
+                  width: 1.5,
+                ),
+                boxShadow: hasValue
+                    ? <BoxShadow>[
+                        BoxShadow(
+                          color: colors.accentLight,
+                          blurRadius: 0,
+                          spreadRadius: 3,
+                        ),
+                      ]
+                    : null,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      hasValue ? value!.format(context) : 'Set time',
+                      style: KText.body.copyWith(
+                        color: hasValue ? colors.fgPrimary : colors.fgTertiary,
+                      ),
+                    ),
+                  ),
+                  if (hasValue)
+                    GestureDetector(
+                      onTap: onClear,
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Icon(
+                          LucideIcons.x,
+                          size: 14,
+                          color: colors.fgTertiary,
+                        ),
+                      ),
+                    )
+                  else
+                    Icon(
+                      LucideIcons.clock,
+                      size: 16,
+                      color: colors.fgTertiary,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DurationPickerField extends StatelessWidget {
+  const _DurationPickerField({
+    required this.value,
+    required this.formatDuration,
+    required this.onTap,
+    this.onClear,
+  });
+
+  final int? value;
+  final String Function(int) formatDuration;
+  final VoidCallback onTap;
+  final VoidCallback? onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final hasValue = value != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Duration',
+          style: KText.caption.copyWith(
+            fontWeight: FontWeight.w500,
+            color: colors.fgSecondary,
+          ),
+        ),
+        const SizedBox(height: KSpace.s1 + 1),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(KRadius.md),
+            child: AnimatedContainer(
+              duration: KMotion.base,
+              decoration: BoxDecoration(
+                color: colors.bgElevated,
+                borderRadius: BorderRadius.circular(KRadius.md),
+                border: Border.all(
+                  color: hasValue ? colors.accent : colors.border,
+                  width: 1.5,
+                ),
+                boxShadow: hasValue
+                    ? <BoxShadow>[
+                        BoxShadow(
+                          color: colors.accentLight,
+                          blurRadius: 0,
+                          spreadRadius: 3,
+                        ),
+                      ]
+                    : null,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      hasValue ? formatDuration(value!) : 'Set duration',
+                      style: KText.body.copyWith(
+                        color: hasValue ? colors.fgPrimary : colors.fgTertiary,
+                      ),
+                    ),
+                  ),
+                  if (hasValue)
+                    GestureDetector(
+                      onTap: onClear,
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Icon(
+                          LucideIcons.x,
+                          size: 14,
+                          color: colors.fgTertiary,
+                        ),
+                      ),
+                    )
+                  else
+                    Icon(
+                      LucideIcons.timer,
+                      size: 16,
+                      color: colors.fgTertiary,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DurationPickerSheet extends StatefulWidget {
+  const _DurationPickerSheet({required this.initialMinutes});
+
+  final int initialMinutes;
+
+  @override
+  State<_DurationPickerSheet> createState() => _DurationPickerSheetState();
+}
+
+class _DurationPickerSheetState extends State<_DurationPickerSheet> {
+  static const _hours = [0, 1, 2, 3, 4];
+  static const _minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+
+  late int _hourIndex;
+  late int _minIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    final h = (widget.initialMinutes ~/ 60).clamp(0, _hours.last);
+    final m = widget.initialMinutes % 60;
+    _hourIndex = _hours.indexOf(h);
+    final closestMin = _minutes.reduce(
+      (a, b) => (a - m).abs() <= (b - m).abs() ? a : b,
+    );
+    _minIndex = _minutes.indexOf(closestMin);
+  }
+
+  int get _totalMinutes => _hours[_hourIndex] * 60 + _minutes[_minIndex];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
+        ),
+      ),
+      padding: EdgeInsets.only(bottom: bottomSafe),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const SizedBox(height: 10),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colors.border,
+              borderRadius: BorderRadius.circular(KRadius.full),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    'Duration',
+                    style: KText.h3.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: colors.fgPrimary,
+                    ),
+                  ),
+                ),
+                _CloseButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: colors.borderSubtle),
+          SizedBox(
+            height: 200,
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: CupertinoPicker(
+                    scrollController: FixedExtentScrollController(
+                      initialItem: _hourIndex,
+                    ),
+                    itemExtent: 40,
+                    selectionOverlay: Container(
+                      decoration: BoxDecoration(
+                        border: Border.symmetric(
+                          horizontal: BorderSide(
+                            color: colors.border,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                    onSelectedItemChanged: (i) => _hourIndex = i,
+                    children: [
+                      for (final h in _hours)
+                        Center(
+                          child: Text(
+                            '$h h',
+                            style: KText.body.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: colors.fgPrimary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: CupertinoPicker(
+                    scrollController: FixedExtentScrollController(
+                      initialItem: _minIndex,
+                    ),
+                    itemExtent: 40,
+                    selectionOverlay: Container(
+                      decoration: BoxDecoration(
+                        border: Border.symmetric(
+                          horizontal: BorderSide(
+                            color: colors.border,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                    onSelectedItemChanged: (i) => _minIndex = i,
+                    children: [
+                      for (final m in _minutes)
+                        Center(
+                          child: Text(
+                            '$m min',
+                            style: KText.body.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: colors.fgPrimary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+            child: KButton(
+              label: 'Done',
+              onPressed: () {
+                final total = _totalMinutes;
+                Navigator.of(context).pop(total > 0 ? total : null);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

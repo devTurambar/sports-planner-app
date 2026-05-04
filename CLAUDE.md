@@ -78,8 +78,8 @@ lib/
     guaranteed order.
   - `extrasFor(date) → int` is the count beyond the primary (used for
     "+N more" badges in the week view).
-  - `save({date, id?, ...})`: pass `id` to update an existing entry,
-    omit it to append a new one.
+  - `save({date, id?, name, type?, duration?, timeOfDay?, notes?})`:
+    pass `id` to update an existing entry, omit it to append a new one.
   - `toggleDone(date, {id})`: toggles a single activity. `id` optional —
     when omitted, the day's primary is toggled. **Silently ignored for
     future dates** — activities can only be marked done on or before
@@ -99,6 +99,19 @@ lib/
   surfaced as `today` at read time when the date matches today (see
   `_withSyncedTodayStatus`) — handled inside `PlanController`, callers
   shouldn't reapply this themselves.
+- **Activity fields**: `Activity` has `name`, `type` (`ActivityType?`),
+  `timeOfDay` (`String?`, stored as `"HH:mm"` 24-hour format),
+  `duration` (`String?`, stored as `"N min"` e.g. `"45 min"`), `notes`,
+  and `calendarEventId`. There is no `intensity` field. The `meta`
+  getter formats as `"time · duration"`.
+- **Form fields in `day_detail_sheet.dart`**: Activity name is a text
+  input. Type is a chip selector with **no default** (starts null;
+  tapping a selected chip deselects it). Time opens
+  `showTimePicker` and displays in the device's locale format
+  (12h/24h). Duration opens a `CupertinoPicker` bottom sheet with
+  hour (0–4) and minute (0–55, 5-min steps) wheels. Both Time and
+  Duration are optional and show a tappable field with clear (×)
+  button when filled.
 - **Recurrence**: defined in `day_detail_sheet.dart` as
   `RecurrenceRule { none, daily, weekly, weekdays, weekends }`. On
   save it `expand`s into a list of dates and the sheet calls
@@ -122,8 +135,8 @@ lib/
   the month view's `selected_day_card.dart`. Don't duplicate this
   layout; extend `KActivityCard` instead. The meta row is rendered
   inside `Visibility(maintainSize: true)` so cards in a list stack at
-  equal height even when duration/intensity are absent — don't
-  collapse it back to a conditional `if (meta != null)`.
+  equal height even when time/duration are absent — don't collapse it
+  back to a conditional `if (meta != null)`.
 - **Bottom sheets and the gesture/safe area**: pad the inner
   scrolling content with `MediaQuery.paddingOf(context).bottom` so
   controls don't sit under the Android gesture bar (see
@@ -211,9 +224,9 @@ without discussion.
   `android/` scaffolding.
 - **Local persistence via SQLite**: `ActivityDb`
   (`lib/state/activity_db.dart`) wraps `sqflite` with a single
-  `activities` table. `PlanController` is created via an async
-  factory (`PlanController.create()`) that loads from the DB at
-  startup and fire-and-forgets writes on every mutation. **On web**,
+  `activities` table (schema version 3). `PlanController` is created
+  via an async factory (`PlanController.create()`) that loads from the
+  DB at startup and fire-and-forgets writes on every mutation. **On web**,
   `sqflite` is not supported — `ActivityDb` detects `kIsWeb` and
   no-ops all calls, so the app runs in-memory (no persistence across
   refreshes). On native (iOS/Android/macOS) data persists to disk.
@@ -257,7 +270,8 @@ without discussion.
 - ✅ Default syncs to all writable calendars; user can pick a specific
   one. Event IDs stored as JSON map on `Activity.calendarEventId`.
 - ✅ Deleting an activity in the app also deletes the calendar event
-  (app is source of truth).
+  (app is source of truth). Calendar events use `Activity.timeOfDay`
+  for the start time (falls back to 08:00 when unset).
 - **TODO**: multi-select calendar picker (checkboxes instead of
   single-select / all).
 - **TODO**: consider optional "keep on calendar?" prompt when deleting

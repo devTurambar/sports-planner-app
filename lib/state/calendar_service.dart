@@ -136,19 +136,21 @@ class CalendarService {
   static Event _buildEvent(String calendarId, Activity activity) {
     final date = KDate.startOfDay(activity.date);
     final location = tz.getLocation('UTC');
+    final startHour = _parseStartHour(activity.timeOfDay);
+    final startMinute = _parseStartMinute(activity.timeOfDay);
     final start = tz.TZDateTime(
       location,
       date.year,
       date.month,
       date.day,
-      8,
+      startHour,
+      startMinute,
     );
 
     final durationMin = _parseDurationMinutes(activity.duration);
     final end = start.add(Duration(minutes: durationMin));
 
     final description = <String>[
-      if (activity.intensity != null) 'Intensity: ${activity.intensity}',
       if (activity.notes != null) activity.notes!,
     ].join('\n');
 
@@ -167,5 +169,24 @@ class CalendarService {
     if (digits == null) return 60;
     final n = int.tryParse(digits);
     return (n != null && n > 0) ? n : 60;
+  }
+
+  static final _timeRe = RegExp(r'(\d{1,2}):(\d{2})');
+
+  static int _parseStartHour(String? raw) {
+    if (raw == null) return 8;
+    final m = _timeRe.firstMatch(raw);
+    if (m == null) return 8;
+    var h = int.parse(m.group(1)!);
+    if (raw.toLowerCase().contains('pm') && h < 12) h += 12;
+    if (raw.toLowerCase().contains('am') && h == 12) h = 0;
+    return h.clamp(0, 23);
+  }
+
+  static int _parseStartMinute(String? raw) {
+    if (raw == null) return 0;
+    final m = _timeRe.firstMatch(raw);
+    if (m == null) return 0;
+    return int.parse(m.group(2)!).clamp(0, 59);
   }
 }

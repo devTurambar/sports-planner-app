@@ -58,7 +58,7 @@ class PlanController extends ChangeNotifier {
     required String name,
     ActivityType? type,
     String? duration,
-    String? intensity,
+    String? timeOfDay,
     String? notes,
   }) {
     final trimmed = name.trim();
@@ -86,7 +86,7 @@ class PlanController extends ChangeNotifier {
           name: trimmed,
           type: type,
           duration: duration,
-          intensity: intensity,
+          timeOfDay: timeOfDay,
           notes: notes,
         );
         list[index] = updated;
@@ -104,7 +104,7 @@ class PlanController extends ChangeNotifier {
       name: trimmed,
       type: type,
       duration: duration,
-      intensity: intensity,
+      timeOfDay: timeOfDay,
       notes: notes,
     );
     list.add(activity);
