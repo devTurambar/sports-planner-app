@@ -251,18 +251,17 @@ without discussion.
 
 ## Roadmap
 
-### Calendar sync (next up)
-- Use `device_calendar` plugin to read/write native calendar events
-  (CalendarKit on iOS, CalendarProvider on Android).
-- No auth needed — the OS handles cloud sync (Google/iCloud)
-  transparently.
-- Request runtime calendar permissions (read + write).
-- Let the user pick which device calendar to sync to; persist the
-  choice in SharedPreferences.
-- On activity save/update/delete, create/update/delete matching
-  calendar events.
-- Store the calendar event ID on the `Activity` model so updates and
-  deletes can target the right event.
+### Calendar sync (done — polish remaining)
+- ✅ `device_calendar` plugin wired up (CalendarKit / CalendarProvider).
+- ✅ Runtime permissions, calendar picker, create/update/delete events.
+- ✅ Default syncs to all writable calendars; user can pick a specific
+  one. Event IDs stored as JSON map on `Activity.calendarEventId`.
+- ✅ Deleting an activity in the app also deletes the calendar event
+  (app is source of truth).
+- **TODO**: multi-select calendar picker (checkboxes instead of
+  single-select / all).
+- **TODO**: consider optional "keep on calendar?" prompt when deleting
+  an activity that has a linked calendar event.
 
 ### Authentication + cloud sync (after calendar)
 - Add a backend (Firebase Auth or Supabase) for user accounts.

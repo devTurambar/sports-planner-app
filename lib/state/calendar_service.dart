@@ -8,7 +8,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../models/activity.dart';
 import '../utils/date_utils.dart';
 
-const _kCalendarIdKey = 'kadence.calendar.id';
+const _kCalendarIdsKey = 'kadence.calendar.ids';
 const _kCalendarSyncKey = 'kadence.calendar.sync';
 
 class CalendarService {
@@ -32,15 +32,18 @@ class CalendarService {
     await _prefs?.setBool(_kCalendarSyncKey, value);
   }
 
-  /// null means "all writable calendars" (the default).
-  static String? get selectedCalendarId =>
-      _prefs?.getString(_kCalendarIdKey);
+  /// Empty set means "all writable calendars" (the default).
+  static Set<String> get selectedCalendarIds {
+    final raw = _prefs?.getStringList(_kCalendarIdsKey);
+    if (raw == null || raw.isEmpty) return const {};
+    return raw.toSet();
+  }
 
-  static Future<void> setSelectedCalendarId(String? id) async {
-    if (id == null) {
-      await _prefs?.remove(_kCalendarIdKey);
+  static Future<void> setSelectedCalendarIds(Set<String> ids) async {
+    if (ids.isEmpty) {
+      await _prefs?.remove(_kCalendarIdsKey);
     } else {
-      await _prefs?.setString(_kCalendarIdKey, id);
+      await _prefs?.setStringList(_kCalendarIdsKey, ids.toList());
     }
   }
 
@@ -70,8 +73,8 @@ class CalendarService {
   }
 
   static Future<List<String>> _targetCalendarIds() async {
-    final picked = selectedCalendarId;
-    if (picked != null) return [picked];
+    final picked = selectedCalendarIds;
+    if (picked.isNotEmpty) return picked.toList();
     final calendars = await getWritableCalendars();
     return calendars.map((c) => c.id!).where((id) => id.isNotEmpty).toList();
   }

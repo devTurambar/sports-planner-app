@@ -10,8 +10,6 @@ import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 
-const _kAllCalendarsSentinel = '__all__';
-
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -21,7 +19,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _calendarSync = CalendarService.syncEnabled;
-  String? _selectedCalendarId = CalendarService.selectedCalendarId;
+  Set<String> _selectedIds = CalendarService.selectedCalendarIds;
   List<Calendar> _calendars = const [];
   bool _loadingCalendars = false;
 
@@ -50,46 +48,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await _loadCalendars();
     } else {
       await CalendarService.setSyncEnabled(false);
-      await CalendarService.setSelectedCalendarId(null);
+      await CalendarService.setSelectedCalendarIds({});
       setState(() {
         _calendarSync = false;
-        _selectedCalendarId = null;
+        _selectedIds = {};
         _calendars = const [];
       });
     }
   }
 
-  Future<void> _pickCalendar() async {
+  Future<void> _pickCalendars() async {
     if (_calendars.isEmpty) return;
     final colors = context.colors;
-    final picked = await showModalBottomSheet<String?>(
+    final result = await showModalBottomSheet<Set<String>>(
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: colors.scrim,
       builder: (ctx) => _CalendarPicker(
         calendars: _calendars,
-        selectedId: _selectedCalendarId,
+        selectedIds: _selectedIds,
       ),
     );
-    if (!mounted) return;
-    if (picked == _kAllCalendarsSentinel) {
-      await CalendarService.setSelectedCalendarId(null);
-      setState(() => _selectedCalendarId = null);
-    } else if (picked != null) {
-      await CalendarService.setSelectedCalendarId(picked);
-      setState(() => _selectedCalendarId = picked);
+    if (result != null && mounted) {
+      await CalendarService.setSelectedCalendarIds(result);
+      setState(() => _selectedIds = result);
     }
   }
 
   String get _calendarLabel {
     if (!_calendarSync) return 'Off';
     if (_loadingCalendars) return '…';
-    if (_selectedCalendarId == null) return 'All calendars';
-    final match = _calendars
-        .where((c) => c.id == _selectedCalendarId)
-        .toList();
-    if (match.isEmpty) return 'All calendars';
-    return match.first.name ?? 'Calendar';
+    if (_selectedIds.isEmpty) return 'All calendars';
+    if (_selectedIds.length == 1) {
+      final match = _calendars.where((c) => c.id == _selectedIds.first);
+      if (match.isNotEmpty) return match.first.name ?? 'Calendar';
+    }
+    return '${_selectedIds.length} calendars';
   }
 
   @override
@@ -143,9 +137,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             if (_calendarSync)
               _StaticRow(
-                label: 'Calendar',
+                label: 'Calendars',
                 value: _calendarLabel,
-                onTap: _pickCalendar,
+                onTap: _pickCalendars,
                 isLast: true,
               ),
             if (!_calendarSync)
@@ -296,14 +290,37 @@ class _StaticRow extends StatelessWidget {
   }
 }
 
-class _CalendarPicker extends StatelessWidget {
+class _CalendarPicker extends StatefulWidget {
   const _CalendarPicker({
     required this.calendars,
-    required this.selectedId,
+    required this.selectedIds,
   });
 
   final List<Calendar> calendars;
-  final String? selectedId;
+  final Set<String> selectedIds;
+
+  @override
+  State<_CalendarPicker> createState() => _CalendarPickerState();
+}
+
+class _CalendarPickerState extends State<_CalendarPicker> {
+  late Set<String> _selected = Set<String>.from(widget.selectedIds);
+
+  bool get _isAll => _selected.isEmpty;
+
+  void _toggleAll() {
+    setState(() => _selected = {});
+  }
+
+  void _toggle(String id) {
+    setState(() {
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+      } else {
+        _selected.add(id);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -329,17 +346,30 @@ class _CalendarPicker extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Choose calendar',
-                style: KText.h3.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: colors.fgPrimary,
+            padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    'Choose calendars',
+                    style: KText.h3.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: colors.fgPrimary,
+                    ),
+                  ),
                 ),
-              ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(_selected),
+                  child: Text(
+                    'Done',
+                    style: KText.bodySm.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.accent,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Divider(height: 1, color: colors.borderSubtle),
@@ -347,114 +377,134 @@ class _CalendarPicker extends StatelessWidget {
             child: ListView.builder(
               shrinkWrap: true,
               padding: EdgeInsets.only(bottom: KSpace.s4 + bottomSafe),
-              itemCount: calendars.length + 1,
+              itemCount: widget.calendars.length + 1,
               itemBuilder: (ctx, i) {
                 if (i == 0) {
-                  final isAll = selectedId == null;
-                  return Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () =>
-                          Navigator.of(ctx).pop(_kAllCalendarsSentinel),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 14,
-                        ),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(
-                              LucideIcons.layers,
-                              size: 14,
-                              color: colors.fgSecondary,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'All calendars',
-                                style: KText.body.copyWith(
-                                  color: colors.fgPrimary,
-                                  fontWeight: isAll
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                            if (isAll)
-                              Icon(
-                                LucideIcons.check,
-                                size: 16,
-                                color: colors.accent,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  return _CalendarRow(
+                    label: 'All calendars',
+                    icon: LucideIcons.layers,
+                    isChecked: _isAll,
+                    onTap: _toggleAll,
                   );
                 }
-                final cal = calendars[i - 1];
-                final isSelected = cal.id == selectedId;
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => Navigator.of(ctx).pop(cal.id),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: Color(cal.color ?? 0xFF4A7C59),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  cal.name ?? 'Calendar',
-                                  style: KText.body.copyWith(
-                                    color: colors.fgPrimary,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                  ),
-                                ),
-                                if (cal.accountName != null &&
-                                    cal.accountName!.isNotEmpty)
-                                  Text(
-                                    cal.accountName!,
-                                    style: KText.caption.copyWith(
-                                      fontSize: 11,
-                                      color: colors.fgTertiary,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          if (isSelected)
-                            Icon(
-                              LucideIcons.check,
-                              size: 16,
-                              color: colors.accent,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
+                final cal = widget.calendars[i - 1];
+                final id = cal.id ?? '';
+                return _CalendarRow(
+                  label: cal.name ?? 'Calendar',
+                  subtitle: cal.accountName,
+                  color: Color(cal.color ?? 0xFF4A7C59),
+                  isChecked: _isAll || _selected.contains(id),
+                  onTap: () => _toggle(id),
                 );
               },
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CalendarRow extends StatelessWidget {
+  const _CalendarRow({
+    required this.label,
+    required this.isChecked,
+    required this.onTap,
+    this.subtitle,
+    this.icon,
+    this.color,
+  });
+
+  final String label;
+  final String? subtitle;
+  final IconData? icon;
+  final Color? color;
+  final bool isChecked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Row(
+            children: <Widget>[
+              if (icon != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Icon(icon, size: 14, color: colors.fgSecondary),
+                ),
+              if (color != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      label,
+                      style: KText.body.copyWith(
+                        color: colors.fgPrimary,
+                        fontWeight:
+                            isChecked ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                    if (subtitle != null && subtitle!.isNotEmpty)
+                      Text(
+                        subtitle!,
+                        style: KText.caption.copyWith(
+                          fontSize: 11,
+                          color: colors.fgTertiary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              _Checkbox(checked: isChecked),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Checkbox extends StatelessWidget {
+  const _Checkbox({required this.checked});
+
+  final bool checked;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return AnimatedContainer(
+      duration: KMotion.fast,
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        color: checked ? colors.accent : Colors.transparent,
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(
+          color: checked ? colors.accent : colors.border,
+          width: 1.5,
+        ),
+      ),
+      child: checked
+          ? Icon(LucideIcons.check, size: 13, color: colors.fgInverse)
+          : null,
     );
   }
 }
