@@ -22,92 +22,120 @@ class WeekView extends StatefulWidget {
 }
 
 class WeekViewState extends State<WeekView> {
-  DateTime? _cursor;
+  static const _initialPage = 5200;
+  late final PageController _pageCtrl =
+      PageController(initialPage: _initialPage);
+  int _currentPage = _initialPage;
 
   /// Reset the visible week to the one containing today. Called from
   /// the parent shell when the user taps the "Today" action.
   void jumpToToday() {
-    setState(() => _cursor = null);
+    _pageCtrl.animateToPage(
+      _initialPage,
+      duration: KMotion.base,
+      curve: Curves.easeInOut,
+    );
   }
 
-  void _shiftWeek(int days) {
-    final today = TodayScope.of(context);
-    final base = _cursor ?? today;
-    setState(() => _cursor = base.add(Duration(days: days)));
+  void _shiftWeek(int delta) {
+    final target = _currentPage + delta;
+    _pageCtrl.animateToPage(
+      target,
+      duration: KMotion.base,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  DateTime _cursorForPage(int page, DateTime today) {
+    final offset = page - _initialPage;
+    return today.add(Duration(days: offset * 7));
   }
 
   @override
   Widget build(BuildContext context) {
     final today = TodayScope.of(context);
     final plan = context.watch<PlanController>();
-    final cursor = _cursor ?? today;
-    final week = plan.weekFor(cursor);
 
-    final isCurrentWeek = KDate.isSameDay(
-      KDate.mondayOfWeek(cursor),
-      KDate.mondayOfWeek(today),
-    );
+    return PageView.builder(
+      controller: _pageCtrl,
+      onPageChanged: (page) => setState(() => _currentPage = page),
+      itemBuilder: (context, page) {
+        final cursor = _cursorForPage(page, today);
+        final week = plan.weekFor(cursor);
 
-    var planned = 0;
-    var done = 0;
-    for (final item in week) {
-      for (final a in plan.activitiesFor(item.date)) {
-        planned++;
-        if (a.status == DayStatus.done) done++;
-      }
-    }
+        final isCurrentWeek = KDate.isSameDay(
+          KDate.mondayOfWeek(cursor),
+          KDate.mondayOfWeek(today),
+        );
 
-    final onTrack = planned == 0
-        ? 0
-        : ((done / planned) * 100).round().clamp(0, 100);
+        var planned = 0;
+        var done = 0;
+        for (final item in week) {
+          for (final a in plan.activitiesFor(item.date)) {
+            planned++;
+            if (a.status == DayStatus.done) done++;
+          }
+        }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        KSpace.s4,
-        4,
-        KSpace.s4,
-        KSpace.s16,
-      ),
-      physics: const BouncingScrollPhysics(),
-      children: <Widget>[
-        _WeekNav(
-          monday: KDate.mondayOfWeek(cursor),
-          isCurrent: isCurrentWeek,
-          onPrev: () => _shiftWeek(-7),
-          onNext: () => _shiftWeek(7),
-        ),
-        const SizedBox(height: KSpace.s2),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: KStatCard(value: done.toString(), label: 'Done'),
-            ),
-            const SizedBox(width: KSpace.s2),
-            Expanded(
-              child:
-                  KStatCard(value: planned.toString(), label: 'Planned'),
-            ),
-            const SizedBox(width: KSpace.s2),
-            Expanded(
-              child: KStatCard(
-                value: '$onTrack%',
-                label: 'On track',
-                accent: true,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: KSpace.s3 + 2),
-        for (final item in week) ...<Widget>[
-          DayCard(
-            activity: item,
-            extras: plan.extrasFor(item.date),
-            onTap: () => _handleRowTap(context, item),
-            onCheckTap: () => _handleCheck(context, item),
+        final onTrack = planned == 0
+            ? 0
+            : ((done / planned) * 100).round().clamp(0, 100);
+
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(
+            KSpace.s4,
+            4,
+            KSpace.s4,
+            KSpace.s16,
           ),
-          const SizedBox(height: KSpace.s2),
-        ],
-      ],
+          physics: const BouncingScrollPhysics(),
+          children: <Widget>[
+            _WeekNav(
+              monday: KDate.mondayOfWeek(cursor),
+              isCurrent: isCurrentWeek,
+              onPrev: () => _shiftWeek(-1),
+              onNext: () => _shiftWeek(1),
+            ),
+            const SizedBox(height: KSpace.s2),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: KStatCard(value: done.toString(), label: 'Done'),
+                ),
+                const SizedBox(width: KSpace.s2),
+                Expanded(
+                  child: KStatCard(
+                      value: planned.toString(), label: 'Planned'),
+                ),
+                const SizedBox(width: KSpace.s2),
+                Expanded(
+                  child: KStatCard(
+                    value: '$onTrack%',
+                    label: 'On track',
+                    accent: true,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: KSpace.s3 + 2),
+            for (final item in week) ...<Widget>[
+              DayCard(
+                activity: item,
+                extras: plan.extrasFor(item.date),
+                onTap: () => _handleRowTap(context, item),
+                onCheckTap: () => _handleCheck(context, item),
+              ),
+              const SizedBox(height: KSpace.s2),
+            ],
+          ],
+        );
+      },
     );
   }
 

@@ -23,29 +23,32 @@ class MonthView extends StatefulWidget {
 }
 
 class _MonthViewState extends State<MonthView> {
-  late DateTime _cursor;
+  static const _initialPage = 5200;
+  late final PageController _pageCtrl =
+      PageController(initialPage: _initialPage);
+  int _currentPage = _initialPage;
   DateTime? _selected;
-  final ScrollController _scroll = ScrollController();
   final GlobalKey _detailKey = GlobalKey();
 
   @override
-  void initState() {
-    super.initState();
-    final today = KDate.startOfDay(DateTime.now());
-    _cursor = DateTime(today.year, today.month);
-  }
-
-  @override
   void dispose() {
-    _scroll.dispose();
+    _pageCtrl.dispose();
     super.dispose();
   }
 
   void _shiftMonth(int delta) {
-    setState(() {
-      _cursor = DateTime(_cursor.year, _cursor.month + delta);
-      _selected = null;
-    });
+    final target = _currentPage + delta;
+    _pageCtrl.animateToPage(
+      target,
+      duration: KMotion.base,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  DateTime _cursorForPage(int page) {
+    final today = KDate.startOfDay(DateTime.now());
+    final offset = page - _initialPage;
+    return DateTime(today.year, today.month + offset);
   }
 
   void _select(DateTime date) {
@@ -55,7 +58,6 @@ class _MonthViewState extends State<MonthView> {
           : date;
     });
     if (_selected != null) {
-      // After layout, scroll the detail card into view.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _detailKey.currentContext;
         if (ctx != null) {
@@ -76,116 +78,123 @@ class _MonthViewState extends State<MonthView> {
     final today = TodayScope.of(context);
     final plan = context.watch<PlanController>();
 
-    // Build the grid: (monday-index offset) leading blanks, then 1..n.
-    final firstOfMonth = DateTime(_cursor.year, _cursor.month);
-    final offset = (firstOfMonth.weekday - DateTime.monday) % 7;
-    final totalDays = KDate.daysInMonth(_cursor.year, _cursor.month);
+    return PageView.builder(
+      controller: _pageCtrl,
+      onPageChanged: (page) => setState(() {
+        _currentPage = page;
+        _selected = null;
+      }),
+      itemBuilder: (context, page) {
+        final cursor = _cursorForPage(page);
 
-    final cells = <Widget>[
-      for (var i = 0; i < offset; i++) const SizedBox.shrink(),
-      for (var d = 1; d <= totalDays; d++)
-        Builder(builder: (ctx) {
-          final date = DateTime(_cursor.year, _cursor.month, d);
-          final activity = plan.forDate(date);
-          // An empty day that happens to be today should still visually
-          // anchor the grid, so promote it to the `today` status.
-          final effective = KDate.isSameDay(date, today) &&
-                  activity.status == DayStatus.empty
-              ? DayStatus.today
-              : activity.status;
-          return MonthDayCell(
-            day: d,
-            status: effective,
-            selected:
-                _selected != null && KDate.isSameDay(_selected!, date),
-            onTap: () => _select(date),
-          );
-        }),
-    ];
+        final firstOfMonth = DateTime(cursor.year, cursor.month);
+        final offset = (firstOfMonth.weekday - DateTime.monday) % 7;
+        final totalDays = KDate.daysInMonth(cursor.year, cursor.month);
 
-    var doneCount = 0;
-    var plannedCount = 0;
-    for (var i = 1; i <= totalDays; i++) {
-      final d = DateTime(_cursor.year, _cursor.month, i);
-      for (final a in plan.activitiesFor(d)) {
-        plannedCount++;
-        if (a.status == DayStatus.done) doneCount++;
-      }
-    }
+        final cells = <Widget>[
+          for (var i = 0; i < offset; i++) const SizedBox.shrink(),
+          for (var d = 1; d <= totalDays; d++)
+            Builder(builder: (ctx) {
+              final date = DateTime(cursor.year, cursor.month, d);
+              final activity = plan.forDate(date);
+              final effective = KDate.isSameDay(date, today) &&
+                      activity.status == DayStatus.empty
+                  ? DayStatus.today
+                  : activity.status;
+              return MonthDayCell(
+                day: d,
+                status: effective,
+                selected:
+                    _selected != null && KDate.isSameDay(_selected!, date),
+                onTap: () => _select(date),
+              );
+            }),
+        ];
 
-    return ListView(
-      controller: _scroll,
-      padding: const EdgeInsets.fromLTRB(
-        KSpace.s4,
-        0,
-        KSpace.s4,
-        KSpace.s16,
-      ),
-      physics: const BouncingScrollPhysics(),
-      children: <Widget>[
-        _MonthNav(
-          cursor: _cursor,
-          onPrev: () => _shiftMonth(-1),
-          onNext: () => _shiftMonth(1),
-        ),
-        const SizedBox(height: KSpace.s2),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: KStatCard(
-                value: doneCount.toString(),
-                label: 'Done',
-                accent: true,
-              ),
-            ),
-            const SizedBox(width: KSpace.s1 + 2),
-            Expanded(
-              child: KStatCard(
-                value: plannedCount.toString(),
-                label: 'Planned',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: KSpace.s2 + 2),
-        _WeekdayHeader(colors: colors),
-        const SizedBox(height: 4),
-        GridView.count(
-          crossAxisCount: 7,
-          mainAxisSpacing: 3,
-          crossAxisSpacing: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: cells,
-        ),
-        if (_selected != null) ...<Widget>[
-          const SizedBox(height: KSpace.s3 + 2),
-          KeyedSubtree(
-            key: _detailKey,
-            child: _AnimatedDetail(
-              child: SelectedDayCard(
-                date: _selected!,
-                activities: plan.activitiesFor(_selected!),
-                onClose: () => setState(() => _selected = null),
-                onEditActivity: (activity) => showDayDetailSheet(
-                  context: context,
-                  date: _selected!,
-                  existing: activity,
-                ),
-                onToggleActivity: (activity) =>
-                    plan.toggleDone(_selected!, id: activity.id),
-                onAdd: () => showDayDetailSheet(
-                  context: context,
-                  date: _selected!,
-                  existing: null,
-                ),
-              ),
-            ),
+        var doneCount = 0;
+        var plannedCount = 0;
+        for (var i = 1; i <= totalDays; i++) {
+          final d = DateTime(cursor.year, cursor.month, i);
+          for (final a in plan.activitiesFor(d)) {
+            plannedCount++;
+            if (a.status == DayStatus.done) doneCount++;
+          }
+        }
+
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(
+            KSpace.s4,
+            0,
+            KSpace.s4,
+            KSpace.s16,
           ),
-        ],
-        const SizedBox(height: KSpace.s3),
-        _Legend(),
-      ],
+          physics: const BouncingScrollPhysics(),
+          children: <Widget>[
+            _MonthNav(
+              cursor: cursor,
+              onPrev: () => _shiftMonth(-1),
+              onNext: () => _shiftMonth(1),
+            ),
+            const SizedBox(height: KSpace.s2),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: KStatCard(
+                    value: doneCount.toString(),
+                    label: 'Done',
+                    accent: true,
+                  ),
+                ),
+                const SizedBox(width: KSpace.s1 + 2),
+                Expanded(
+                  child: KStatCard(
+                    value: plannedCount.toString(),
+                    label: 'Planned',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: KSpace.s2 + 2),
+            _WeekdayHeader(colors: colors),
+            const SizedBox(height: 4),
+            GridView.count(
+              crossAxisCount: 7,
+              mainAxisSpacing: 3,
+              crossAxisSpacing: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: cells,
+            ),
+            if (_selected != null) ...<Widget>[
+              const SizedBox(height: KSpace.s3 + 2),
+              KeyedSubtree(
+                key: _detailKey,
+                child: _AnimatedDetail(
+                  child: SelectedDayCard(
+                    date: _selected!,
+                    activities: plan.activitiesFor(_selected!),
+                    onClose: () => setState(() => _selected = null),
+                    onEditActivity: (activity) => showDayDetailSheet(
+                      context: context,
+                      date: _selected!,
+                      existing: activity,
+                    ),
+                    onToggleActivity: (activity) =>
+                        plan.toggleDone(_selected!, id: activity.id),
+                    onAdd: () => showDayDetailSheet(
+                      context: context,
+                      date: _selected!,
+                      existing: null,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: KSpace.s3),
+            _Legend(),
+          ],
+        );
+      },
     );
   }
 }
