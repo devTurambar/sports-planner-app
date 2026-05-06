@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
@@ -11,6 +9,11 @@ import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/k_button.dart';
 import '../../widgets/k_input.dart';
+import 'widgets/close_button.dart';
+import 'widgets/duration_picker.dart';
+import 'widgets/recurrence_selector.dart';
+import 'widgets/time_picker_field.dart';
+import 'widgets/type_selector.dart';
 
 /// Opens the add/edit bottom sheet. [existing] is null for a brand-new
 /// session; pass the current activity to prefill the form for editing.
@@ -82,8 +85,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
     return '$h h $m min';
   }
 
-  static String _formatDurationForStorage(int minutes) =>
-      '$minutes min';
+  static String _formatDurationForStorage(int minutes) => '$minutes min';
 
   bool get _isEditable =>
       widget.existing != null && widget.existing!.status != DayStatus.empty;
@@ -170,7 +172,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
     final picked = await showModalBottomSheet<int>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _DurationPickerSheet(
+      builder: (_) => DurationPickerSheet(
         initialMinutes: _durationMinutes ?? 45,
       ),
     );
@@ -279,7 +281,8 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                       ],
                     ),
                   ),
-                  _CloseButton(onPressed: () => Navigator.of(context).pop()),
+                  SheetCloseButton(
+                      onPressed: () => Navigator.of(context).pop()),
                 ],
               ),
             ),
@@ -301,16 +304,16 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                       placeholder: 'e.g. Morning run',
                     ),
                     const SizedBox(height: KSpace.s3 + 2),
-                    _TypeSelector(
+                    TypeSelector(
                       value: _type,
-                      onChanged: (v) => setState(() =>
-                          _type = (v == _type) ? null : v),
+                      onChanged: (v) =>
+                          setState(() => _type = (v == _type) ? null : v),
                     ),
                     const SizedBox(height: KSpace.s3 + 2),
                     Row(
                       children: <Widget>[
                         Expanded(
-                          child: _TimePickerField(
+                          child: TimePickerField(
                             value: _selectedTime,
                             onTap: _pickTime,
                             onClear: _selectedTime != null
@@ -320,7 +323,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                         ),
                         const SizedBox(width: KSpace.s2 + 2),
                         Expanded(
-                          child: _DurationPickerField(
+                          child: DurationPickerField(
                             value: _durationMinutes,
                             formatDuration: _formatDuration,
                             onTap: _pickDuration,
@@ -343,13 +346,13 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                     ),
                     if (!_isEditable) ...<Widget>[
                       const SizedBox(height: KSpace.s3 + 2),
-                      _RecurrenceSelector(
+                      RecurrenceSelector(
                         value: _recurrence,
                         onChanged: (v) => setState(() => _recurrence = v),
                       ),
                       if (_recurrence != RecurrenceRule.none) ...<Widget>[
                         const SizedBox(height: KSpace.s3),
-                        _WeeksStepper(
+                        WeeksStepper(
                           value: _weeks,
                           onChanged: (v) => setState(() => _weeks = v),
                         ),
@@ -384,659 +387,6 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: colors.bgSubtle,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onPressed,
-        child: SizedBox(
-          width: 30,
-          height: 30,
-          child: Icon(LucideIcons.x, size: 14, color: colors.fgSecondary),
-        ),
-      ),
-    );
-  }
-}
-
-class _TypeSelector extends StatelessWidget {
-  const _TypeSelector({required this.value, required this.onChanged});
-
-  final ActivityType? value;
-  final ValueChanged<ActivityType> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Type',
-          style: KText.caption.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.fgSecondary,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Wrap(
-          spacing: 7,
-          runSpacing: 7,
-          children: ActivityType.values
-              .map((t) => _TypeChip(
-                    type: t,
-                    selected: value == t,
-                    onTap: () => onChanged(t),
-                  ))
-              .toList(growable: false),
-        ),
-      ],
-    );
-  }
-}
-
-class _TypeChip extends StatelessWidget {
-  const _TypeChip({
-    required this.type,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final ActivityType type;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: selected ? colors.accentLight : colors.bgSubtle,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: AnimatedContainer(
-          duration: KMotion.fast,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selected ? colors.accent : Colors.transparent,
-              width: 1.5,
-            ),
-          ),
-          child: Text(
-            type.label,
-            style: KText.bodySm.copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: selected ? colors.accent : colors.fgSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-enum RecurrenceRule { none, daily, weekly, weekdays, weekends }
-
-extension RecurrenceRuleX on RecurrenceRule {
-  String get label => switch (this) {
-        RecurrenceRule.none => 'Once',
-        RecurrenceRule.daily => 'Daily',
-        RecurrenceRule.weekly => 'Weekly',
-        RecurrenceRule.weekdays => 'Weekdays',
-        RecurrenceRule.weekends => 'Weekends',
-      };
-
-  /// Returns every date that should receive this session given a starting
-  /// [base] date and a duration in [weeks]. The [base] date is always
-  /// included (even if the rule would normally skip it).
-  List<DateTime> expand(DateTime base, int weeks) {
-    final start = KDate.startOfDay(base);
-    if (this == RecurrenceRule.none) return <DateTime>[start];
-    if (this == RecurrenceRule.weekly) {
-      return List<DateTime>.generate(
-        weeks,
-        (i) => start.add(Duration(days: 7 * i)),
-      );
-    }
-
-    final totalDays = weeks * 7;
-    final all = List<DateTime>.generate(
-      totalDays,
-      (i) => start.add(Duration(days: i)),
-    );
-    return switch (this) {
-      RecurrenceRule.daily => all,
-      RecurrenceRule.weekdays => all
-          .where((d) =>
-              d.weekday >= DateTime.monday && d.weekday <= DateTime.friday)
-          .toList(growable: false),
-      RecurrenceRule.weekends => <DateTime>[
-          start,
-          ...all.skip(1).where(
-                (d) =>
-                    d.weekday == DateTime.saturday ||
-                    d.weekday == DateTime.sunday,
-              ),
-        ],
-      RecurrenceRule.none || RecurrenceRule.weekly => <DateTime>[start],
-    };
-  }
-}
-
-class _RecurrenceSelector extends StatelessWidget {
-  const _RecurrenceSelector({required this.value, required this.onChanged});
-
-  final RecurrenceRule value;
-  final ValueChanged<RecurrenceRule> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Repeats',
-          style: KText.caption.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.fgSecondary,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Wrap(
-          spacing: 7,
-          runSpacing: 7,
-          children: RecurrenceRule.values
-              .map((r) => _RecurrenceChip(
-                    rule: r,
-                    selected: value == r,
-                    onTap: () => onChanged(r),
-                  ))
-              .toList(growable: false),
-        ),
-      ],
-    );
-  }
-}
-
-class _RecurrenceChip extends StatelessWidget {
-  const _RecurrenceChip({
-    required this.rule,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final RecurrenceRule rule;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: selected ? colors.accentLight : colors.bgSubtle,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: AnimatedContainer(
-          duration: KMotion.fast,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selected ? colors.accent : Colors.transparent,
-              width: 1.5,
-            ),
-          ),
-          child: Text(
-            rule.label,
-            style: KText.bodySm.copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: selected ? colors.accent : colors.fgSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WeeksStepper extends StatelessWidget {
-  const _WeeksStepper({required this.value, required this.onChanged});
-
-  final int value;
-  final ValueChanged<int> onChanged;
-
-  static const int _min = 1;
-  static const int _max = 12;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Text(
-            'Repeat for',
-            style: KText.body.copyWith(color: colors.fgPrimary),
-          ),
-        ),
-        _StepperButton(
-          icon: LucideIcons.minus,
-          onPressed: value > _min ? () => onChanged(value - 1) : null,
-        ),
-        SizedBox(
-          width: 64,
-          child: Text(
-            value == 1 ? '1 week' : '$value weeks',
-            textAlign: TextAlign.center,
-            style: KText.body.copyWith(
-              fontWeight: FontWeight.w600,
-              color: colors.fgPrimary,
-            ),
-          ),
-        ),
-        _StepperButton(
-          icon: LucideIcons.plus,
-          onPressed: value < _max ? () => onChanged(value + 1) : null,
-        ),
-      ],
-    );
-  }
-}
-
-class _StepperButton extends StatelessWidget {
-  const _StepperButton({required this.icon, required this.onPressed});
-
-  final IconData icon;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final enabled = onPressed != null;
-    return Material(
-      color: colors.bgSubtle,
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: 30,
-          height: 30,
-          child: Icon(
-            icon,
-            size: 14,
-            color: enabled ? colors.fgSecondary : colors.fgDisabled,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TimePickerField extends StatelessWidget {
-  const _TimePickerField({
-    required this.value,
-    required this.onTap,
-    this.onClear,
-  });
-
-  final TimeOfDay? value;
-  final VoidCallback onTap;
-  final VoidCallback? onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final hasValue = value != null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Time',
-          style: KText.caption.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.fgSecondary,
-          ),
-        ),
-        const SizedBox(height: KSpace.s1 + 1),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(KRadius.md),
-            child: AnimatedContainer(
-              duration: KMotion.base,
-              decoration: BoxDecoration(
-                color: colors.bgElevated,
-                borderRadius: BorderRadius.circular(KRadius.md),
-                border: Border.all(
-                  color: hasValue ? colors.accent : colors.border,
-                  width: 1.5,
-                ),
-                boxShadow: hasValue
-                    ? <BoxShadow>[
-                        BoxShadow(
-                          color: colors.accentLight,
-                          blurRadius: 0,
-                          spreadRadius: 3,
-                        ),
-                      ]
-                    : null,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      hasValue ? value!.format(context) : 'Set time',
-                      style: KText.body.copyWith(
-                        color: hasValue ? colors.fgPrimary : colors.fgTertiary,
-                      ),
-                    ),
-                  ),
-                  if (hasValue)
-                    GestureDetector(
-                      onTap: onClear,
-                      behavior: HitTestBehavior.opaque,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 4),
-                        child: Icon(
-                          LucideIcons.x,
-                          size: 14,
-                          color: colors.fgTertiary,
-                        ),
-                      ),
-                    )
-                  else
-                    Icon(
-                      LucideIcons.clock,
-                      size: 16,
-                      color: colors.fgTertiary,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DurationPickerField extends StatelessWidget {
-  const _DurationPickerField({
-    required this.value,
-    required this.formatDuration,
-    required this.onTap,
-    this.onClear,
-  });
-
-  final int? value;
-  final String Function(int) formatDuration;
-  final VoidCallback onTap;
-  final VoidCallback? onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final hasValue = value != null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Duration',
-          style: KText.caption.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colors.fgSecondary,
-          ),
-        ),
-        const SizedBox(height: KSpace.s1 + 1),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(KRadius.md),
-            child: AnimatedContainer(
-              duration: KMotion.base,
-              decoration: BoxDecoration(
-                color: colors.bgElevated,
-                borderRadius: BorderRadius.circular(KRadius.md),
-                border: Border.all(
-                  color: hasValue ? colors.accent : colors.border,
-                  width: 1.5,
-                ),
-                boxShadow: hasValue
-                    ? <BoxShadow>[
-                        BoxShadow(
-                          color: colors.accentLight,
-                          blurRadius: 0,
-                          spreadRadius: 3,
-                        ),
-                      ]
-                    : null,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      hasValue ? formatDuration(value!) : 'Set duration',
-                      style: KText.body.copyWith(
-                        color: hasValue ? colors.fgPrimary : colors.fgTertiary,
-                      ),
-                    ),
-                  ),
-                  if (hasValue)
-                    GestureDetector(
-                      onTap: onClear,
-                      behavior: HitTestBehavior.opaque,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 4),
-                        child: Icon(
-                          LucideIcons.x,
-                          size: 14,
-                          color: colors.fgTertiary,
-                        ),
-                      ),
-                    )
-                  else
-                    Icon(
-                      LucideIcons.timer,
-                      size: 16,
-                      color: colors.fgTertiary,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DurationPickerSheet extends StatefulWidget {
-  const _DurationPickerSheet({required this.initialMinutes});
-
-  final int initialMinutes;
-
-  @override
-  State<_DurationPickerSheet> createState() => _DurationPickerSheetState();
-}
-
-class _DurationPickerSheetState extends State<_DurationPickerSheet> {
-  static const _hours = [0, 1, 2, 3, 4];
-  static const _minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-
-  late int _hourIndex;
-  late int _minIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    final h = (widget.initialMinutes ~/ 60).clamp(0, _hours.last);
-    final m = widget.initialMinutes % 60;
-    _hourIndex = _hours.indexOf(h);
-    final closestMin = _minutes.reduce(
-      (a, b) => (a - m).abs() <= (b - m).abs() ? a : b,
-    );
-    _minIndex = _minutes.indexOf(closestMin);
-  }
-
-  int get _totalMinutes => _hours[_hourIndex] * 60 + _minutes[_minIndex];
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final bottomSafe = MediaQuery.paddingOf(context).bottom;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.bgElevated,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(KRadius.xl),
-        ),
-      ),
-      padding: EdgeInsets.only(bottom: bottomSafe),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const SizedBox(height: 10),
-          Container(
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colors.border,
-              borderRadius: BorderRadius.circular(KRadius.full),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    'Duration',
-                    style: KText.h3.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: colors.fgPrimary,
-                    ),
-                  ),
-                ),
-                _CloseButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: colors.borderSubtle),
-          SizedBox(
-            height: 200,
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: CupertinoPicker(
-                    scrollController: FixedExtentScrollController(
-                      initialItem: _hourIndex,
-                    ),
-                    itemExtent: 40,
-                    selectionOverlay: Container(
-                      decoration: BoxDecoration(
-                        border: Border.symmetric(
-                          horizontal: BorderSide(
-                            color: colors.border,
-                            width: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    onSelectedItemChanged: (i) => _hourIndex = i,
-                    children: [
-                      for (final h in _hours)
-                        Center(
-                          child: Text(
-                            '$h h',
-                            style: KText.body.copyWith(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: colors.fgPrimary,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CupertinoPicker(
-                    scrollController: FixedExtentScrollController(
-                      initialItem: _minIndex,
-                    ),
-                    itemExtent: 40,
-                    selectionOverlay: Container(
-                      decoration: BoxDecoration(
-                        border: Border.symmetric(
-                          horizontal: BorderSide(
-                            color: colors.border,
-                            width: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    onSelectedItemChanged: (i) => _minIndex = i,
-                    children: [
-                      for (final m in _minutes)
-                        Center(
-                          child: Text(
-                            '$m min',
-                            style: KText.body.copyWith(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: colors.fgPrimary,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-            child: KButton(
-              label: 'Done',
-              onPressed: () {
-                final total = _totalMinutes;
-                Navigator.of(context).pop(total > 0 ? total : null);
-              },
-            ),
-          ),
-        ],
       ),
     );
   }

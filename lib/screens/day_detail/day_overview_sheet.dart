@@ -8,6 +8,7 @@ import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
+import 'widgets/close_button.dart';
 import '../../widgets/k_activity_card.dart';
 import '../../widgets/k_button.dart';
 import 'day_detail_sheet.dart';
@@ -96,7 +97,7 @@ class DayOverviewSheet extends StatelessWidget {
                     ],
                   ),
                 ),
-                _CloseButton(onPressed: () => Navigator.of(context).pop()),
+                SheetCloseButton(onPressed: () => Navigator.of(context).pop()),
               ],
             ),
           ),
@@ -149,30 +150,6 @@ class DayOverviewSheet extends StatelessWidget {
       context: context,
       date: date,
       existing: null,
-    );
-  }
-}
-
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: colors.bgSubtle,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onPressed,
-        child: SizedBox(
-          width: 30,
-          height: 30,
-          child: Icon(LucideIcons.x, size: 14, color: colors.fgSecondary),
-        ),
-      ),
     );
   }
 }

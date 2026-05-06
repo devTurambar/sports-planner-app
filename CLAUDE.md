@@ -38,10 +38,42 @@ lib/
     week/                 # Week view + day card
     month/                # Month grid + selected-day detail
     day_detail/           # Day overview sheet + add/edit form sheet
+      widgets/            # Extracted form widgets (type selector, pickers, etc.)
     empty/                # Empty state
     stats/                # Stats screen (KPIs + bar chart + type breakdown)
     settings/             # Settings screen
 ```
+
+## Code structure & good practices
+
+- **Keep files small**: no Dart file should exceed ~400 lines. When a
+  file grows beyond that, extract self-contained widgets, helpers, or
+  models into their own files. A screen file should contain only the
+  screen's state and layout — supporting widgets belong in a `widgets/`
+  subfolder (e.g. `screens/day_detail/widgets/`).
+- **Extract early**: if a widget has its own state, distinct
+  responsibility, or is reused in more than one place, it belongs in
+  its own file. Don't wait for the file to get large — extract as you
+  write. Private `_Foo` widgets are fine for tiny helpers; anything
+  over ~60 lines or with its own callbacks should be public and
+  extracted.
+- **Shared widgets go in `lib/widgets/`**: prefixed with `k_` (e.g.
+  `k_button.dart`, `k_activity_card.dart`). Screen-specific widgets
+  go in the screen's `widgets/` subfolder.
+- **One responsibility per file**: a model file defines the model. A
+  controller file defines the controller. Don't mix UI and business
+  logic in the same file.
+- **Name files after their primary export**: `type_selector.dart`
+  exports `TypeSelector`, `duration_picker.dart` exports
+  `DurationPickerField` + `DurationPickerSheet`, etc.
+- **Avoid duplication**: before writing a widget, check if a similar
+  one already exists in `lib/widgets/` or a screen's `widgets/`
+  subfolder. Extend or compose existing widgets rather than
+  copy-pasting. If two files have the same private widget, extract it
+  into a shared file.
+- **Prefer composition over configuration**: rather than adding many
+  boolean flags to one widget, create focused variants or compose
+  smaller pieces.
 
 ## Conventions to follow
 
