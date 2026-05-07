@@ -310,10 +310,16 @@ without discussion.
   an activity that has a linked calendar event.
 
 ### Authentication + cloud sync (after calendar)
-- Add a backend (Firebase Auth or Supabase) for user accounts.
+- Supabase chosen as backend. Project settings: Data API enabled,
+  auto-expose new tables disabled, automatic RLS enabled.
+- Auth providers: Google + Apple Sign-In.
+- **TODO**: enroll in Apple Developer Program ($99/yr) to configure
+  Apple Sign-In (Services ID, return URL, Sign in with Apple
+  capability in Xcode).
 - Login/signup screens (email + social providers).
 - Sync local SQLite data to the cloud so activities persist across
-  devices.
+  devices. Strategy: offline-first with last-write-wins conflict
+  resolution.
 - Required foundation for Strava integration (need a backend to
   securely store OAuth tokens and handle callbacks).
 

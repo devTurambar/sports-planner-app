@@ -163,7 +163,7 @@ class _Content extends StatelessWidget {
       return Text(
         isPast ? 'Rest day' : 'No session',
         style: KText.body.copyWith(
-          color: colors.fgDisabled,
+          color: colors.fgSecondary,
           fontSize: 14,
         ),
       );
