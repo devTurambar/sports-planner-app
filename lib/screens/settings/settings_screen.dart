@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../state/auth_controller.dart';
 import '../../state/calendar_service.dart';
 import '../../state/onboarding_controller.dart';
 import '../../state/theme_controller.dart';
@@ -155,6 +156,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () async {
                 await onboarding.reset();
               },
+            ),
+            _StaticRow(
+              label: 'Sign out',
+              value: '',
+              onTap: () => context.read<AuthController>().signOut(),
               isLast: true,
             ),
           ],

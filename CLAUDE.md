@@ -309,17 +309,59 @@ without discussion.
 - **TODO**: consider optional "keep on calendar?" prompt when deleting
   an activity that has a linked calendar event.
 
-### Authentication + cloud sync (after calendar)
-- Supabase chosen as backend. Project settings: Data API enabled,
-  auto-expose new tables disabled, automatic RLS enabled.
-- Auth providers: Google + Apple Sign-In.
+### Authentication + cloud sync (in progress)
+- Supabase chosen as backend. Project ref: `hpkapuvemjzjdjdrqrio`.
+  Project settings: Data API enabled, auto-expose new tables disabled,
+  automatic RLS enabled.
+- Auth providers: Google + Apple Sign-In. Google OAuth configured
+  (web client ID in Supabase). Apple pending developer enrollment.
+- Supabase credentials stored in `.env` (gitignored), loaded via
+  `--dart-define-from-file=.env`. Shell alias `fr` defined in
+  `~/.zshrc` for convenience (`flutter run --dart-define-from-file=.env`).
+
+#### Database schema (done)
+- ✅ `profiles` table: auto-created on signup via trigger on
+  `auth.users`. Columns: `id` (uuid, PK, FK → auth.users),
+  `display_name`, `avatar_url`, `created_at`. RLS: users read/update
+  own row only.
+- ✅ `activities` table: mirrors local SQLite schema + cloud fields.
+  Columns: `id` (text, PK — matches local UUIDs), `user_id` (uuid,
+  FK → auth.users), `date`, `status`, `name`, `type`, `duration`,
+  `time_of_day`, `notes`, `calendar_event_id`, `created_at`,
+  `updated_at` (auto-bumped via trigger). Index on
+  `(user_id, date)`. RLS: full CRUD scoped to own `user_id`.
+- ✅ `handle_new_user()` trigger populates `profiles` from Google/Apple
+  metadata (`full_name`, `avatar_url`) on signup.
+- ✅ `update_updated_at()` trigger auto-sets `updated_at` on every
+  activity update — used by last-write-wins sync.
+
+#### Flutter auth layer (done)
+- ✅ `supabase_flutter` package added.
+- ✅ `AuthController` (`lib/state/auth_controller.dart`): wraps
+  Supabase auth client, listens to `onAuthStateChange`, exposes
+  `isSignedIn`, `user`, `displayName`, `signInWithGoogle()`,
+  `signInWithApple()`, `signOut()`.
+- ✅ `LoginScreen` (`lib/screens/auth/login_screen.dart`): Google +
+  Apple sign-in buttons, Kadence design tokens.
+- ⚠️ Auth gate wired in `app.dart` but currently commented out —
+  re-enable once iOS/Android deep-link URL schemes are configured so
+  OAuth callbacks return to the app.
+- ✅ Sign out row added to settings screen.
+
+#### TODO
 - **TODO**: enroll in Apple Developer Program ($99/yr) to configure
   Apple Sign-In (Services ID, return URL, Sign in with Apple
   capability in Xcode).
-- Login/signup screens (email + social providers).
-- Sync local SQLite data to the cloud so activities persist across
-  devices. Strategy: offline-first with last-write-wins conflict
-  resolution.
+- **TODO**: configure deep link URL scheme (`io.supabase.kadence`) in
+  iOS `Info.plist` and Android `AndroidManifest.xml` so OAuth
+  callback returns to the app.
+- **TODO**: build sync layer — push local activities to Supabase
+  `activities` table on save/delete, pull remote changes on app start.
+  Strategy: offline-first with last-write-wins (`updated_at`).
+- **TODO**: handle first-login migration — upload existing local-only
+  activities to the cloud on first sign-in.
+- **TODO**: add native Google Sign-In (Android/iOS client IDs) for
+  one-tap sign-in instead of browser redirect.
 - Required foundation for Strava integration (need a backend to
   securely store OAuth tokens and handle callbacks).
 
