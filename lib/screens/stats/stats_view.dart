@@ -1,6 +1,3 @@
-import 'dart:math' as math;
-
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -12,9 +9,8 @@ import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
 
-const double _kBarWidth = 20;
-const double _kBarSpacing = 6;
-const double _kChartHeight = 180;
+
+const int _kWeekCount = 26;
 
 class StatsView extends StatefulWidget {
   const StatsView({super.key});
@@ -24,7 +20,7 @@ class StatsView extends StatefulWidget {
 }
 
 class _StatsViewState extends State<StatsView> {
-  int _selectedWeek = -1;
+  ActivityType? _typeFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -32,20 +28,17 @@ class _StatsViewState extends State<StatsView> {
     final plan = context.watch<PlanController>();
     final data = _StatsData.compute(plan, today);
 
-    if (data.totalSessions == 0) {
+    final hasAnyActivity = data.dayCells.any((c) => !c.isEmpty);
+    if (data.totalSessions == 0 && !hasAnyActivity) {
       return const _StatsEmpty();
     }
 
-    final hasSelection =
-        _selectedWeek >= 0 && _selectedWeek < data.weekBuckets.length;
-    final breakdownBuckets =
-        hasSelection ? data.weekTypeCounts[_selectedWeek] : data.typeCounts;
-    final breakdownTotal = hasSelection
-        ? data.weekBuckets[_selectedWeek].count
+    final filteredBreakdown = _typeFilter != null
+        ? data.typeCounts.where((b) => b.type == _typeFilter).toList()
+        : data.typeCounts;
+    final filteredTotal = _typeFilter != null
+        ? filteredBreakdown.fold<int>(0, (s, b) => s + b.count)
         : data.totalSessions;
-    final breakdownLabel = hasSelection
-        ? _weekRangeLabel(data.weekBuckets[_selectedWeek])
-        : null;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -60,77 +53,112 @@ class _StatsViewState extends State<StatsView> {
         Row(
           children: <Widget>[
             Expanded(
-              child: _Kpi(
-                value: data.totalSessions.toString(),
-                label: 'Total sessions',
-                accent: true,
-              ),
+              child: _Kpi(value: data.totalSessions.toString(), label: 'Sessions'),
             ),
             const SizedBox(width: KSpace.s2),
             Expanded(
               child: _Kpi(
                 value: data.currentStreak.toString(),
-                label: data.currentStreak == 1
-                    ? 'Week streak'
-                    : 'Weeks streak',
+                label: 'Streak',
+                suffix: 'wk',
+              ),
+            ),
+            const SizedBox(width: KSpace.s2),
+            Expanded(
+              child: _Kpi(
+                value: data.avgPerWeek.toStringAsFixed(1),
+                label: 'Average',
+                suffix: '/wk',
               ),
             ),
           ],
         ),
         const SizedBox(height: KSpace.s3),
-        _SessionsChart(
-          buckets: data.weekBuckets,
-          selectedIndex: _selectedWeek,
-          onSelected: (i) => setState(() {
-            _selectedWeek = _selectedWeek == i ? -1 : i;
-          }),
+        _HeatmapCard(
+          data: data,
+          typeFilter: _typeFilter,
         ),
         const SizedBox(height: KSpace.s3),
         _TypeBreakdown(
-          buckets: breakdownBuckets,
-          total: breakdownTotal,
-          weekLabel: breakdownLabel,
-          onClear: hasSelection
-              ? () => setState(() => _selectedWeek = -1)
+          buckets: filteredBreakdown,
+          allBuckets: data.typeCounts,
+          total: filteredTotal,
+          maxCount: data.typeCounts.isEmpty
+              ? 1
+              : data.typeCounts.first.count,
+          typeFilter: _typeFilter,
+          onTypeSelected: (type) => setState(() {
+            _typeFilter = _typeFilter == type ? null : type;
+          }),
+          onClear: _typeFilter != null
+              ? () => setState(() => _typeFilter = null)
               : null,
         ),
       ],
     );
   }
-
-  String _weekRangeLabel(_WeekBucket bucket) {
-    final start = bucket.start;
-    final end = start.add(const Duration(days: 6));
-    if (start.month == end.month) {
-      return '${start.shortMonth} ${start.day} – ${end.day}';
-    }
-    return '${start.shortMonth} ${start.day} – ${end.shortMonth} ${end.day}';
-  }
 }
 
 // ── data ─────────────────────────────────────────────────────────────────
+
+class _DayCell {
+  const _DayCell({
+    this.primaryType,
+    this.activities = const <_CellActivity>[],
+  });
+
+  final ActivityType? primaryType;
+  final List<_CellActivity> activities;
+
+  bool get isEmpty => activities.isEmpty;
+
+  int get doneCount =>
+      activities.where((a) => a.status == DayStatus.done).length;
+  int get plannedCount =>
+      activities.where((a) => a.status != DayStatus.done).length;
+  bool get hasPlannedOnly => doneCount == 0 && plannedCount > 0;
+
+  ({ActivityType? type, bool dimmed})? renderForFilter(ActivityType? filter) {
+    if (isEmpty) return null;
+    if (filter == null) {
+      return (type: primaryType, dimmed: hasPlannedOnly);
+    }
+    final matches = activities.where((a) => a.type == filter).toList();
+    if (matches.isEmpty) return null;
+    final done = matches.where((a) => a.status == DayStatus.done).length;
+    return (type: filter, dimmed: done == 0);
+  }
+}
+
+class _CellActivity {
+  const _CellActivity({required this.type, required this.status});
+
+  final ActivityType? type;
+  final DayStatus status;
+}
 
 class _StatsData {
   const _StatsData({
     required this.totalSessions,
     required this.currentStreak,
-    required this.weekBuckets,
+    required this.avgPerWeek,
     required this.typeCounts,
-    required this.weekTypeCounts,
+    required this.dayCells,
+    required this.weekStarts,
   });
 
   final int totalSessions;
   final int currentStreak;
-  final List<_WeekBucket> weekBuckets;
+  final double avgPerWeek;
   final List<_TypeBucket> typeCounts;
-  final List<List<_TypeBucket>> weekTypeCounts;
+  final List<_DayCell> dayCells;
+  final List<DateTime> weekStarts;
 
   static _StatsData compute(PlanController plan, DateTime today) {
-    final all = plan
+    final done = plan
         .allActivities()
-        .where((a) => a.status != DayStatus.empty)
+        .where((a) => a.status == DayStatus.done)
         .toList(growable: false);
-    final done = all.where((a) => a.status == DayStatus.done).toList();
 
     final mondayThis = KDate.mondayOfWeek(today);
     bool inWeek(Activity a, DateTime weekStart) {
@@ -138,26 +166,35 @@ class _StatsData {
       return !a.date.isBefore(weekStart) && a.date.isBefore(end);
     }
 
-    final earliest = done.isEmpty
-        ? mondayThis
-        : done.map((a) => a.date).reduce((a, b) => a.isBefore(b) ? a : b);
-    final mondayFirst = KDate.mondayOfWeek(earliest);
-    final daysDiff = DateTime.utc(mondayThis.year, mondayThis.month, mondayThis.day)
-        .difference(DateTime.utc(mondayFirst.year, mondayFirst.month, mondayFirst.day))
-        .inDays;
-    final weekCount = daysDiff ~/ 7 + 1;
+    final weekStarts = <DateTime>[];
+    for (var i = _kWeekCount - 1; i >= 0; i--) {
+      weekStarts.add(mondayThis.subtract(Duration(days: 7 * i)));
+    }
 
-    final weekBuckets = <_WeekBucket>[];
-    final weekTypeCounts = <List<_TypeBucket>>[];
-    for (var i = weekCount - 1; i >= 0; i--) {
-      final weekStart = mondayThis.subtract(Duration(days: 7 * i));
-      final weekDone = done.where((a) => inWeek(a, weekStart)).toList();
-      weekBuckets.add(_WeekBucket(
-        start: weekStart,
-        count: weekDone.length,
-        isCurrent: i == 0,
-      ));
-      weekTypeCounts.add(_buildTypeBuckets(weekDone));
+    final all = plan.allActivities().toList(growable: false);
+
+    final todayStart = KDate.startOfDay(today);
+    final dayCells = <_DayCell>[];
+    for (final ws in weekStarts) {
+      for (var d = 0; d < 7; d++) {
+        final date = ws.add(Duration(days: d));
+        if (date.isAfter(todayStart)) break;
+        final dayActivities = all
+            .where((a) =>
+                KDate.isSameDay(a.date, date) &&
+                a.status != DayStatus.empty)
+            .toList();
+        if (dayActivities.isEmpty) {
+          dayCells.add(const _DayCell());
+        } else {
+          dayCells.add(_DayCell(
+            primaryType: plan.forDate(date).type,
+            activities: dayActivities
+                .map((a) => _CellActivity(type: a.type, status: a.status))
+                .toList(growable: false),
+          ));
+        }
+      }
     }
 
     final currentDone = done.any((a) => inWeek(a, mondayThis));
@@ -173,12 +210,19 @@ class _StatsData {
       }
     }
 
+    final weeksWithData = weekStarts.where((ws) {
+      return done.any((a) => inWeek(a, ws));
+    }).length;
+    final avgPerWeek =
+        weeksWithData == 0 ? 0.0 : done.length / weeksWithData;
+
     return _StatsData(
       totalSessions: done.length,
       currentStreak: streak,
-      weekBuckets: weekBuckets,
+      avgPerWeek: avgPerWeek,
       typeCounts: _buildTypeBuckets(done),
-      weekTypeCounts: weekTypeCounts,
+      dayCells: dayCells,
+      weekStarts: weekStarts,
     );
   }
 
@@ -194,18 +238,6 @@ class _StatsData {
   }
 }
 
-class _WeekBucket {
-  const _WeekBucket({
-    required this.start,
-    required this.count,
-    required this.isCurrent,
-  });
-
-  final DateTime start;
-  final int count;
-  final bool isCurrent;
-}
-
 class _TypeBucket {
   const _TypeBucket({required this.type, required this.count});
 
@@ -215,89 +247,43 @@ class _TypeBucket {
   String get label => type?.label ?? 'Other';
 }
 
-// ── scrollable sessions chart ───────────────────────────────────────────
+// ── 26-week contribution heatmap ─────────────────────────────────────────
 
-class _SessionsChart extends StatefulWidget {
-  const _SessionsChart({
-    required this.buckets,
-    required this.selectedIndex,
-    required this.onSelected,
-  });
+class _HeatmapCard extends StatelessWidget {
+  const _HeatmapCard({required this.data, this.typeFilter});
 
-  final List<_WeekBucket> buckets;
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-
-  @override
-  State<_SessionsChart> createState() => _SessionsChartState();
-}
-
-class _SessionsChartState extends State<_SessionsChart> {
-  late final ScrollController _scrollCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollCtrl = ScrollController();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollCtrl.hasClients) {
-        _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollCtrl.dispose();
-    super.dispose();
-  }
+  final _StatsData data;
+  final ActivityType? typeFilter;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final buckets = widget.buckets;
-    final selected = widget.selectedIndex;
-    final maxCount = buckets.fold<int>(0, (m, b) => math.max(m, b.count));
-    final maxY = (maxCount == 0 ? 1 : maxCount + 1).toDouble();
+    final filtered = typeFilter != null;
+    final filterLabel = filtered
+        ? 'Filtered to ${typeFilter!.label}'
+        : 'Tinted by primary activity';
 
-    final chartWidth =
-        buckets.length * (_kBarWidth + _kBarSpacing) + _kBarSpacing;
-
-    final monthLabels = <int, String>{};
-    for (var i = 0; i < buckets.length; i++) {
-      final cur = buckets[i].start;
-      if (i == 0 ||
-          cur.month != buckets[i - 1].start.month ||
-          cur.year != buckets[i - 1].start.year) {
-        monthLabels[i] = cur.shortMonth;
-      }
-    }
-
-    final hasSelection = selected >= 0 && selected < buckets.length;
+    final firstWeek = data.weekStarts.first;
+    final lastWeek = data.weekStarts.last.add(const Duration(days: 6));
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(
-        KSpace.s4,
-        KSpace.s4,
-        KSpace.s4,
-        KSpace.s2,
-      ),
+      padding: const EdgeInsets.all(KSpace.s4),
       decoration: BoxDecoration(
-        color: colors.bgElevated,
-        borderRadius: BorderRadius.circular(KRadius.md),
-        border: Border.all(color: colors.border),
+        color: colors.bgCard,
+        borderRadius: BorderRadius.circular(KRadius.lg + 4),
+        border: Border.all(color: colors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
+        children: [
           Row(
-            children: <Widget>[
+            children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
+                  children: [
                     Text(
-                      'Sessions per week',
+                      '$_kWeekCount-week activity',
                       style: KText.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.fgPrimary,
@@ -305,194 +291,133 @@ class _SessionsChartState extends State<_SessionsChart> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      buckets.length == 1
-                          ? 'This week'
-                          : 'Last ${buckets.length} weeks',
+                      filterLabel,
                       style: KText.caption.copyWith(
-                        fontSize: 11,
-                        color: colors.fgSecondary,
+                        fontSize: 10,
+                        color: colors.fgTertiary,
                       ),
                     ),
                   ],
                 ),
               ),
-              if (hasSelection)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: colors.accentLight,
-                    borderRadius: BorderRadius.circular(KRadius.full),
-                  ),
-                  child: Text(
-                    '${buckets[selected].count} sessions',
-                    style: KText.caption.copyWith(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: colors.accent,
-                    ),
+              if (filtered)
+                _ClearPill(onTap: () {})
+              else
+                Text(
+                  '${firstWeek.shortMonth} ${firstWeek.year % 100} → ${lastWeek.shortMonth} ${lastWeek.day}',
+                  style: KText.caption.copyWith(
+                    fontSize: 11,
+                    color: colors.fgSecondary,
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: KSpace.s4),
-          SizedBox(
-            height: _kChartHeight + 28,
-            child: Row(
-              children: <Widget>[
-                _YAxis(maxY: maxY, colors: colors),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _scrollCtrl,
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: SizedBox(
-                      width: chartWidth,
-                      height: _kChartHeight + 28,
-                      child: BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.spaceAround,
-                          maxY: maxY,
-                          minY: 0,
-                          barTouchData: BarTouchData(
-                            enabled: true,
-                            touchTooltipData: BarTouchTooltipData(
-                              getTooltipColor: (_) => Colors.transparent,
-                              tooltipPadding: EdgeInsets.zero,
-                              tooltipMargin: 0,
-                              getTooltipItem: (_, __, ___, ____) => null,
-                            ),
-                            touchCallback: (event, response) {
-                              if (event is FlTapUpEvent) {
-                                final idx =
-                                    response?.spot?.touchedBarGroupIndex;
-                                if (idx != null) widget.onSelected(idx);
-                              }
-                            },
-                          ),
-                          gridData: FlGridData(
-                            show: true,
-                            drawVerticalLine: false,
-                            horizontalInterval:
-                                maxY > 4 ? (maxY / 4).ceilToDouble() : 1,
-                            getDrawingHorizontalLine: (value) => FlLine(
-                              color: colors.border.withValues(alpha: 0.5),
-                              strokeWidth: 0.5,
-                            ),
-                          ),
-                          borderData: FlBorderData(show: false),
-                          titlesData: FlTitlesData(
-                            leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 24,
-                                getTitlesWidget: (value, meta) {
-                                  final i = value.toInt();
-                                  if (!monthLabels.containsKey(i)) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      monthLabels[i]!,
-                                      style: KText.caption.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: colors.fgSecondary,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          barGroups: <BarChartGroupData>[
-                            for (var i = 0; i < buckets.length; i++)
-                              BarChartGroupData(
-                                x: i,
-                                barRods: <BarChartRodData>[
-                                  BarChartRodData(
-                                    toY: math.max(
-                                        buckets[i].count.toDouble(), 0),
-                                    color: _barColor(
-                                        i, buckets[i], selected, colors),
-                                    width: _kBarWidth,
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(KRadius.xs),
-                                    ),
-                                    backDrawRodData:
-                                        BackgroundBarChartRodData(
-                                      show: true,
-                                      toY: maxY,
-                                      color: colors.bgSubtle
-                                          .withValues(alpha: 0.5),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: KSpace.s3),
+          _HeatmapGrid(
+            cells: data.dayCells,
+            typeFilter: typeFilter,
           ),
+          const SizedBox(height: 6),
+          _MonthLabels(weekStarts: data.weekStarts),
         ],
       ),
     );
   }
-
-  Color _barColor(
-      int index, _WeekBucket bucket, int selected, KadenceColors colors) {
-    if (index == selected) return colors.accentHover;
-    if (selected >= 0) return colors.accent.withValues(alpha: 0.25);
-    if (bucket.isCurrent) return colors.accent.withValues(alpha: 0.45);
-    return colors.accent;
-  }
 }
 
-class _YAxis extends StatelessWidget {
-  const _YAxis({required this.maxY, required this.colors});
+class _HeatmapGrid extends StatelessWidget {
+  const _HeatmapGrid({required this.cells, this.typeFilter});
 
-  final double maxY;
-  final KadenceColors colors;
+  final List<_DayCell> cells;
+  final ActivityType? typeFilter;
 
   @override
   Widget build(BuildContext context) {
-    final interval = maxY > 4 ? (maxY / 4).ceilToDouble() : 1.0;
-    final labels = <double>[];
-    for (var v = 0.0; v <= maxY; v += interval) {
-      labels.add(v);
+    final colors = context.colors;
+    final todayIndex = cells.length - 1;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const totalGap = (_kWeekCount - 1) * 2.0;
+        final cellSize = (constraints.maxWidth - totalGap) / _kWeekCount;
+        final clampedSize = cellSize.clamp(8.0, 14.0);
+
+        return SizedBox(
+          height: 7 * clampedSize + 6 * 2.0,
+          child: GridView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
+            ),
+            itemCount: cells.length,
+            itemBuilder: (context, index) {
+              final cell = cells[index];
+              final isToday = index == todayIndex;
+              final render = cell.renderForFilter(typeFilter);
+
+              if (render == null) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: colors.fgTertiary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(2),
+                    border: isToday
+                        ? Border.all(color: colors.fgPrimary, width: 1.5)
+                        : null,
+                  ),
+                );
+              }
+
+              final tint = context.typeColor(render.type).tint;
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: render.dimmed
+                      ? Color.lerp(colors.bgCard, tint, 0.35)
+                      : tint,
+                  borderRadius: BorderRadius.circular(2),
+                  border: isToday
+                      ? Border.all(color: colors.fgPrimary, width: 1.5)
+                      : null,
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MonthLabels extends StatelessWidget {
+  const _MonthLabels({required this.weekStarts});
+
+  final List<DateTime> weekStarts;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final labels = <String>[];
+    for (var i = 0; i < weekStarts.length; i++) {
+      if (i == 0 ||
+          weekStarts[i].month != weekStarts[i - 1].month) {
+        labels.add(weekStarts[i].shortMonth);
+      }
     }
 
-    return SizedBox(
-      width: 22,
-      height: _kChartHeight,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: labels.reversed
-            .map((v) => Text(
-                  v.toInt().toString(),
-                  style: KText.caption.copyWith(
-                    fontSize: 9,
-                    color: colors.fgTertiary,
-                  ),
-                ))
-            .toList(),
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: labels
+          .map((m) => Text(
+                m,
+                style: KText.caption.copyWith(
+                  fontSize: 9,
+                  color: colors.fgTertiary,
+                ),
+              ))
+          .toList(),
     );
   }
 }
@@ -503,49 +428,59 @@ class _Kpi extends StatelessWidget {
   const _Kpi({
     required this.value,
     required this.label,
-    this.accent = false,
+    this.suffix,
   });
 
   final String value;
   final String label;
-  final bool accent;
+  final String? suffix;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fg = accent ? colors.accent : colors.fgPrimary;
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KSpace.s4,
-        vertical: KSpace.s3,
-      ),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: accent ? colors.accentLight : colors.bgElevated,
-        borderRadius: BorderRadius.circular(KRadius.md),
-        border: Border.all(
-          color:
-              accent ? colors.accent.withValues(alpha: 0.15) : colors.border,
-        ),
+        color: colors.bgCard,
+        borderRadius: BorderRadius.circular(KRadius.lg + 4),
+        border: Border.all(color: colors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(
-            value,
-            style: KText.h2.copyWith(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: fg,
-              height: 1,
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: value,
+                  style: KText.h2.copyWith(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: colors.fgPrimary,
+                    height: 1,
+                  ),
+                ),
+                if (suffix != null)
+                  TextSpan(
+                    text: ' $suffix',
+                    style: KText.caption.copyWith(
+                      fontSize: 12,
+                      color: colors.fgTertiary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
-            label,
+            label.toUpperCase(),
             style: KText.caption.copyWith(
-              fontSize: 11,
-              color: fg.withValues(alpha: 0.75),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+              color: colors.fgTertiary,
             ),
           ),
         ],
@@ -554,40 +489,36 @@ class _Kpi extends StatelessWidget {
   }
 }
 
-// ── activity type breakdown ─────────────────────────────────────────────
+// ── activity type breakdown (filter buttons) ──────────────────────────────
 
 class _TypeBreakdown extends StatelessWidget {
   const _TypeBreakdown({
     required this.buckets,
+    required this.allBuckets,
     required this.total,
-    this.weekLabel,
+    required this.maxCount,
+    this.typeFilter,
+    required this.onTypeSelected,
     this.onClear,
   });
 
   final List<_TypeBucket> buckets;
+  final List<_TypeBucket> allBuckets;
   final int total;
-  final String? weekLabel;
+  final int maxCount;
+  final ActivityType? typeFilter;
+  final ValueChanged<ActivityType?> onTypeSelected;
   final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isFiltered = weekLabel != null;
     return Container(
-      padding: const EdgeInsets.fromLTRB(
-        KSpace.s4,
-        KSpace.s4,
-        KSpace.s4,
-        KSpace.s3,
-      ),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.bgElevated,
-        borderRadius: BorderRadius.circular(KRadius.md),
-        border: Border.all(
-          color: isFiltered
-              ? colors.accent.withValues(alpha: 0.3)
-              : colors.border,
-        ),
+        color: colors.bgCard,
+        borderRadius: BorderRadius.circular(KRadius.lg + 4),
+        border: Border.all(color: colors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,74 +526,47 @@ class _TypeBreakdown extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'By activity',
-                      style: KText.body.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colors.fgPrimary,
-                      ),
-                    ),
-                    if (isFiltered) ...<Widget>[
-                      const SizedBox(height: 2),
-                      Text(
-                        weekLabel!,
-                        style: KText.caption.copyWith(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: colors.accent,
-                        ),
-                      ),
-                    ],
-                  ],
+                child: Text(
+                  'By activity',
+                  style: KText.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.fgPrimary,
+                  ),
                 ),
               ),
               if (onClear != null)
-                GestureDetector(
-                  onTap: onClear,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: colors.bgSubtle,
-                      borderRadius: BorderRadius.circular(KRadius.full),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Icon(LucideIcons.x, size: 12, color: colors.fgSecondary),
-                        const SizedBox(width: 4),
-                        Text(
-                          'All time',
-                          style: KText.caption.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: colors.fgSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
+                _ClearPill(onTap: onClear!)
+              else
+                Text(
+                  'All time',
+                  style: KText.caption.copyWith(
+                    fontSize: 10,
+                    color: colors.fgTertiary,
                   ),
                 ),
             ],
           ),
           const SizedBox(height: KSpace.s3),
-          if (buckets.isEmpty)
+          if (allBuckets.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: KSpace.s4),
               child: Center(
                 child: Text(
-                  'No sessions this week',
+                  'No sessions yet',
                   style: KText.bodySm.copyWith(color: colors.fgTertiary),
                 ),
               ),
             )
           else
-            for (var i = 0; i < buckets.length; i++) ...<Widget>[
-              _TypeRow(bucket: buckets[i], total: total),
-              if (i < buckets.length - 1) const SizedBox(height: KSpace.s3),
+            for (var i = 0; i < allBuckets.length; i++) ...<Widget>[
+              _TypeRow(
+                bucket: allBuckets[i],
+                maxCount: maxCount,
+                active: typeFilter == allBuckets[i].type,
+                dim: typeFilter != null && typeFilter != allBuckets[i].type,
+                onTap: () => onTypeSelected(allBuckets[i].type),
+              ),
+              if (i < allBuckets.length - 1) const SizedBox(height: 8),
             ],
         ],
       ),
@@ -671,52 +575,124 @@ class _TypeBreakdown extends StatelessWidget {
 }
 
 class _TypeRow extends StatelessWidget {
-  const _TypeRow({required this.bucket, required this.total});
+  const _TypeRow({
+    required this.bucket,
+    required this.maxCount,
+    required this.active,
+    required this.dim,
+    required this.onTap,
+  });
 
   final _TypeBucket bucket;
-  final int total;
+  final int maxCount;
+  final bool active;
+  final bool dim;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fraction = total == 0 ? 0.0 : bucket.count / total;
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: 64,
-          child: Text(
-            bucket.label,
-            style: KText.bodySm.copyWith(
-              fontWeight: FontWeight.w500,
-              color: colors.fgPrimary,
-            ),
+    final tc = context.typeColor(bucket.type);
+    final fraction = maxCount == 0 ? 0.0 : bucket.count / maxCount;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedOpacity(
+        duration: KMotion.fast,
+        opacity: dim ? 0.4 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: active
+                ? Color.lerp(Colors.transparent, tc.tint, 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(right: 6),
+                decoration: BoxDecoration(
+                  color: tc.tint,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(
+                width: 48,
+                child: Text(
+                  bucket.label,
+                  style: KText.bodySm.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: colors.fgPrimary,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(KRadius.full),
+                  child: LinearProgressIndicator(
+                    value: fraction,
+                    minHeight: 6,
+                    backgroundColor: colors.bgSubtle,
+                    valueColor: AlwaysStoppedAnimation<Color>(tc.tint),
+                  ),
+                ),
+              ),
+              const SizedBox(width: KSpace.s2),
+              SizedBox(
+                width: 24,
+                child: Text(
+                  bucket.count.toString(),
+                  textAlign: TextAlign.right,
+                  style: KText.bodySm.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.fgPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: KSpace.s2),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(KRadius.full),
-            child: LinearProgressIndicator(
-              value: fraction,
-              minHeight: 6,
-              backgroundColor: colors.bgSubtle,
-              valueColor: AlwaysStoppedAnimation<Color>(colors.accent),
-            ),
-          ),
+      ),
+    );
+  }
+}
+
+class _ClearPill extends StatelessWidget {
+  const _ClearPill({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: colors.bgSubtle,
+          borderRadius: BorderRadius.circular(KRadius.full),
         ),
-        const SizedBox(width: KSpace.s2),
-        SizedBox(
-          width: 28,
-          child: Text(
-            bucket.count.toString(),
-            textAlign: TextAlign.right,
-            style: KText.bodySm.copyWith(
-              fontWeight: FontWeight.w600,
-              color: colors.fgPrimary,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.x, size: 10, color: colors.fgSecondary),
+            const SizedBox(width: 4),
+            Text(
+              'Clear',
+              style: KText.caption.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: colors.fgSecondary,
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -752,7 +728,7 @@ class _StatsEmpty extends StatelessWidget {
                 child: Icon(
                   LucideIcons.chartColumn,
                   size: 36,
-                  color: colors.accent,
+                  color: colors.fgTertiary,
                 ),
               ),
               const SizedBox(height: KSpace.s6 + 4),

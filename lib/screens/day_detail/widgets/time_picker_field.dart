@@ -5,6 +5,14 @@ import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
 
+String _format12h(TimeOfDay t) {
+  final h = t.hour;
+  final m = t.minute.toString().padLeft(2, '0');
+  final period = h >= 12 ? 'PM' : 'AM';
+  final hour12 = h == 0 ? 12 : (h > 12 ? h - 12 : h);
+  return '$hour12:$m $period';
+}
+
 class TimePickerField extends StatelessWidget {
   const TimePickerField({
     required this.value,
@@ -62,7 +70,7 @@ class TimePickerField extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      hasValue ? value!.format(context) : 'Set time',
+                      hasValue ? _format12h(value!) : 'Set time',
                       style: KText.body.copyWith(
                         color: hasValue ? colors.fgPrimary : colors.fgTertiary,
                       ),

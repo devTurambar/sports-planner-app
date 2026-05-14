@@ -25,6 +25,16 @@ class KDate {
     'Su',
   ];
 
+  static const List<String> fullWeekdays = <String>[
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
   static const List<String> shortMonths = <String>[
     'Jan',
     'Feb',
@@ -93,6 +103,7 @@ extension DateTimeKadence on DateTime {
   DateTime get justDate => KDate.startOfDay(this);
 
   String get shortWeekday => KDate.shortWeekdays[weekday - 1];
+  String get fullWeekday => KDate.fullWeekdays[weekday - 1];
   String get shortMonth => KDate.shortMonths[month - 1];
   String get fullMonth => KDate.fullMonths[month - 1];
 }

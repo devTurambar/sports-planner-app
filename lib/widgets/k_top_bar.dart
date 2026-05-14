@@ -6,62 +6,94 @@ import '../state/theme_controller.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_text_styles.dart';
 
-/// Title bar used across the home scaffold. Left and right slots accept
-/// any widget so screens can drop a "Today" button or extra actions.
 class KTopBar extends StatelessWidget implements PreferredSizeWidget {
-  const KTopBar({required this.title, this.leading, this.actions, super.key});
+  const KTopBar({
+    required this.title,
+    this.accentColor,
+    this.leading,
+    this.actions,
+    super.key,
+  });
 
   final String title;
+  final Color? accentColor;
   final Widget? leading;
   final List<Widget>? actions;
 
   @override
-  Size get preferredSize => const Size.fromHeight(52);
+  Size get preferredSize => const Size.fromHeight(60);
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final tint = accentColor ?? colors.fgPrimary;
+
     return Material(
       color: colors.bgBase,
       child: SafeArea(
         bottom: false,
-        child: SizedBox(
-          height: preferredSize.height,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-            child: Row(
-              children: <Widget>[
-                SizedBox(width: 56, child: leading ?? const SizedBox()),
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      title,
-                      style: KText.h3.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colors.fgPrimary,
-                        letterSpacing: -0.2,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 52,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: title),
+                            TextSpan(
+                              text: '.',
+                              style: TextStyle(color: tint),
+                            ),
+                          ],
+                        ),
+                        style: KText.h2.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: colors.fgPrimary,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ),
-                  ),
+                    if (actions != null) ...actions!,
+                    if (leading != null) ...[
+                      const SizedBox(width: 8),
+                      leading!,
+                    ],
+                  ],
                 ),
-                SizedBox(
-                  width: 56,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: actions ?? const <Widget>[],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            if (accentColor != null)
+              Container(
+                height: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  gradient: LinearGradient(
+                    colors: [
+                      tint.withValues(alpha: 0.55),
+                      tint.withValues(alpha: 0.55),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.35, 1.0],
+                  ),
+                ),
+              )
+            else
+              const SizedBox(height: 2),
+          ],
         ),
       ),
     );
   }
 }
 
-/// A round icon button for [KTopBar] actions.
 class KCircleIconButton extends StatelessWidget {
   const KCircleIconButton({
     required this.icon,
@@ -78,14 +110,20 @@ class KCircleIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final button = Material(
-      color: colors.bgSubtle,
+      color: colors.bgCard,
       shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
         customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: 32,
-          height: 32,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: colors.borderSubtle),
+          ),
+          alignment: Alignment.center,
           child: Icon(icon, color: colors.fgSecondary, size: 16),
         ),
       ),
@@ -94,7 +132,6 @@ class KCircleIconButton extends StatelessWidget {
   }
 }
 
-/// Light/dark toggle rendered as a sun or moon icon in a round button.
 class KDarkModeToggle extends StatelessWidget {
   const KDarkModeToggle({super.key});
 

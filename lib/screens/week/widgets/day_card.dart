@@ -2,56 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../models/activity.dart';
+
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
 import '../../../utils/date_utils.dart';
+import '../../../widgets/k_type_tile.dart';
 
-/// A row in the week list. Structure: day/date column, status dot,
-/// activity block, and a tappable check/action circle on the right.
 class DayCard extends StatelessWidget {
   const DayCard({
     required this.activity,
     required this.onTap,
     required this.onCheckTap,
     this.extras = 0,
+    this.secondaryType,
     super.key,
   });
 
   final Activity activity;
   final VoidCallback onTap;
   final VoidCallback onCheckTap;
-
-  /// Count of additional activities on the same day, beyond [activity].
-  /// When greater than 0 a "+N" badge is shown.
   final int extras;
+  final ActivityType? secondaryType;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final status = activity.status;
-
     final isToday = status == DayStatus.today;
-    final isDone = status == DayStatus.done;
     final isEmpty = status == DayStatus.empty;
+    final type = activity.type;
+    final tc = type != null ? context.typeColor(type) : null;
+    final tint = tc?.tint ?? colors.fgTertiary;
 
     final borderColor = isToday
-        ? colors.accent
-        : isDone
-            ? colors.accentMuted
-            : isEmpty
-                ? colors.borderSubtle
-                : colors.border;
-
-    final background = (isToday || isDone)
-        ? colors.accentLight.withValues(
-            alpha: Theme.of(context).brightness == Brightness.light ? 0.3 : 1)
+        ? tint
         : isEmpty
-            ? Colors.transparent
-            : colors.bgElevated;
-
-    final dotColor =
-        isToday || isDone ? colors.accent : colors.fgDisabled;
+            ? colors.borderSubtle
+            : colors.borderSubtle;
 
     return Material(
       color: Colors.transparent,
@@ -60,45 +48,53 @@ class DayCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(KRadius.lg),
         child: Ink(
           decoration: BoxDecoration(
-            color: background,
+            color: isEmpty ? Colors.transparent : colors.bgCard,
             borderRadius: BorderRadius.circular(KRadius.lg),
             border: isEmpty
                 ? null
-                : Border.all(color: borderColor, width: 1),
+                : Border.all(color: borderColor, width: isToday ? 1.5 : 1),
+            boxShadow: isEmpty ? null : [],
           ),
           child: CustomPaint(
             painter: isEmpty
-                ? _DashedBorderPainter(color: colors.border)
+                ? _DashedBorderPainter(color: colors.borderSubtle)
                 : null,
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: KSpace.s4,
-                vertical: KSpace.s3 + 1,
+                horizontal: KSpace.s3,
+                vertical: KSpace.s3,
               ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 64),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                  _DayStamp(activity: activity),
-                  const SizedBox(width: KSpace.s3 + 2),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 7),
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: dotColor,
-                        shape: BoxShape.circle,
-                      ),
+              child: Row(
+                children: <Widget>[
+                  if (!isEmpty) ...[
+                    _TypeStripe(
+                      tint: tint,
+                      secondaryTint: secondaryType != null
+                          ? context.typeColor(secondaryType!).tint
+                          : null,
+                    ),
+                    const SizedBox(width: KSpace.s2),
+                  ],
+                  _DayStamp(activity: activity, tint: tint),
+                  const SizedBox(width: KSpace.s2 + 2),
+                  if (type != null) ...[
+                    KTypeTile(type: type),
+                    const SizedBox(width: KSpace.s2 + 2),
+                  ],
+                  Expanded(
+                    child: _Content(
+                      activity: activity,
+                      extras: extras,
+                      tint: tint,
                     ),
                   ),
-                  const SizedBox(width: KSpace.s3 + 2),
-                  Expanded(child: _Content(activity: activity, extras: extras)),
                   const SizedBox(width: KSpace.s2),
-                  _CheckButton(activity: activity, onTap: onCheckTap),
+                  _CheckButton(
+                    activity: activity,
+                    onTap: onCheckTap,
+                    tint: tint,
+                  ),
                 ],
-                ),
               ),
             ),
           ),
@@ -108,36 +104,63 @@ class DayCard extends StatelessWidget {
   }
 }
 
+class _TypeStripe extends StatelessWidget {
+  const _TypeStripe({required this.tint, this.secondaryTint});
+
+  final Color tint;
+  final Color? secondaryTint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 3,
+      height: 40,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        gradient: secondaryTint != null
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [tint, secondaryTint!],
+                stops: const [0.6, 0.6],
+              )
+            : null,
+        color: secondaryTint == null ? tint : null,
+      ),
+    );
+  }
+}
+
 class _DayStamp extends StatelessWidget {
-  const _DayStamp({required this.activity});
+  const _DayStamp({required this.activity, required this.tint});
 
   final Activity activity;
+  final Color tint;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isToday = activity.status == DayStatus.today;
     return SizedBox(
-      width: 32,
+      width: 30,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Text(
             activity.date.weekdayShort.toUpperCase(),
             style: KText.caption.copyWith(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: isToday ? colors.accent : colors.fgTertiary,
-              letterSpacing: 0.44,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: isToday ? tint : colors.fgTertiary,
+              letterSpacing: 0.6,
             ),
           ),
           Text(
             activity.date.day.toString(),
             style: KText.body.copyWith(
-              fontSize: 16,
+              fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: isToday ? colors.accent : colors.fgSecondary,
-              height: 1.2,
+              color: isToday ? tint : colors.fgSecondary,
+              height: 1.1,
             ),
           ),
         ],
@@ -147,10 +170,15 @@ class _DayStamp extends StatelessWidget {
 }
 
 class _Content extends StatelessWidget {
-  const _Content({required this.activity, this.extras = 0});
+  const _Content({
+    required this.activity,
+    this.extras = 0,
+    required this.tint,
+  });
 
   final Activity activity;
   final int extras;
+  final Color tint;
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +191,7 @@ class _Content extends StatelessWidget {
       return Text(
         isPast ? 'Rest day' : 'No session',
         style: KText.body.copyWith(
-          color: colors.fgSecondary,
+          color: colors.fgTertiary,
           fontSize: 14,
         ),
       );
@@ -173,39 +201,37 @@ class _Content extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Flexible(
               child: Text(
                 activity.name ?? '—',
                 style: KText.body.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: isDone ? colors.accentMuted : colors.fgPrimary,
-                  decoration: isDone
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
-                  decorationColor: colors.accentMuted,
+                  color: isDone ? colors.fgTertiary : colors.fgPrimary,
+                  decoration:
+                      isDone ? TextDecoration.lineThrough : TextDecoration.none,
+                  decorationColor: colors.fgTertiary,
                 ),
               ),
             ),
             if (extras > 0) ...<Widget>[
               const SizedBox(width: 6),
-              _MoreBadge(count: extras),
+              _MoreBadge(count: extras, tint: tint),
             ],
           ],
         ),
-        if (activity.meta != null) ...<Widget>[
+        if (activity.timeOfDay != null || activity.duration != null) ...<Widget>[
           const SizedBox(height: 2),
           Text(
-            activity.meta!,
-            style: KText.caption.copyWith(color: colors.fgSecondary),
+            activity.formattedMeta(false) ?? '',
+            style: KText.caption.copyWith(
+              fontSize: 11,
+              color: colors.fgSecondary,
+            ),
           ),
-        ],
-        if (activity.type != null) ...<Widget>[
-          const SizedBox(height: 5),
-          _TypePill(type: activity.type!),
         ],
       ],
     );
@@ -213,51 +239,25 @@ class _Content extends StatelessWidget {
 }
 
 class _MoreBadge extends StatelessWidget {
-  const _MoreBadge({required this.count});
+  const _MoreBadge({required this.count, required this.tint});
 
   final int count;
+  final Color tint;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: colors.accentLight,
+        color: Color.lerp(Colors.transparent, tint, 0.16),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         '+$count more',
         style: KText.caption.copyWith(
           fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: colors.accent,
-        ),
-      ),
-    );
-  }
-}
-
-class _TypePill extends StatelessWidget {
-  const _TypePill({required this.type});
-
-  final ActivityType type;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: colors.bgSubtle,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Text(
-        type.label,
-        style: KText.caption.copyWith(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: colors.fgSecondary,
+          fontWeight: FontWeight.w700,
+          color: tint,
         ),
       ),
     );
@@ -265,30 +265,29 @@ class _TypePill extends StatelessWidget {
 }
 
 class _CheckButton extends StatelessWidget {
-  const _CheckButton({required this.activity, required this.onTap});
+  const _CheckButton({
+    required this.activity,
+    required this.onTap,
+    required this.tint,
+  });
 
   final Activity activity;
   final VoidCallback onTap;
+  final Color tint;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final status = activity.status;
     final isDone = status == DayStatus.done;
-    final isToday = status == DayStatus.today;
     final isEmpty = status == DayStatus.empty;
 
-    final bg = isDone
-        ? colors.accent
-        : isToday
-            ? colors.accentLight
-            : colors.bgSubtle;
-
+    final bg = isDone ? tint : Colors.transparent;
     final fg = isDone
-        ? colors.accentFg
-        : isToday
-            ? colors.accent
-            : colors.fgDisabled;
+        ? const Color(0xFF0A0A08)
+        : isEmpty
+            ? colors.fgTertiary
+            : colors.borderStrong;
 
     final IconData icon;
     if (isDone) {
@@ -300,19 +299,19 @@ class _CheckButton extends StatelessWidget {
     }
 
     return Material(
-      color: isEmpty ? Colors.transparent : bg,
+      color: bg,
       shape: const CircleBorder(),
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: Container(
-          width: 28,
-          height: 28,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: isEmpty
-                ? Border.all(color: colors.border, width: 1.5)
-                : null,
+            border: isDone
+                ? null
+                : Border.all(color: colors.borderStrong, width: 1.5),
           ),
           alignment: Alignment.center,
           child: Icon(icon, size: 14, color: fg),
