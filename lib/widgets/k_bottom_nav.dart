@@ -12,11 +12,13 @@ class KBottomNav extends StatelessWidget {
   const KBottomNav({
     required this.current,
     required this.onSelect,
+    this.accentColor,
     super.key,
   });
 
   final HomeTab current;
   final ValueChanged<HomeTab> onSelect;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class KBottomNav extends StatelessWidget {
               icon: LucideIcons.calendarDays,
               current: current,
               onSelect: onSelect,
+              accentColor: accentColor,
             ),
             _NavItem(
               tab: HomeTab.month,
@@ -44,6 +47,7 @@ class KBottomNav extends StatelessWidget {
               icon: LucideIcons.layoutGrid,
               current: current,
               onSelect: onSelect,
+              accentColor: accentColor,
             ),
             _NavItem(
               tab: HomeTab.stats,
@@ -51,6 +55,7 @@ class KBottomNav extends StatelessWidget {
               icon: LucideIcons.chartColumn,
               current: current,
               onSelect: onSelect,
+              accentColor: accentColor,
             ),
             _NavItem(
               tab: HomeTab.settings,
@@ -58,6 +63,7 @@ class KBottomNav extends StatelessWidget {
               icon: LucideIcons.settings,
               current: current,
               onSelect: onSelect,
+              accentColor: accentColor,
             ),
           ],
         ),
@@ -73,6 +79,7 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.current,
     required this.onSelect,
+    this.accentColor,
   });
 
   final HomeTab tab;
@@ -80,12 +87,13 @@ class _NavItem extends StatelessWidget {
   final IconData icon;
   final HomeTab current;
   final ValueChanged<HomeTab> onSelect;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final active = current == tab;
-    final color = active ? colors.accent : colors.fgTertiary;
+    final color = active ? (accentColor ?? colors.accent) : colors.fgTertiary;
     return Expanded(
       child: InkWell(
         onTap: () => onSelect(tab),

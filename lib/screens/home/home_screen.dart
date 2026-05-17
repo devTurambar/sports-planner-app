@@ -3,8 +3,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../state/plan_controller.dart';
+import '../../state/type_color_controller.dart';
 import '../../theme/kadence_colors.dart';
-import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/k_bottom_nav.dart';
 import '../../widgets/k_top_bar.dart';
@@ -32,38 +32,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final today = TodayScope.of(context);
+    final typeColors = context.watch<TypeColorController>();
+    final accentTint = typeColors.accentTint(colors);
 
     final String title = switch (_tab) {
-      HomeTab.week => '${today.shortMonth} ${today.year}',
+      HomeTab.week => 'This week',
       HomeTab.month => '${today.fullMonth} ${today.year}',
       HomeTab.stats => 'Stats',
       HomeTab.settings => 'Settings',
     };
 
-    final Widget? leading = _tab == HomeTab.week
-        ? TextButton(
-            onPressed: () => _weekKey.currentState?.jumpToToday(),
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              foregroundColor: colors.accent,
-            ),
-            child: Text(
-              'Today',
-              style: KText.bodySm.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.accent,
-              ),
-            ),
-          )
-        : null;
+    final Color? accentColor = _tab == HomeTab.settings ? null : accentTint;
 
     return Scaffold(
       backgroundColor: colors.bgBase,
       appBar: KTopBar(
         title: title,
-        leading: leading,
+        accentColor: accentColor,
         actions: const <Widget>[KDarkModeToggle()],
       ),
       body: IndexedStack(
@@ -79,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _tab == HomeTab.settings || _tab == HomeTab.stats
           ? null
           : _KadenceFab(
+              accentColor: accentColor,
               onPressed: () => showDayDetailSheet(
                 context: context,
                 date: context.read<PlanController>().today,
@@ -87,28 +73,32 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: KBottomNav(
         current: _tab,
         onSelect: (tab) => setState(() => _tab = tab),
+        accentColor: accentColor,
       ),
     );
   }
 }
 
 class _KadenceFab extends StatelessWidget {
-  const _KadenceFab({required this.onPressed});
+  const _KadenceFab({required this.onPressed, this.accentColor});
 
   final VoidCallback onPressed;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    final bg = accentColor ?? context.colors.typeRun.tint;
+    const fg = Color(0xFF0E0E0C);
+
     return FloatingActionButton(
       onPressed: onPressed,
-      backgroundColor: colors.accent,
-      foregroundColor: colors.accentFg,
-      elevation: 0,
-      highlightElevation: 0,
+      backgroundColor: bg,
+      foregroundColor: fg,
+      elevation: 4,
+      highlightElevation: 6,
       splashColor: Colors.white24,
-      shape: const CircleBorder(),
-      child: Icon(LucideIcons.plus, color: colors.accentFg),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: const Icon(LucideIcons.plus, color: fg),
     );
   }
 }

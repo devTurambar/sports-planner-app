@@ -8,13 +8,10 @@ import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
-import '../../widgets/k_stat_card.dart';
 import '../day_detail/day_detail_sheet.dart';
 import 'widgets/day_cell.dart';
 import 'widgets/selected_day_card.dart';
 
-/// Month view — a 7-column grid with day-status indicators, plus stats
-/// and a selectable detail card below.
 class MonthView extends StatefulWidget {
   const MonthView({super.key});
 
@@ -86,7 +83,6 @@ class _MonthViewState extends State<MonthView> {
       }),
       itemBuilder: (context, page) {
         final cursor = _cursorForPage(page);
-
         final firstOfMonth = DateTime(cursor.year, cursor.month);
         final offset = (firstOfMonth.weekday - DateTime.monday) % 7;
         final totalDays = KDate.daysInMonth(cursor.year, cursor.month);
@@ -96,14 +92,20 @@ class _MonthViewState extends State<MonthView> {
           for (var d = 1; d <= totalDays; d++)
             Builder(builder: (ctx) {
               final date = DateTime(cursor.year, cursor.month, d);
-              final activity = plan.forDate(date);
+              final activities = plan.activitiesFor(date);
+              final primary = plan.forDate(date);
               final effective = KDate.isSameDay(date, today) &&
-                      activity.status == DayStatus.empty
+                      primary.status == DayStatus.empty
                   ? DayStatus.today
-                  : activity.status;
+                  : primary.status;
+              final secondaryType =
+                  activities.length > 1 ? activities[1].type : null;
               return MonthDayCell(
                 day: d,
                 status: effective,
+                type: primary.type,
+                secondaryType: secondaryType,
+                sessionCount: activities.length,
                 selected:
                     _selected != null && KDate.isSameDay(_selected!, date),
                 onTap: () => _select(date),
@@ -120,6 +122,9 @@ class _MonthViewState extends State<MonthView> {
             if (a.status == DayStatus.done) doneCount++;
           }
         }
+        final onTrack = plannedCount == 0
+            ? 0
+            : ((doneCount / plannedCount) * 100).round().clamp(0, 100);
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -139,17 +144,23 @@ class _MonthViewState extends State<MonthView> {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: KStatCard(
+                  child: _StatTile(
                     value: doneCount.toString(),
                     label: 'Done',
-                    accent: true,
                   ),
                 ),
-                const SizedBox(width: KSpace.s1 + 2),
+                const SizedBox(width: KSpace.s2),
                 Expanded(
-                  child: KStatCard(
+                  child: _StatTile(
                     value: plannedCount.toString(),
                     label: 'Planned',
+                  ),
+                ),
+                const SizedBox(width: KSpace.s2),
+                Expanded(
+                  child: _StatTile(
+                    value: '$onTrack%',
+                    label: 'On track',
                   ),
                 ),
               ],
@@ -159,8 +170,9 @@ class _MonthViewState extends State<MonthView> {
             const SizedBox(height: 4),
             GridView.count(
               crossAxisCount: 7,
-              mainAxisSpacing: 3,
-              crossAxisSpacing: 3,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+              childAspectRatio: 1.05,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               children: cells,
@@ -190,11 +202,54 @@ class _MonthViewState extends State<MonthView> {
                 ),
               ),
             ],
-            const SizedBox(height: KSpace.s3),
-            _Legend(),
           ],
         );
       },
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.bgCard,
+        borderRadius: BorderRadius.circular(KRadius.lg + 4),
+        border: Border.all(color: colors.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: KText.h2.copyWith(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: colors.fgPrimary,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label.toUpperCase(),
+            style: KText.caption.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+              color: colors.fgTertiary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -327,91 +382,6 @@ class _AnimatedDetailState extends State<_AnimatedDetail>
           end: Offset.zero,
         ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic)),
         child: widget.child,
-      ),
-    );
-  }
-}
-
-class _Legend extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final items = <Widget>[
-      _LegendItem(
-        label: 'Done',
-        icon: _ShapeDot(color: colors.accent),
-      ),
-      _LegendItem(
-        label: 'Planned',
-        icon: _ShapeDot(color: colors.fgTertiary, filled: false),
-      ),
-      _LegendItem(
-        label: 'Today',
-        icon: Container(
-          width: 9,
-          height: 9,
-          decoration: BoxDecoration(
-            color: colors.accent,
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-      ),
-    ];
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-      decoration: BoxDecoration(
-        color: colors.bgElevated,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: colors.border),
-      ),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 4,
-        children: items,
-      ),
-    );
-  }
-}
-
-class _LegendItem extends StatelessWidget {
-  const _LegendItem({required this.label, required this.icon});
-
-  final String label;
-  final Widget icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        icon,
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: KText.caption.copyWith(fontSize: 10, color: colors.fgSecondary),
-        ),
-      ],
-    );
-  }
-}
-
-class _ShapeDot extends StatelessWidget {
-  const _ShapeDot({required this.color, this.filled = true});
-
-  final Color color;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 9,
-      height: 9,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: filled ? color : Colors.transparent,
-        border: filled ? null : Border.all(color: color, width: 1.5),
       ),
     );
   }

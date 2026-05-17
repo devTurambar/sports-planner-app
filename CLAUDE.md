@@ -4,7 +4,8 @@
 
 Kadence is a minimalist Flutter mobile app for planning weekly sports
 activities. It implements the "Kadence Design System" — Personality:
-Calm, Minimalist, Motivating. Accent color: Forest Sage (#4A7C59).
+Calm, Minimalist, Motivating. Default accent color: Coral (#FF7A45
+dark / #E85F2C light), user-configurable via Settings.
 
 Screens: 5-step Onboarding, Week View, Month View, Day Detail bottom
 sheet, Empty State, Stats, Settings.
@@ -19,7 +20,7 @@ sheet, Empty State, Stats, Settings.
 - `path` for database path resolution
 - `google_fonts` (Sora, tabular figures)
 - `lucide_icons_flutter` for outline icons
-- `fl_chart` for the stats bar chart
+- No external charting library — stats heatmap is built with custom widgets
 
 ## Architecture at a glance
 
@@ -29,7 +30,7 @@ lib/
   app.dart                # MaterialApp + TodayScope + onboarding gate
   theme/                  # Design tokens (colors, spacing, text, theme)
   models/                 # Activity + DayStatus + ActivityType
-  state/                  # ChangeNotifier controllers (theme, onboarding, plan) + ActivityDb
+  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color) + ActivityDb
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
@@ -40,7 +41,7 @@ lib/
     day_detail/           # Day overview sheet + add/edit form sheet
       widgets/            # Extracted form widgets (type selector, pickers, etc.)
     empty/                # Empty state
-    stats/                # Stats screen (KPIs + bar chart + type breakdown)
+    stats/                # Stats screen (KPIs + heatmap + type breakdown)
     settings/             # Settings screen
 ```
 
@@ -88,7 +89,8 @@ lib/
   `ThemeController`. Don't branch on `isDark` inside widgets — add the
   token to both `KadenceColors.light` and `KadenceColors.dark` instead.
 - **State**: one `ChangeNotifier` per domain (`theme`, `onboarding`,
-  `plan`). Screens read via `context.watch<T>()` / `context.read<T>()`.
+  `plan`, `type_color`). Screens read via `context.watch<T>()` /
+  `context.read<T>()`.
 - **Dates**: always run user-supplied dates through
   `KDate.startOfDay(...)` before storing or comparing. The plan map is
   keyed by `KDate.keyFor(date)` (YYYY-MM-DD).
@@ -99,6 +101,29 @@ lib/
   is no `rest` — empty days *are* rest days. The dead
   `colors.statusRest*` tokens still live in `kadence_colors.dart` but
   are unused; safe to ignore or delete.
+- **Per-type color system**: `TypeColorController`
+  (`lib/state/type_color_controller.dart`) manages user-customizable
+  colors for each activity type plus a global accent color. It stores
+  per-type overrides as a palette index (0–6) in SharedPreferences
+  (`kadence.type_colors`). The accent color is also a palette index
+  (`kadence.accent_color`, default 0 = Coral).
+  - **7-color palette**: Coral(0), Blue(1), Rose(2), Purple(3),
+    Teal(4), Green(5), Amber(6). Each has light+dark tint/bg pairs
+    defined in `KadenceColors.paletteColor(int)`.
+  - **Resolving type colors**: use `context.typeColor(type)` (a
+    `BuildContext` extension in `kadence_colors.dart`). This checks
+    `TypeColorController` for a user override first, then falls back
+    to the type's default palette color. **Never** call
+    `colors.typeColors(type)` directly — always go through the
+    extension so overrides are respected.
+  - **Accent color**: fixed per-user (not dynamic per screen). Read
+    via `TypeColorController.accentTint(colors)`. Used for the FAB,
+    bottom nav active tab, top bar underline, and toggle accents.
+    Default is Coral (#FF7A45 dark / #E85F2C light). Users can change
+    it in Settings via the accent color row.
+  - **Settings UI**: the Settings screen has an "Accent color" row
+    with 7 inline palette dots, and a "Type colors" row that opens a
+    bottom sheet listing all 19 activity types with 7 swatches each.
 - **Multiple activities per day**: `PlanController` stores
   `Map<String, List<Activity>>` — each date can hold N entries. APIs:
   - `forDate(date) → Activity` returns the *primary* (priority order:
@@ -136,14 +161,18 @@ lib/
   `duration` (`String?`, stored as `"N min"` e.g. `"45 min"`), `notes`,
   and `calendarEventId`. There is no `intensity` field. The `meta`
   getter formats as `"time · duration"`.
+- **Time display is always 12-hour AM/PM**. Even though `timeOfDay`
+  is stored internally as 24-hour `"HH:mm"`, all UI surfaces call
+  `formattedMeta(false)` which converts to 12h format via `_to12h`.
+  The time picker field (`time_picker_field.dart`) also forces 12h
+  display regardless of device locale.
 - **Form fields in `day_detail_sheet.dart`**: Activity name is a text
   input. Type is a chip selector with **no default** (starts null;
   tapping a selected chip deselects it). Time opens
-  `showTimePicker` and displays in the device's locale format
-  (12h/24h). Duration opens a `CupertinoPicker` bottom sheet with
-  hour (0–4) and minute (0–55, 5-min steps) wheels. Both Time and
-  Duration are optional and show a tappable field with clear (×)
-  button when filled.
+  `showTimePicker` and always displays in 12h AM/PM format. Duration
+  opens a `CupertinoPicker` bottom sheet with hour (0–4) and minute
+  (0–55, 5-min steps) wheels. Both Time and Duration are optional and
+  show a tappable field with clear (×) button when filled.
 - **Recurrence**: defined in `day_detail_sheet.dart` as
   `RecurrenceRule { none, daily, weekly, weekdays, weekends }`. On
   save it `expand`s into a list of dates and the sheet calls
@@ -204,33 +233,26 @@ lib/
 - **Stats screen**: `lib/screens/stats/stats_view.dart` is read-only
   and recomputes from `PlanController` on every build (no caching).
   Layout: 2 KPI tiles (Total sessions, Week streak), a **26-week
-  horizontally scrollable** sessions-per-week `BarChart` from
-  `fl_chart`, and a "By activity" type breakdown with
-  `LinearProgressIndicator` bars.
-  - **Chart**: scrollable via `SingleChildScrollView`, starts anchored
-    to the current week (rightmost). X-axis shows month labels at the
-    first bar of each new month. Y-axis labels rendered as a separate
-    `_YAxis` widget to the left of the scroll area. Current week bar
-    is dimmed (`accent.withValues(alpha: 0.45)`).
-  - **Bar selection**: tapping a bar selects that week — the breakdown
-    card below filters to only that week's activity types. Tapping
-    the same bar again (or the "All time" pill in the breakdown
-    header) deselects and restores the all-time view. Non-selected
-    bars dim to `alpha: 0.25` when a selection is active. The
-    selected bar uses `accentHover`. A session-count badge appears in
-    the chart header while a bar is selected.
-  - **Breakdown card**: shows a week-range subtitle and an accent
-    border when filtered. Empty weeks show "No sessions this week".
+  activity heatmap** (custom widget, no charting library), and a "By
+  activity" type breakdown with `LinearProgressIndicator` bars.
+  - **Heatmap**: a grid of small day cells spanning 26 weeks. Each
+    cell's color reflects the activity type done that day. Cells with
+    only planned (not-done) activities are shown **dimmed** (35% blend
+    toward `bgCard`). The heatmap **ends at today** — no future day
+    cells are rendered. Scrollable horizontally, anchored to today
+    (rightmost).
+  - **Type filter**: tapping an activity type in the breakdown filters
+    the heatmap to highlight only that type's cells.
   - Streak rule: count consecutive completed weeks ending at the most
     recent completed week; the current week is *excluded* (not reset)
     when it has zero done sessions so far.
-  - **Done-only**: both the chart bars and the breakdown count only
-    `DayStatus.done` activities. Planned/today sessions are excluded
-    from all stats numbers.
-  - `_StatsData` pre-computes both all-time and per-week type
-    breakdowns (`weekTypeCounts`) so the parent `_StatsViewState` can
-    swap them instantly on selection without requerying.
-  - Empty state shown when `totalSessions == 0`.
+  - **Done-only for KPIs**: Total sessions and streak count only
+    `DayStatus.done` activities. The heatmap shows both done
+    (full color) and planned (dimmed) so users can see their schedule.
+  - `_StatsData` pre-computes day cells with separate `doneCount` and
+    `plannedCount` per cell, plus all-time type breakdowns.
+  - Empty state shown when `totalSessions == 0` and no planned
+    activities exist.
 
 ## Commands
 
@@ -264,8 +286,8 @@ without discussion.
   refreshes). On native (iOS/Android/macOS) data persists to disk.
 - **No seed data**: the app starts empty. First-time users see the
   empty week grid and can add their own sessions.
-- **Default theme is light mode**. `ThemeController` falls back to
-  `ThemeMode.light` when no preference is saved (not `ThemeMode.system`).
+- **Default theme is dark mode**. `ThemeController` falls back to
+  `ThemeMode.dark` when no preference is saved (not `ThemeMode.system`).
 - **Onboarding gate** lives in `_AppGate` (`lib/app.dart`) — it watches
   `OnboardingController.isCompleted`. Resetting the gate for manual
   testing: call `OnboardingController.reset()` or clear the

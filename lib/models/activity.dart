@@ -9,26 +9,80 @@ enum DayStatus { empty, planned, today, done }
 
 /// Sport / activity category. The values match the design bundle's pills
 /// so copy stays aligned end-to-end.
-enum ActivityType { run, cycle, gym, yoga, swim, walk, other }
+enum ActivityType {
+  run,
+  trailRun,
+  hike,
+  walk,
+  cycle,
+  mtb,
+  swim,
+  gym,
+  yoga,
+  hiit,
+  row,
+  ski,
+  surf,
+  climb,
+  tennis,
+  padel,
+  dance,
+  elliptical,
+  other,
+}
 
 extension ActivityTypeLabel on ActivityType {
   String get label {
     switch (this) {
       case ActivityType.run:
         return 'Run';
+      case ActivityType.trailRun:
+        return 'Trail Run';
+      case ActivityType.hike:
+        return 'Hike';
+      case ActivityType.walk:
+        return 'Walk';
       case ActivityType.cycle:
         return 'Cycle';
+      case ActivityType.mtb:
+        return 'MTB';
+      case ActivityType.swim:
+        return 'Swim';
       case ActivityType.gym:
         return 'Gym';
       case ActivityType.yoga:
         return 'Yoga';
-      case ActivityType.swim:
-        return 'Swim';
-      case ActivityType.walk:
-        return 'Walk';
+      case ActivityType.hiit:
+        return 'HIIT';
+      case ActivityType.row:
+        return 'Row';
+      case ActivityType.ski:
+        return 'Ski';
+      case ActivityType.surf:
+        return 'Surf';
+      case ActivityType.climb:
+        return 'Climb';
+      case ActivityType.tennis:
+        return 'Tennis';
+      case ActivityType.padel:
+        return 'Padel';
+      case ActivityType.dance:
+        return 'Dance';
+      case ActivityType.elliptical:
+        return 'Elliptical';
       case ActivityType.other:
         return 'Other';
     }
+  }
+
+  String get dbKey => name;
+
+  static ActivityType? fromDbKey(String? key) {
+    if (key == null) return null;
+    for (final t in ActivityType.values) {
+      if (t.name == key) return t;
+    }
+    return null;
   }
 }
 
@@ -57,12 +111,25 @@ class Activity {
   final String? notes;
   final String? calendarEventId;
 
-  String? get meta {
+  String? get meta => formattedMeta(false);
+
+  String? formattedMeta(bool use24h) {
     final parts = <String>[
-      if (timeOfDay != null && timeOfDay!.isNotEmpty) timeOfDay!,
+      if (timeOfDay != null && timeOfDay!.isNotEmpty)
+        use24h ? timeOfDay! : _to12h(timeOfDay!),
       if (duration != null && duration!.isNotEmpty) duration!,
     ];
     return parts.isEmpty ? null : parts.join(' · ');
+  }
+
+  static String _to12h(String hhmm) {
+    final parts = hhmm.split(':');
+    if (parts.length != 2) return hhmm;
+    final h = int.tryParse(parts[0]) ?? 0;
+    final m = parts[1];
+    final period = h >= 12 ? 'PM' : 'AM';
+    final hour12 = h == 0 ? 12 : (h > 12 ? h - 12 : h);
+    return '$hour12:$m $period';
   }
 
   Activity copyWith({

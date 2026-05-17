@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/activity.dart';
 import '../../state/auth_controller.dart';
 import '../../state/calendar_service.dart';
 import '../../state/onboarding_controller.dart';
 import '../../state/theme_controller.dart';
+import '../../state/type_color_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
+import '../../widgets/k_type_tile.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -87,11 +90,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '${_selectedIds.length} calendars';
   }
 
+  void _showSignInSheet(BuildContext context) {
+    final colors = context.colors;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: colors.scrim,
+      builder: (_) => const _SignInSheet(),
+    );
+  }
+
+  void _showTypeColorPicker(BuildContext context) {
+    final colors = context.colors;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: colors.scrim,
+      isScrollControlled: true,
+      builder: (_) => const _TypeColorPickerSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final theme = context.watch<ThemeController>();
     final onboarding = context.watch<OnboardingController>();
+    final auth = context.watch<AuthController>();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -124,8 +149,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () => onboarding.setReminders(
                 enabled: !onboarding.remindersEnabled,
               ),
-              isLast: true,
             ),
+            const _AccentColorRow(isLast: true),
           ],
         ),
         const SizedBox(height: KSpace.s3),
@@ -151,16 +176,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _Group(
           rows: <Widget>[
             _StaticRow(
+              label: 'Type colors',
+              value: 'Customize',
+              onTap: () => _showTypeColorPicker(context),
+              isLast: true,
+            ),
+          ],
+        ),
+        const SizedBox(height: KSpace.s3),
+        _Group(
+          rows: <Widget>[
+            if (auth.isSignedIn)
+              _StaticRow(
+                label: 'Account',
+                value: auth.displayName ?? 'Signed in',
+                onTap: () {},
+              ),
+            if (auth.isSignedIn)
+              _StaticRow(
+                label: 'Sign out',
+                value: '',
+                onTap: () => auth.signOut(),
+              ),
+            if (!auth.isSignedIn)
+              _StaticRow(
+                label: 'Sign in',
+                value: 'Sync your data',
+                onTap: () => _showSignInSheet(context),
+              ),
+            _StaticRow(
               label: 'Redo onboarding',
               value: 'Start',
               onTap: () async {
                 await onboarding.reset();
               },
-            ),
-            _StaticRow(
-              label: 'Sign out',
-              value: '',
-              onTap: () => context.read<AuthController>().signOut(),
               isLast: true,
             ),
           ],
@@ -555,6 +604,311 @@ class _Toggle extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SignInSheet extends StatelessWidget {
+  const _SignInSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final auth = context.read<AuthController>();
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(20, 16, 20, KSpace.s4 + bottomSafe),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.border,
+                borderRadius: BorderRadius.circular(KRadius.full),
+              ),
+            ),
+            const SizedBox(height: KSpace.s4),
+            Text(
+              'Sign in to sync',
+              style: KText.h3.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: colors.fgPrimary,
+              ),
+            ),
+            const SizedBox(height: KSpace.s2),
+            Text(
+              'Back up your data and access it from any device.',
+              style: KText.bodySm.copyWith(color: colors.fgTertiary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: KSpace.s6),
+            _SignInButton(
+              label: 'Continue with Google',
+              icon: LucideIcons.globe,
+              onTap: () {
+                Navigator.of(context).pop();
+                auth.signInWithGoogle();
+              },
+            ),
+            const SizedBox(height: KSpace.s3),
+            _SignInButton(
+              label: 'Continue with Apple',
+              icon: LucideIcons.apple,
+              onTap: () {
+                Navigator.of(context).pop();
+                auth.signInWithApple();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SignInButton extends StatelessWidget {
+  const _SignInButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: KSpace.s4),
+          decoration: BoxDecoration(
+            color: colors.bgSubtle,
+            border: Border.all(color: colors.border),
+            borderRadius: BorderRadius.circular(KRadius.lg),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: colors.fgPrimary),
+              const SizedBox(width: KSpace.s3),
+              Text(
+                label,
+                style: KText.button.copyWith(color: colors.fgPrimary),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeColorPickerSheet extends StatelessWidget {
+  const _TypeColorPickerSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final controller = context.watch<TypeColorController>();
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.75,
+      ),
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const SizedBox(height: 10),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colors.border,
+              borderRadius: BorderRadius.circular(KRadius.full),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    'Type colors',
+                    style: KText.h3.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: colors.fgPrimary,
+                    ),
+                  ),
+                ),
+                if (controller.overrides.isNotEmpty)
+                  TextButton(
+                    onPressed: controller.resetAll,
+                    child: Text(
+                      'Reset all',
+                      style: KText.bodySm.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.fgTertiary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: colors.borderSubtle),
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(bottom: KSpace.s4 + bottomSafe),
+              itemCount: ActivityType.values.length,
+              itemBuilder: (ctx, i) {
+                final type = ActivityType.values[i];
+                return _TypeColorRow(type: type);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TypeColorRow extends StatelessWidget {
+  const _TypeColorRow({required this.type});
+
+  final ActivityType type;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final controller = context.watch<TypeColorController>();
+    final currentIdx = controller.indexFor(type);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        children: <Widget>[
+          KTypeTile(type: type, size: 32, iconSize: 15),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              type.label,
+              style: KText.body.copyWith(color: colors.fgPrimary),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(TypeColorController.paletteSize, (idx) {
+              final swatch = colors.paletteColor(idx);
+              final selected = currentIdx == idx ||
+                  (currentIdx == null &&
+                      KadenceColors.defaultIndexFor(type) == idx);
+              return GestureDetector(
+                onTap: () => controller.setColor(type, idx),
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  margin: const EdgeInsets.only(left: 6),
+                  decoration: BoxDecoration(
+                    color: swatch.tint,
+                    shape: BoxShape.circle,
+                    border: selected
+                        ? Border.all(color: colors.fgPrimary, width: 2)
+                        : null,
+                  ),
+                  child: selected
+                      ? Icon(LucideIcons.check, size: 11, color: colors.bgBase)
+                      : null,
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccentColorRow extends StatelessWidget {
+  const _AccentColorRow({this.isLast = false});
+
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final controller = context.watch<TypeColorController>();
+    final currentIdx = controller.accentIndex;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : Border(
+                bottom: BorderSide(color: colors.borderSubtle, width: 1),
+              ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: KSpace.s4, vertical: 13),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              'Accent color',
+              style: KText.body.copyWith(color: colors.fgPrimary),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(TypeColorController.paletteSize, (idx) {
+              final swatch = colors.paletteColor(idx);
+              final selected = currentIdx == idx;
+              return GestureDetector(
+                onTap: () => controller.setAccent(idx),
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  margin: const EdgeInsets.only(left: 6),
+                  decoration: BoxDecoration(
+                    color: swatch.tint,
+                    shape: BoxShape.circle,
+                    border: selected
+                        ? Border.all(color: colors.fgPrimary, width: 2)
+                        : null,
+                  ),
+                  child: selected
+                      ? Icon(LucideIcons.check, size: 11, color: colors.bgBase)
+                      : null,
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }

@@ -31,10 +31,15 @@ class SelectedDayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final primaryType = activities.isNotEmpty ? activities.first.type : null;
+    final tc = primaryType != null ? context.typeColor(primaryType) : null;
     return Container(
       decoration: BoxDecoration(
-        color: colors.bgSubtle,
-        borderRadius: BorderRadius.circular(KRadius.lg),
+        color: tc?.bg ?? colors.bgSubtle,
+        borderRadius: BorderRadius.circular(KRadius.lg + 4),
+        border: tc != null
+            ? Border.all(color: tc.tint.withValues(alpha: 0.18))
+            : null,
       ),
       padding: const EdgeInsets.fromLTRB(12, 10, 10, 12),
       child: Column(

@@ -8,12 +8,10 @@ import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
-import '../../widgets/k_stat_card.dart';
 import '../day_detail/day_detail_sheet.dart';
 import '../day_detail/day_overview_sheet.dart';
 import 'widgets/day_card.dart';
 
-/// Week view — the default home screen.
 class WeekView extends StatefulWidget {
   const WeekView({super.key});
 
@@ -27,8 +25,6 @@ class WeekViewState extends State<WeekView> {
       PageController(initialPage: _initialPage);
   int _currentPage = _initialPage;
 
-  /// Reset the visible week to the one containing today. Called from
-  /// the parent shell when the user taps the "Today" action.
   void jumpToToday() {
     _pageCtrl.animateToPage(
       _initialPage,
@@ -103,31 +99,20 @@ class WeekViewState extends State<WeekView> {
               onNext: () => _shiftWeek(1),
             ),
             const SizedBox(height: KSpace.s2),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: KStatCard(value: done.toString(), label: 'Done'),
-                ),
-                const SizedBox(width: KSpace.s2),
-                Expanded(
-                  child: KStatCard(
-                      value: planned.toString(), label: 'Planned'),
-                ),
-                const SizedBox(width: KSpace.s2),
-                Expanded(
-                  child: KStatCard(
-                    value: '$onTrack%',
-                    label: 'On track',
-                    accent: true,
-                  ),
-                ),
-              ],
+            _WeekSummaryCard(
+              week: week,
+              plan: plan,
+              done: done,
+              planned: planned,
+              onTrack: onTrack,
+              today: today,
             ),
             const SizedBox(height: KSpace.s3 + 2),
             for (final item in week) ...<Widget>[
               DayCard(
                 activity: item,
                 extras: plan.extrasFor(item.date),
+                secondaryType: _secondaryType(plan, item.date),
                 onTap: () => _handleRowTap(context, item),
                 onCheckTap: () => _handleCheck(context, item),
               ),
@@ -139,9 +124,14 @@ class WeekViewState extends State<WeekView> {
     );
   }
 
+  ActivityType? _secondaryType(PlanController plan, DateTime date) {
+    final all = plan.activitiesFor(date);
+    if (all.length < 2) return null;
+    return all[1].type;
+  }
+
   void _handleRowTap(BuildContext context, Activity item) {
     if (item.status == DayStatus.empty) {
-      // Empty day: skip the overview, go straight to the add form.
       showDayDetailSheet(context: context, date: item.date, existing: null);
     } else {
       showDayOverviewSheet(context: context, date: item.date);
@@ -164,6 +154,182 @@ class WeekViewState extends State<WeekView> {
         );
         break;
     }
+  }
+}
+
+class _WeekSummaryCard extends StatelessWidget {
+  const _WeekSummaryCard({
+    required this.week,
+    required this.plan,
+    required this.done,
+    required this.planned,
+    required this.onTrack,
+    required this.today,
+  });
+
+  final List<Activity> week;
+  final PlanController plan;
+  final int done;
+  final int planned;
+  final int onTrack;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.bgCard,
+        borderRadius: BorderRadius.circular(KRadius.lg + 4),
+        border: Border.all(color: colors.borderSubtle),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: done.toString(),
+                        style: KText.h2.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: colors.fgPrimary,
+                          height: 1,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '/$planned',
+                        style: KText.h2.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w500,
+                          color: colors.fgTertiary,
+                          height: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'sessions done · $onTrack% on track',
+                  style: KText.caption.copyWith(
+                    fontSize: 11,
+                    color: colors.fgSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < week.length; i++) ...[
+                if (i > 0) const SizedBox(width: 3),
+                _WeekDotCell(
+                  activity: week[i],
+                  plan: plan,
+                  today: today,
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekDotCell extends StatelessWidget {
+  const _WeekDotCell({
+    required this.activity,
+    required this.plan,
+    required this.today,
+  });
+
+  final Activity activity;
+  final PlanController plan;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final type = activity.type;
+    final status = activity.status;
+    final isToday = KDate.isSameDay(activity.date, today);
+    final isEmpty = status == DayStatus.empty;
+    final tc = type != null ? context.typeColor(type) : null;
+    final tint = tc?.tint ?? colors.fgTertiary;
+
+    final int level;
+    if (status == DayStatus.done) {
+      level = 4;
+    } else if (status == DayStatus.today) {
+      level = 2;
+    } else if (status == DayStatus.planned) {
+      level = 1;
+    } else {
+      level = 0;
+    }
+
+    final all = plan.activitiesFor(activity.date);
+    final secondaryType = all.length > 1 ? all[1].type : null;
+
+    final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final dayIndex = activity.date.weekday - 1;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: isEmpty
+                ? colors.bgCard
+                : colors.heatLevel(tint, level),
+            borderRadius: BorderRadius.circular(4),
+            border: isToday
+                ? Border.all(color: colors.fgPrimary, width: 1.5)
+                : null,
+          ),
+          child: secondaryType != null
+              ? Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    margin: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: context.typeColor(secondaryType).tint,
+                      borderRadius: BorderRadius.circular(1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colors.bgBase,
+                          spreadRadius: 1.5,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : null,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          dayLabels[dayIndex],
+          style: KText.caption.copyWith(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            color: colors.fgTertiary,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -212,7 +378,7 @@ class _WeekNav extends StatelessWidget {
                       'This week',
                       style: KText.caption.copyWith(
                         fontSize: 10,
-                        color: colors.accent,
+                        color: colors.fgSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

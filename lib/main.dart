@@ -11,6 +11,7 @@ import 'state/calendar_service.dart';
 import 'state/onboarding_controller.dart';
 import 'state/plan_controller.dart';
 import 'state/theme_controller.dart';
+import 'state/type_color_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<OnboardingController>(
           create: (_) => OnboardingController(prefs),
+        ),
+        ChangeNotifierProvider<TypeColorController>(
+          create: (_) => TypeColorController(prefs),
         ),
         ChangeNotifierProvider<PlanController>.value(
           value: planController,
