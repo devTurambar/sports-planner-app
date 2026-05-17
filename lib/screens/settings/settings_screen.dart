@@ -90,6 +90,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '${_selectedIds.length} calendars';
   }
 
+  void _showSignInSheet(BuildContext context) {
+    final colors = context.colors;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: colors.scrim,
+      builder: (_) => const _SignInSheet(),
+    );
+  }
+
   void _showTypeColorPicker(BuildContext context) {
     final colors = context.colors;
     showModalBottomSheet<void>(
@@ -106,6 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final colors = context.colors;
     final theme = context.watch<ThemeController>();
     final onboarding = context.watch<OnboardingController>();
+    final auth = context.watch<AuthController>();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -175,17 +186,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: KSpace.s3),
         _Group(
           rows: <Widget>[
+            if (auth.isSignedIn)
+              _StaticRow(
+                label: 'Account',
+                value: auth.displayName ?? 'Signed in',
+                onTap: () {},
+              ),
+            if (auth.isSignedIn)
+              _StaticRow(
+                label: 'Sign out',
+                value: '',
+                onTap: () => auth.signOut(),
+              ),
+            if (!auth.isSignedIn)
+              _StaticRow(
+                label: 'Sign in',
+                value: 'Sync your data',
+                onTap: () => _showSignInSheet(context),
+              ),
             _StaticRow(
               label: 'Redo onboarding',
               value: 'Start',
               onTap: () async {
                 await onboarding.reset();
               },
-            ),
-            _StaticRow(
-              label: 'Sign out',
-              value: '',
-              onTap: () => context.read<AuthController>().signOut(),
               isLast: true,
             ),
           ],
@@ -578,6 +602,119 @@ class _Toggle extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SignInSheet extends StatelessWidget {
+  const _SignInSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final auth = context.read<AuthController>();
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(20, 16, 20, KSpace.s4 + bottomSafe),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.border,
+                borderRadius: BorderRadius.circular(KRadius.full),
+              ),
+            ),
+            const SizedBox(height: KSpace.s4),
+            Text(
+              'Sign in to sync',
+              style: KText.h3.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: colors.fgPrimary,
+              ),
+            ),
+            const SizedBox(height: KSpace.s2),
+            Text(
+              'Back up your data and access it from any device.',
+              style: KText.bodySm.copyWith(color: colors.fgTertiary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: KSpace.s6),
+            _SignInButton(
+              label: 'Continue with Google',
+              icon: LucideIcons.globe,
+              onTap: () {
+                Navigator.of(context).pop();
+                auth.signInWithGoogle();
+              },
+            ),
+            const SizedBox(height: KSpace.s3),
+            _SignInButton(
+              label: 'Continue with Apple',
+              icon: LucideIcons.apple,
+              onTap: () {
+                Navigator.of(context).pop();
+                auth.signInWithApple();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SignInButton extends StatelessWidget {
+  const _SignInButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: KSpace.s4),
+          decoration: BoxDecoration(
+            color: colors.bgSubtle,
+            border: Border.all(color: colors.border),
+            borderRadius: BorderRadius.circular(KRadius.lg),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: colors.fgPrimary),
+              const SizedBox(width: KSpace.s3),
+              Text(
+                label,
+                style: KText.button.copyWith(color: colors.fgPrimary),
+              ),
+            ],
           ),
         ),
       ),
