@@ -1,23 +1,52 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/activity.dart';
 import '../utils/date_utils.dart';
 import 'activity_db.dart';
 import 'calendar_service.dart';
+import 'sync_service.dart';
 
 class PlanController extends ChangeNotifier {
-  PlanController._({required DateTime today}) : _today = today;
+  PlanController._({required DateTime today, required SharedPreferences prefs})
+      : _today = today,
+        _prefs = prefs;
 
-  static Future<PlanController> create({DateTime? now}) async {
+  static Future<PlanController> create({
+    DateTime? now,
+    required SharedPreferences prefs,
+  }) async {
     final today = KDate.startOfDay(now ?? DateTime.now());
-    final controller = PlanController._(today: today);
+    final controller = PlanController._(today: today, prefs: prefs);
     await controller._loadOrSeed();
     return controller;
   }
 
   final DateTime _today;
+  final SharedPreferences _prefs;
   final Map<String, List<Activity>> _byDate = <String, List<Activity>>{};
   int _idSeed = 0;
+
+  /// Current user ID for cloud sync. Null when signed out.
+  String? _userId;
+  String? get userId => _userId;
+
+  /// Set the user ID and reload data from a sync result.
+  void setUserId(String? id) {
+    _userId = id;
+  }
+
+  /// Replace local data with a synced map (called after sync).
+  void replaceAll(Map<String, List<Activity>> synced) {
+    _byDate.clear();
+    _byDate.addAll(synced);
+    _recomputeIdSeed();
+    notifyListeners();
+  }
+
+  /// Expose internal map for sync reads.
+  Map<String, List<Activity>> get byDate =>
+      Map<String, List<Activity>>.unmodifiable(_byDate);
 
   DateTime get today => _today;
 
@@ -71,6 +100,7 @@ class PlanController extends ChangeNotifier {
         list.removeWhere((a) => a.id == id);
         if (list.isEmpty) _byDate.remove(key);
         ActivityDb.deleteById(id);
+        _pushDelete(id);
         for (final a in removed) {
           CalendarService.deleteEvent(a);
         }
@@ -92,6 +122,7 @@ class PlanController extends ChangeNotifier {
         list[index] = updated;
         ActivityDb.upsert(updated);
         CalendarService.updateEvent(updated);
+        _pushToCloud(updated);
         notifyListeners();
         return;
       }
@@ -109,6 +140,7 @@ class PlanController extends ChangeNotifier {
     );
     list.add(activity);
     ActivityDb.upsert(activity);
+    _pushToCloud(activity);
     _syncNewEvent(activity, key, list.length - 1);
     notifyListeners();
   }
@@ -144,6 +176,7 @@ class PlanController extends ChangeNotifier {
     );
     list[targetIndex] = updated;
     ActivityDb.upsert(updated);
+    _pushToCloud(updated);
     notifyListeners();
   }
 
@@ -160,6 +193,9 @@ class PlanController extends ChangeNotifier {
       updated.add(list[i]);
     }
     ActivityDb.upsertAll(updated);
+    for (final a in updated) {
+      _pushToCloud(a);
+    }
     notifyListeners();
   }
 
@@ -169,6 +205,7 @@ class PlanController extends ChangeNotifier {
     if (removed != null) {
       for (final a in removed) {
         CalendarService.deleteEvent(a);
+        _pushDelete(a.id);
       }
       ActivityDb.deleteByDate(key);
       notifyListeners();
@@ -186,6 +223,7 @@ class PlanController extends ChangeNotifier {
     }
     if (target.isNotEmpty) {
       ActivityDb.deleteById(id);
+      _pushDelete(id);
       for (final a in target) {
         CalendarService.deleteEvent(a);
       }
@@ -197,6 +235,7 @@ class PlanController extends ChangeNotifier {
     for (final list in _byDate.values) {
       for (final a in list) {
         CalendarService.deleteEvent(a);
+        _pushDelete(a.id);
       }
     }
     _byDate.clear();
@@ -254,16 +293,38 @@ class PlanController extends ChangeNotifier {
 
   String _nextId() => 'a${++_idSeed}';
 
+  /// Push an activity to cloud if signed in. Fire-and-forget.
+  void _pushToCloud(Activity a) {
+    if (_userId != null) {
+      SyncService.pushChange(a, _userId!);
+    }
+  }
+
+  /// Delete from cloud if signed in. Queue as pending if signed out.
+  void _pushDelete(String activityId) {
+    if (_userId != null) {
+      SyncService.pushDelete(activityId);
+    } else {
+      // Signed out — queue for next sync.
+      SyncService.addPendingDelete(_prefs, activityId);
+    }
+  }
+
+  void _recomputeIdSeed() {
+    _idSeed = 0;
+    for (final list in _byDate.values) {
+      for (final a in list) {
+        final n = int.tryParse(a.id.replaceFirst('a', ''));
+        if (n != null && n > _idSeed) _idSeed = n;
+      }
+    }
+  }
+
   Future<void> _loadOrSeed() async {
     final loaded = await ActivityDb.loadAll();
     if (loaded.isNotEmpty) {
       _byDate.addAll(loaded);
-      for (final list in _byDate.values) {
-        for (final a in list) {
-          final n = int.tryParse(a.id.replaceFirst('a', ''));
-          if (n != null && n > _idSeed) _idSeed = n;
-        }
-      }
+      _recomputeIdSeed();
     }
     notifyListeners();
   }

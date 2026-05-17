@@ -76,7 +76,7 @@ class _SportStepState extends State<SportStep> {
             ),
           ),
           const SizedBox(height: KSpace.s4),
-          const ProgressDots(total: 5, current: 1),
+          const ProgressDots(total: 6, current: 1),
           const SizedBox(height: KSpace.s1 + 2),
           KButton(
             label: 'Continue',

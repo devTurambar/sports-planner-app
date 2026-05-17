@@ -31,13 +31,16 @@ Future<void> main() async {
   tz.initializeTimeZones();
   final prefs = await SharedPreferences.getInstance();
   await CalendarService.init(prefs);
-  final planController = await PlanController.create();
+  final planController = await PlanController.create(prefs: prefs);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthController>(
-          create: (_) => AuthController(),
+          create: (_) => AuthController(
+            prefs: prefs,
+            planController: planController,
+          ),
         ),
         ChangeNotifierProvider<ThemeController>(
           create: (_) => ThemeController(prefs),

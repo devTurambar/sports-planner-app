@@ -82,7 +82,7 @@ class ReadyStep extends StatelessWidget {
               ],
             ),
           ),
-          const ProgressDots(total: 5, current: 4),
+          const ProgressDots(total: 6, current: 4),
           const SizedBox(height: KSpace.s1 + 2),
           KButton(label: 'Start planning', onPressed: onDone),
         ],

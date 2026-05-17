@@ -90,16 +90,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '${_selectedIds.length} calendars';
   }
 
-  void _showSignInSheet(BuildContext context) {
-    final colors = context.colors;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: colors.scrim,
-      builder: (_) => const _SignInSheet(),
-    );
-  }
-
   void _showTypeColorPicker(BuildContext context) {
     final colors = context.colors;
     showModalBottomSheet<void>(
@@ -126,6 +116,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         KSpace.s16,
       ),
       children: <Widget>[
+        _AccountCard(auth: auth),
+        const SizedBox(height: KSpace.s3),
         _Group(
           rows: <Widget>[
             _ToggleRow(
@@ -186,24 +178,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: KSpace.s3),
         _Group(
           rows: <Widget>[
-            if (auth.isSignedIn)
-              _StaticRow(
-                label: 'Account',
-                value: auth.displayName ?? 'Signed in',
-                onTap: () {},
-              ),
-            if (auth.isSignedIn)
-              _StaticRow(
-                label: 'Sign out',
-                value: '',
-                onTap: () => auth.signOut(),
-              ),
-            if (!auth.isSignedIn)
-              _StaticRow(
-                label: 'Sign in',
-                value: 'Sync your data',
-                onTap: () => _showSignInSheet(context),
-              ),
             _StaticRow(
               label: 'Redo onboarding',
               value: 'Start',
@@ -605,6 +579,133 @@ class _Toggle extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AccountCard extends StatelessWidget {
+  const _AccountCard({required this.auth});
+
+  final AuthController auth;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    if (auth.isSignedIn) {
+      return Container(
+        padding: const EdgeInsets.all(KSpace.s4),
+        decoration: BoxDecoration(
+          color: colors.bgElevated,
+          border: Border.all(color: colors.border),
+          borderRadius: BorderRadius.circular(KRadius.lg),
+        ),
+        child: Row(
+          children: <Widget>[
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: colors.accentLight,
+              backgroundImage: auth.avatarUrl != null
+                  ? NetworkImage(auth.avatarUrl!)
+                  : null,
+              child: auth.avatarUrl == null
+                  ? Icon(LucideIcons.user, size: 18, color: colors.accent)
+                  : null,
+            ),
+            const SizedBox(width: KSpace.s3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    auth.displayName ?? 'Signed in',
+                    style: KText.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.fgPrimary,
+                    ),
+                  ),
+                  Text(
+                    'Syncing enabled',
+                    style: KText.caption.copyWith(color: colors.fgTertiary),
+                  ),
+                ],
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => auth.signOut(),
+                borderRadius: BorderRadius.circular(KRadius.md),
+                child: Padding(
+                  padding: const EdgeInsets.all(KSpace.s2),
+                  child: Text(
+                    'Sign out',
+                    style: KText.bodySm.copyWith(
+                      color: colors.fgTertiary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showSignInSheet(context),
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: Container(
+          padding: const EdgeInsets.all(KSpace.s4),
+          decoration: BoxDecoration(
+            color: colors.bgElevated,
+            border: Border.all(color: colors.border),
+            borderRadius: BorderRadius.circular(KRadius.lg),
+          ),
+          child: Row(
+            children: <Widget>[
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: colors.accentLight,
+                child: Icon(LucideIcons.cloudUpload, size: 18, color: colors.accent),
+              ),
+              const SizedBox(width: KSpace.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Sign in to sync',
+                      style: KText.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.fgPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Back up and access your data anywhere',
+                      style: KText.caption.copyWith(color: colors.fgTertiary),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: colors.fgTertiary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSignInSheet(BuildContext context) {
+    final colors = context.colors;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: colors.scrim,
+      builder: (_) => const _SignInSheet(),
     );
   }
 }

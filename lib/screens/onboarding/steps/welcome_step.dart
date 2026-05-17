@@ -66,7 +66,7 @@ class WelcomeStep extends StatelessWidget {
               ],
             ),
           ),
-          const ProgressDots(total: 5, current: 0),
+          const ProgressDots(total: 6, current: 0),
           const SizedBox(height: KSpace.s1 + 2),
           KButton(label: 'Get started', onPressed: onNext),
         ],

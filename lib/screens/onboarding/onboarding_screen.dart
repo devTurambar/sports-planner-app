@@ -9,6 +9,7 @@ import '../../theme/kadence_text_styles.dart';
 import 'steps/days_step.dart';
 import 'steps/notify_step.dart';
 import 'steps/ready_step.dart';
+import 'steps/signin_step.dart';
 import 'steps/sport_step.dart';
 import 'steps/welcome_step.dart';
 
@@ -28,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _step = 0;
 
   Future<void> _go(int next) async {
-    if (next >= 5) {
+    if (next >= 6) {
       await context.read<OnboardingController>().complete();
       widget.onFinished();
       return;
@@ -68,6 +69,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         trainingDays: onboarding.trainingDays,
         onDone: () => _go(5),
       ),
+      SignInStep(
+        onSkip: () => _go(6),
+      ),
     ];
 
     return Scaffold(
@@ -76,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: <Widget>[
             _TopRow(
-              canGoBack: _step > 0 && _step < 4,
+              canGoBack: _step > 0 && _step < 4 || _step == 5,
               onBack: () => _go(_step - 1),
             ),
             Expanded(

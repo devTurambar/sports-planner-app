@@ -310,9 +310,6 @@ without discussion.
 ## Not done yet
 
 - No app icons / launcher assets.
-- No remote backend — data is stored locally via SQLite on native
-  platforms. Web runs in-memory only (no persistence). A future
-  backend with authentication will sync per-user data.
 - No localization — copy is hardcoded English.
 - No integration tests; only one smoke test in `test/widget_test.dart`.
 
@@ -365,23 +362,33 @@ without discussion.
   `signInWithApple()`, `signOut()`.
 - ✅ `LoginScreen` (`lib/screens/auth/login_screen.dart`): Google +
   Apple sign-in buttons, Kadence design tokens.
-- ⚠️ Auth gate wired in `app.dart` but currently commented out —
-  re-enable once iOS/Android deep-link URL schemes are configured so
-  OAuth callbacks return to the app.
+- ✅ Auth is optional — no gate. Users sign in from Settings or the
+  6th onboarding step. App is fully usable without an account.
+- ✅ Deep link URL scheme (`io.supabase.kadence://login-callback/`)
+  configured in iOS `Info.plist` and Android `AndroidManifest.xml`.
+- ✅ Settings: prominent account card at top (avatar + name + sign out
+  when signed in; "Sign in to sync" CTA when signed out). Sign-in
+  opens a bottom sheet with Google/Apple buttons.
+- ✅ Onboarding: 6th step offers sign-in with "Skip for now" option.
 - ✅ Sign out row added to settings screen.
+
+#### Sync layer (done)
+- ✅ `SyncService` (`lib/state/sync_service.dart`): offline-first
+  sync with ownership tracking and last-write-wins.
+- ✅ Ownership via `kadence.last_synced_user_id` in SharedPreferences.
+  Three sign-in scenarios:
+  - No owner (offline data) → push local to cloud, merge.
+  - Same user → merge local + cloud, push local-only.
+  - Different user → discard local, pull cloud only.
+- ✅ `PlanController` pushes every mutation (save/toggle/delete) to
+  cloud when signed in. Fire-and-forget for offline resilience.
+- ✅ `AuthController` triggers full sync on sign-in, clears owner on
+  sign-out. Exposes `isSyncing` flag.
 
 #### TODO
 - **TODO**: enroll in Apple Developer Program ($99/yr) to configure
   Apple Sign-In (Services ID, return URL, Sign in with Apple
   capability in Xcode).
-- **TODO**: configure deep link URL scheme (`io.supabase.kadence`) in
-  iOS `Info.plist` and Android `AndroidManifest.xml` so OAuth
-  callback returns to the app.
-- **TODO**: build sync layer — push local activities to Supabase
-  `activities` table on save/delete, pull remote changes on app start.
-  Strategy: offline-first with last-write-wins (`updated_at`).
-- **TODO**: handle first-login migration — upload existing local-only
-  activities to the cloud on first sign-in.
 - **TODO**: add native Google Sign-In (Android/iOS client IDs) for
   one-tap sign-in instead of browser redirect.
 - Required foundation for Strava integration (need a backend to

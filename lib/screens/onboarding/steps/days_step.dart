@@ -80,7 +80,7 @@ class _DaysStepState extends State<DaysStep> {
             ),
           ),
           const SizedBox(height: KSpace.s4),
-          const ProgressDots(total: 5, current: 2),
+          const ProgressDots(total: 6, current: 2),
           const SizedBox(height: KSpace.s1 + 2),
           KButton(
             label: 'Continue',

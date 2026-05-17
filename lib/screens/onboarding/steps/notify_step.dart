@@ -93,7 +93,7 @@ class _NotifyStepState extends State<NotifyStep> {
               ],
             ),
           ),
-          const ProgressDots(total: 5, current: 3),
+          const ProgressDots(total: 6, current: 3),
           const SizedBox(height: KSpace.s1 + 2),
           KButton(
             label: 'Continue',
