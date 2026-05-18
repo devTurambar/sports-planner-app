@@ -80,7 +80,7 @@ class SignInStep extends StatelessWidget {
               ],
             ),
           ),
-          const ProgressDots(total: 6, current: 5),
+          const ProgressDots(total: 3, current: 2),
           const SizedBox(height: KSpace.s1 + 2),
           KButton(
             label: 'Skip for now',

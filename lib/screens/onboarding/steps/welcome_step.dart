@@ -39,7 +39,7 @@ class WelcomeStep extends StatelessWidget {
                 ),
                 const SizedBox(height: KSpace.s2),
                 Text(
-                  'Plan your week.\nMove your body.',
+                  'Plan, track & move.',
                   textAlign: TextAlign.center,
                   style: KText.body.copyWith(
                     fontSize: 16,
@@ -51,12 +51,12 @@ class WelcomeStep extends StatelessWidget {
                 const SizedBox(height: KSpace.s6),
                 const _FeatureRow(
                   icon: LucideIcons.circleDashed,
-                  text: 'Plan sessions before the week starts',
+                  text: 'A simple weekly activity tracker',
                 ),
                 const SizedBox(height: KSpace.s2 + 2),
                 const _FeatureRow(
                   icon: LucideIcons.check,
-                  text: 'Check off as you go',
+                  text: 'Check off sessions as you go',
                 ),
                 const SizedBox(height: KSpace.s2 + 2),
                 const _FeatureRow(
@@ -66,7 +66,7 @@ class WelcomeStep extends StatelessWidget {
               ],
             ),
           ),
-          const ProgressDots(total: 6, current: 0),
+          const ProgressDots(total: 3, current: 0),
           const SizedBox(height: KSpace.s1 + 2),
           KButton(label: 'Get started', onPressed: onNext),
         ],

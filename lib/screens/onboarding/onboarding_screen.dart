@@ -6,11 +6,8 @@ import '../../state/onboarding_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
-import 'steps/days_step.dart';
-import 'steps/notify_step.dart';
-import 'steps/ready_step.dart';
+import 'steps/calendar_step.dart';
 import 'steps/signin_step.dart';
-import 'steps/sport_step.dart';
 import 'steps/welcome_step.dart';
 
 /// Multi-step onboarding. State is persisted as the user advances so
@@ -29,7 +26,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _step = 0;
 
   Future<void> _go(int next) async {
-    if (next >= 6) {
+    if (next >= 3) {
       await context.read<OnboardingController>().complete();
       widget.onFinished();
       return;
@@ -40,38 +37,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final onboarding = context.watch<OnboardingController>();
 
     final steps = <Widget>[
       WelcomeStep(onNext: () => _go(1)),
-      SportStep(
-        initialSelection: onboarding.sports,
-        onNext: (sports) async {
-          await onboarding.setSports(sports);
-          _go(2);
-        },
-      ),
-      DaysStep(
-        initialSelection: onboarding.trainingDays,
-        onNext: (days) async {
-          await onboarding.setTrainingDays(days);
-          _go(3);
-        },
-      ),
-      NotifyStep(
-        initialValue: null,
-        onNext: (enabled) async {
-          await onboarding.setReminders(enabled: enabled);
-          _go(4);
-        },
-      ),
-      ReadyStep(
-        trainingDays: onboarding.trainingDays,
-        onDone: () => _go(5),
-      ),
-      SignInStep(
-        onSkip: () => _go(6),
-      ),
+      CalendarStep(onNext: () => _go(2)),
+      SignInStep(onSkip: () => _go(3)),
     ];
 
     return Scaffold(
@@ -80,7 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: <Widget>[
             _TopRow(
-              canGoBack: _step > 0 && _step < 4 || _step == 5,
+              canGoBack: _step > 0,
               onBack: () => _go(_step - 1),
             ),
             Expanded(

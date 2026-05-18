@@ -6,25 +6,12 @@ import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
 import '../../../widgets/k_button.dart';
 import '../widgets/progress_dots.dart';
-import '../widgets/selectable_tile.dart';
 
-/// Reminder opt-in screen.
-class NotifyStep extends StatefulWidget {
-  const NotifyStep({
-    required this.initialValue,
-    required this.onNext,
-    super.key,
-  });
+/// Informs the user that activities sync with their device calendar.
+class CalendarStep extends StatelessWidget {
+  const CalendarStep({required this.onNext, super.key});
 
-  final bool? initialValue;
-  final ValueChanged<bool> onNext;
-
-  @override
-  State<NotifyStep> createState() => _NotifyStepState();
-}
-
-class _NotifyStepState extends State<NotifyStep> {
-  late bool? _choice = widget.initialValue;
+  final VoidCallback onNext;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +36,7 @@ class _NotifyStepState extends State<NotifyStep> {
                     ),
                     alignment: Alignment.center,
                     child: Icon(
-                      LucideIcons.bell,
+                      LucideIcons.calendarSync,
                       size: 28,
                       color: colors.accent,
                     ),
@@ -57,7 +44,7 @@ class _NotifyStepState extends State<NotifyStep> {
                 ),
                 const SizedBox(height: KSpace.s6),
                 Text(
-                  'Reminders',
+                  'Calendar sync',
                   textAlign: TextAlign.center,
                   style: KText.h2.copyWith(
                     fontSize: 22,
@@ -68,8 +55,8 @@ class _NotifyStepState extends State<NotifyStep> {
                 ),
                 const SizedBox(height: KSpace.s2),
                 Text(
-                  'Get a nudge before each planned session. Useful if you '
-                  'need a prompt to get out the door.',
+                  'Your planned sessions automatically sync with '
+                  'your device calendar so everything stays in one place.',
                   textAlign: TextAlign.center,
                   style: KText.bodySm.copyWith(
                     color: colors.fgSecondary,
@@ -77,31 +64,68 @@ class _NotifyStepState extends State<NotifyStep> {
                   ),
                 ),
                 const SizedBox(height: KSpace.s6),
-                SelectableTile(
-                  title: 'Yes, remind me',
-                  subtitle: '30 min before each session',
-                  selected: _choice == true,
-                  onTap: () => setState(() => _choice = true),
+                _InfoRow(
+                  icon: LucideIcons.calendarPlus,
+                  text: 'Activities appear on your calendar',
+                  colors: colors,
                 ),
-                const SizedBox(height: KSpace.s2),
-                SelectableTile(
-                  title: 'No thanks',
-                  subtitle: "I'll check the app myself",
-                  selected: _choice == false,
-                  onTap: () => setState(() => _choice = false),
+                const SizedBox(height: KSpace.s2 + 2),
+                _InfoRow(
+                  icon: LucideIcons.refreshCw,
+                  text: 'Edits and deletions stay in sync',
+                  colors: colors,
+                ),
+                const SizedBox(height: KSpace.s2 + 2),
+                _InfoRow(
+                  icon: LucideIcons.settings2,
+                  text: 'Choose your calendar in Settings',
+                  colors: colors,
                 ),
               ],
             ),
           ),
-          const ProgressDots(total: 6, current: 3),
+          const ProgressDots(total: 3, current: 1),
           const SizedBox(height: KSpace.s1 + 2),
-          KButton(
-            label: 'Continue',
-            onPressed:
-                _choice == null ? null : () => widget.onNext(_choice!),
-          ),
+          KButton(label: 'Continue', onPressed: onNext),
         ],
       ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.icon,
+    required this.text,
+    required this.colors,
+  });
+
+  final IconData icon;
+  final String text;
+  final KadenceColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: colors.accentLight,
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Icon(icon, size: 14, color: colors.accent),
+        ),
+        const SizedBox(width: KSpace.s2 + 2),
+        Expanded(
+          child: Text(
+            text,
+            style: KText.bodySm.copyWith(color: colors.fgSecondary),
+          ),
+        ),
+      ],
     );
   }
 }
