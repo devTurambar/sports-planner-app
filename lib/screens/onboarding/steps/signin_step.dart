@@ -11,15 +11,27 @@ import '../widgets/progress_dots.dart';
 
 /// Optional sign-in step shown after the week preview. The user can
 /// sign in with Google/Apple or skip to use the app offline-only.
-class SignInStep extends StatelessWidget {
+class SignInStep extends StatefulWidget {
   const SignInStep({required this.onSkip, super.key});
 
   final VoidCallback onSkip;
 
   @override
+  State<SignInStep> createState() => _SignInStepState();
+}
+
+class _SignInStepState extends State<SignInStep> {
+  bool _advanced = false;
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final auth = context.read<AuthController>();
+    final auth = context.watch<AuthController>();
+
+    if (auth.isSignedIn && !_advanced) {
+      _advanced = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => widget.onSkip());
+    }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, KSpace.s8),
@@ -85,7 +97,7 @@ class SignInStep extends StatelessWidget {
           KButton(
             label: 'Skip for now',
             variant: KButtonVariant.ghost,
-            onPressed: onSkip,
+            onPressed: widget.onSkip,
           ),
         ],
       ),

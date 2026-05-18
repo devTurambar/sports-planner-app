@@ -7,7 +7,7 @@ activities. It implements the "Kadence Design System" — Personality:
 Calm, Minimalist, Motivating. Default accent color: Coral (#FF7A45
 dark / #E85F2C light), user-configurable via Settings.
 
-Screens: 5-step Onboarding, Week View, Month View, Day Detail bottom
+Screens: 3-step Onboarding, Week View, Month View, Day Detail bottom
 sheet, Empty State, Stats, Settings.
 
 ## Tech stack
@@ -34,7 +34,7 @@ lib/
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
-    onboarding/           # 5-step flow
+    onboarding/           # 3-step flow (welcome, calendar sync, sign-in)
     home/                 # Shell (IndexedStack + bottom nav)
     week/                 # Week view + day card
     month/                # Month grid + selected-day detail
@@ -363,13 +363,14 @@ without discussion.
 - ✅ `LoginScreen` (`lib/screens/auth/login_screen.dart`): Google +
   Apple sign-in buttons, Kadence design tokens.
 - ✅ Auth is optional — no gate. Users sign in from Settings or the
-  6th onboarding step. App is fully usable without an account.
+  3rd onboarding step. App is fully usable without an account.
 - ✅ Deep link URL scheme (`io.supabase.kadence://login-callback/`)
   configured in iOS `Info.plist` and Android `AndroidManifest.xml`.
 - ✅ Settings: prominent account card at top (avatar + name + sign out
   when signed in; "Sign in to sync" CTA when signed out). Sign-in
   opens a bottom sheet with Google/Apple buttons.
-- ✅ Onboarding: 6th step offers sign-in with "Skip for now" option.
+- ✅ Onboarding: 3rd step offers sign-in with "Skip for now" option.
+  Auto-advances to the app when OAuth sign-in succeeds.
 - ✅ Sign out row added to settings screen.
 
 #### Sync layer (done)
