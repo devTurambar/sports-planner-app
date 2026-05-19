@@ -115,6 +115,9 @@ class WeekViewState extends State<WeekView> {
                 secondaryType: _secondaryType(plan, item.date),
                 onTap: () => _handleRowTap(context, item),
                 onCheckTap: () => _handleCheck(context, item),
+                onLongPress: item.status != DayStatus.empty
+                    ? () => _confirmClearDay(context, item.date)
+                    : null,
               ),
               const SizedBox(height: KSpace.s2),
             ],
@@ -136,6 +139,57 @@ class WeekViewState extends State<WeekView> {
     } else {
       showDayOverviewSheet(context: context, date: item.date);
     }
+  }
+
+  void _confirmClearDay(BuildContext context, DateTime date) {
+    final plan = context.read<PlanController>();
+    final colors = context.colors;
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KRadius.md),
+        ),
+        title: Text(
+          'Delete all sessions?',
+          style: KText.h3.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: colors.fgPrimary,
+          ),
+        ),
+        content: Text(
+          'Every session on this day will be removed. This can\'t be undone.',
+          style: KText.bodySm.copyWith(color: colors.fgSecondary),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w500,
+                color: colors.fgSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Delete',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFB5443A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed != true || !mounted) return;
+      plan.clear(date);
+    });
   }
 
   void _handleCheck(BuildContext context, Activity item) {

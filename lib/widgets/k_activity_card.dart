@@ -12,12 +12,14 @@ class KActivityCard extends StatelessWidget {
     required this.activity,
     required this.onTap,
     this.onCheckTap,
+    this.onLongPress,
     super.key,
   });
 
   final Activity activity;
   final VoidCallback onTap;
   final VoidCallback? onCheckTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +43,7 @@ class KActivityCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(KRadius.lg + 4),
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(KRadius.lg + 4),
         child: Container(
           decoration: BoxDecoration(

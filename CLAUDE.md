@@ -198,6 +198,17 @@ lib/
   inside `Visibility(maintainSize: true)` so cards in a list stack at
   equal height even when time/duration are absent — don't collapse it
   back to a conditional `if (meta != null)`.
+- **Long-press to delete**: every tappable activity surface also
+  supports `onLongPress` → confirmation dialog → delete.
+  - **Single activity**: long-press a `KActivityCard` in the day
+    overview sheet or the month view's `SelectedDayCard`. Calls
+    `plan.delete(date:, id:)`.
+  - **Entire day**: long-press a `DayCard` in the week view, a
+    `MonthDayCell` in the month grid, or the `SelectedDayCard` header.
+    Calls `plan.clear(date)`. Only active when the day has activities.
+  - All delete dialogs share the same style: `AlertDialog` with
+    `bgElevated` background, red (#B5443A) "Delete" button, and a
+    `mounted` guard before acting on the async result.
 - **Bottom sheets and the gesture/safe area**: pad the inner
   scrolling content with `MediaQuery.paddingOf(context).bottom` so
   controls don't sit under the Android gesture bar (see

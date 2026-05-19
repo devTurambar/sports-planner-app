@@ -12,6 +12,7 @@ class MonthDayCell extends StatelessWidget {
     required this.status,
     required this.selected,
     required this.onTap,
+    this.onLongPress,
     this.type,
     this.secondaryType,
     this.sessionCount = 0,
@@ -22,6 +23,7 @@ class MonthDayCell extends StatelessWidget {
   final DayStatus status;
   final bool selected;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final ActivityType? type;
   final ActivityType? secondaryType;
   final int sessionCount;
@@ -62,6 +64,7 @@ class MonthDayCell extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(9),
         child: AspectRatio(
           aspectRatio: 1,

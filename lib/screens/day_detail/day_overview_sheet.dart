@@ -141,6 +141,8 @@ class DayOverviewSheet extends StatelessWidget {
                       onTap: () => _editActivity(context, activities[i]),
                       onCheckTap: () =>
                           plan.toggleDone(date, id: activities[i].id),
+                      onLongPress: () =>
+                          _confirmDelete(context, activities[i]),
                     ),
                   ],
                   const SizedBox(height: 10),
@@ -168,6 +170,57 @@ class DayOverviewSheet extends StatelessWidget {
       date: date,
       existing: null,
     );
+  }
+
+  void _confirmDelete(BuildContext context, Activity activity) {
+    final colors = context.colors;
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KRadius.md),
+        ),
+        title: Text(
+          'Delete session?',
+          style: KText.h3.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: colors.fgPrimary,
+          ),
+        ),
+        content: Text(
+          'This can\'t be undone.',
+          style: KText.bodySm.copyWith(color: colors.fgSecondary),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w500,
+                color: colors.fgSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Delete',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFB5443A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed != true) return;
+      if (!context.mounted) return;
+      context.read<PlanController>().delete(date: date, id: activity.id);
+    });
   }
 }
 
