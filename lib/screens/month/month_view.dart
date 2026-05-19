@@ -109,6 +109,9 @@ class _MonthViewState extends State<MonthView> {
                 selected:
                     _selected != null && KDate.isSameDay(_selected!, date),
                 onTap: () => _select(date),
+                onLongPress: activities.isNotEmpty
+                    ? () => _confirmClearDay(context, date)
+                    : null,
               );
             }),
         ];
@@ -193,6 +196,9 @@ class _MonthViewState extends State<MonthView> {
                     ),
                     onToggleActivity: (activity) =>
                         plan.toggleDone(_selected!, id: activity.id),
+                    onDeleteActivity: (activity) =>
+                        _confirmDeleteActivity(context, activity),
+                    onDeleteAll: () => _confirmClearDay(context, _selected!),
                     onAdd: () => showDayDetailSheet(
                       context: context,
                       date: _selected!,
@@ -206,6 +212,108 @@ class _MonthViewState extends State<MonthView> {
         );
       },
     );
+  }
+
+  void _confirmDeleteActivity(BuildContext context, Activity activity) {
+    final plan = context.read<PlanController>();
+    final colors = context.colors;
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KRadius.md),
+        ),
+        title: Text(
+          'Delete session?',
+          style: KText.h3.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: colors.fgPrimary,
+          ),
+        ),
+        content: Text(
+          'This can\'t be undone.',
+          style: KText.bodySm.copyWith(color: colors.fgSecondary),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w500,
+                color: colors.fgSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Delete',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFB5443A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed != true || !mounted) return;
+      plan.delete(date: activity.date, id: activity.id);
+    });
+  }
+
+  void _confirmClearDay(BuildContext context, DateTime date) {
+    final plan = context.read<PlanController>();
+    final colors = context.colors;
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KRadius.md),
+        ),
+        title: Text(
+          'Delete all sessions?',
+          style: KText.h3.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: colors.fgPrimary,
+          ),
+        ),
+        content: Text(
+          'Every session on this day will be removed. This can\'t be undone.',
+          style: KText.bodySm.copyWith(color: colors.fgSecondary),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w500,
+                color: colors.fgSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Delete',
+              style: KText.bodySm.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFB5443A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed != true || !mounted) return;
+      plan.clear(date);
+    });
   }
 }
 

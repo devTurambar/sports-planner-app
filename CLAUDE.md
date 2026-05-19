@@ -7,7 +7,7 @@ activities. It implements the "Kadence Design System" — Personality:
 Calm, Minimalist, Motivating. Default accent color: Coral (#FF7A45
 dark / #E85F2C light), user-configurable via Settings.
 
-Screens: 5-step Onboarding, Week View, Month View, Day Detail bottom
+Screens: 3-step Onboarding, Week View, Month View, Day Detail bottom
 sheet, Empty State, Stats, Settings.
 
 ## Tech stack
@@ -34,7 +34,7 @@ lib/
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
-    onboarding/           # 5-step flow
+    onboarding/           # 3-step flow (welcome, calendar sync, sign-in)
     home/                 # Shell (IndexedStack + bottom nav)
     week/                 # Week view + day card
     month/                # Month grid + selected-day detail
@@ -198,6 +198,17 @@ lib/
   inside `Visibility(maintainSize: true)` so cards in a list stack at
   equal height even when time/duration are absent — don't collapse it
   back to a conditional `if (meta != null)`.
+- **Long-press to delete**: every tappable activity surface also
+  supports `onLongPress` → confirmation dialog → delete.
+  - **Single activity**: long-press a `KActivityCard` in the day
+    overview sheet or the month view's `SelectedDayCard`. Calls
+    `plan.delete(date:, id:)`.
+  - **Entire day**: long-press a `DayCard` in the week view, a
+    `MonthDayCell` in the month grid, or the `SelectedDayCard` header.
+    Calls `plan.clear(date)`. Only active when the day has activities.
+  - All delete dialogs share the same style: `AlertDialog` with
+    `bgElevated` background, red (#B5443A) "Delete" button, and a
+    `mounted` guard before acting on the async result.
 - **Bottom sheets and the gesture/safe area**: pad the inner
   scrolling content with `MediaQuery.paddingOf(context).bottom` so
   controls don't sit under the Android gesture bar (see
@@ -310,9 +321,6 @@ without discussion.
 ## Not done yet
 
 - No app icons / launcher assets.
-- No remote backend — data is stored locally via SQLite on native
-  platforms. Web runs in-memory only (no persistence). A future
-  backend with authentication will sync per-user data.
 - No localization — copy is hardcoded English.
 - No integration tests; only one smoke test in `test/widget_test.dart`.
 
@@ -365,23 +373,34 @@ without discussion.
   `signInWithApple()`, `signOut()`.
 - ✅ `LoginScreen` (`lib/screens/auth/login_screen.dart`): Google +
   Apple sign-in buttons, Kadence design tokens.
-- ⚠️ Auth gate wired in `app.dart` but currently commented out —
-  re-enable once iOS/Android deep-link URL schemes are configured so
-  OAuth callbacks return to the app.
+- ✅ Auth is optional — no gate. Users sign in from Settings or the
+  3rd onboarding step. App is fully usable without an account.
+- ✅ Deep link URL scheme (`io.supabase.kadence://login-callback/`)
+  configured in iOS `Info.plist` and Android `AndroidManifest.xml`.
+- ✅ Settings: prominent account card at top (avatar + name + sign out
+  when signed in; "Sign in to sync" CTA when signed out). Sign-in
+  opens a bottom sheet with Google/Apple buttons.
+- ✅ Onboarding: 3rd step offers sign-in with "Skip for now" option.
+  Auto-advances to the app when OAuth sign-in succeeds.
 - ✅ Sign out row added to settings screen.
+
+#### Sync layer (done)
+- ✅ `SyncService` (`lib/state/sync_service.dart`): offline-first
+  sync with ownership tracking and last-write-wins.
+- ✅ Ownership via `kadence.last_synced_user_id` in SharedPreferences.
+  Three sign-in scenarios:
+  - No owner (offline data) → push local to cloud, merge.
+  - Same user → merge local + cloud, push local-only.
+  - Different user → discard local, pull cloud only.
+- ✅ `PlanController` pushes every mutation (save/toggle/delete) to
+  cloud when signed in. Fire-and-forget for offline resilience.
+- ✅ `AuthController` triggers full sync on sign-in, clears owner on
+  sign-out. Exposes `isSyncing` flag.
 
 #### TODO
 - **TODO**: enroll in Apple Developer Program ($99/yr) to configure
   Apple Sign-In (Services ID, return URL, Sign in with Apple
   capability in Xcode).
-- **TODO**: configure deep link URL scheme (`io.supabase.kadence`) in
-  iOS `Info.plist` and Android `AndroidManifest.xml` so OAuth
-  callback returns to the app.
-- **TODO**: build sync layer — push local activities to Supabase
-  `activities` table on save/delete, pull remote changes on app start.
-  Strategy: offline-first with last-write-wins (`updated_at`).
-- **TODO**: handle first-login migration — upload existing local-only
-  activities to the cloud on first sign-in.
 - **TODO**: add native Google Sign-In (Android/iOS client IDs) for
   one-tap sign-in instead of browser redirect.
 - Required foundation for Strava integration (need a backend to

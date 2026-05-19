@@ -14,6 +14,7 @@ class DayCard extends StatelessWidget {
     required this.activity,
     required this.onTap,
     required this.onCheckTap,
+    this.onLongPress,
     this.extras = 0,
     this.secondaryType,
     super.key,
@@ -22,6 +23,7 @@ class DayCard extends StatelessWidget {
   final Activity activity;
   final VoidCallback onTap;
   final VoidCallback onCheckTap;
+  final VoidCallback? onLongPress;
   final int extras;
   final ActivityType? secondaryType;
 
@@ -45,6 +47,7 @@ class DayCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(KRadius.lg),
         child: Ink(
           decoration: BoxDecoration(

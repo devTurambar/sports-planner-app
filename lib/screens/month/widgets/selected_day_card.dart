@@ -18,6 +18,8 @@ class SelectedDayCard extends StatelessWidget {
     required this.onEditActivity,
     required this.onToggleActivity,
     required this.onAdd,
+    this.onDeleteActivity,
+    this.onDeleteAll,
     super.key,
   });
 
@@ -27,6 +29,8 @@ class SelectedDayCard extends StatelessWidget {
   final ValueChanged<Activity> onEditActivity;
   final ValueChanged<Activity> onToggleActivity;
   final VoidCallback onAdd;
+  final ValueChanged<Activity>? onDeleteActivity;
+  final VoidCallback? onDeleteAll;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +49,17 @@ class SelectedDayCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _Header(date: date, onClose: onClose),
+          _Header(
+            date: date,
+            onClose: onClose,
+            onLongPress: activities.isNotEmpty ? onDeleteAll : null,
+          ),
           const SizedBox(height: 8),
           _Body(
             activities: activities,
             onEditActivity: onEditActivity,
             onToggleActivity: onToggleActivity,
+            onDeleteActivity: onDeleteActivity,
             onAdd: onAdd,
           ),
         ],
@@ -60,44 +69,52 @@ class SelectedDayCard extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.date, required this.onClose});
+  const _Header({
+    required this.date,
+    required this.onClose,
+    this.onLongPress,
+  });
 
   final DateTime date;
   final VoidCallback onClose;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final label =
         '${date.shortWeekday.toUpperCase()} · ${date.shortMonth} ${date.day}';
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Text(
-            label,
-            style: KText.caption.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: colors.fgTertiary,
-              letterSpacing: 0.6,
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              label,
+              style: KText.caption.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: colors.fgTertiary,
+                letterSpacing: 0.6,
+              ),
             ),
           ),
-        ),
-        InkWell(
-          onTap: onClose,
-          customBorder: const CircleBorder(),
-          child: Container(
-            width: 22,
-            height: 22,
-            decoration: BoxDecoration(
-              color: colors.bgElevated,
-              shape: BoxShape.circle,
+          InkWell(
+            onTap: onClose,
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: colors.bgElevated,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(LucideIcons.x, size: 12, color: colors.fgTertiary),
             ),
-            alignment: Alignment.center,
-            child: Icon(LucideIcons.x, size: 12, color: colors.fgTertiary),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -107,12 +124,14 @@ class _Body extends StatelessWidget {
     required this.activities,
     required this.onEditActivity,
     required this.onToggleActivity,
+    this.onDeleteActivity,
     required this.onAdd,
   });
 
   final List<Activity> activities;
   final ValueChanged<Activity> onEditActivity;
   final ValueChanged<Activity> onToggleActivity;
+  final ValueChanged<Activity>? onDeleteActivity;
   final VoidCallback onAdd;
 
   @override
@@ -147,6 +166,9 @@ class _Body extends StatelessWidget {
             activity: activities[i],
             onTap: () => onEditActivity(activities[i]),
             onCheckTap: () => onToggleActivity(activities[i]),
+            onLongPress: onDeleteActivity != null
+                ? () => onDeleteActivity!(activities[i])
+                : null,
           ),
         ],
         const SizedBox(height: 10),
