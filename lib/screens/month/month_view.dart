@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
+import '../../state/theme_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -83,8 +84,9 @@ class _MonthViewState extends State<MonthView> {
       }),
       itemBuilder: (context, page) {
         final cursor = _cursorForPage(page);
+        final startDay = context.watch<ThemeController>().weekStartDay;
         final firstOfMonth = DateTime(cursor.year, cursor.month);
-        final offset = (firstOfMonth.weekday - DateTime.monday) % 7;
+        final offset = (firstOfMonth.weekday - startDay + 7) % 7;
         final totalDays = KDate.daysInMonth(cursor.year, cursor.month);
 
         final cells = <Widget>[
@@ -169,7 +171,7 @@ class _MonthViewState extends State<MonthView> {
               ],
             ),
             const SizedBox(height: KSpace.s2 + 2),
-            _WeekdayHeader(colors: colors),
+            _WeekdayHeader(colors: colors, startDay: startDay),
             const SizedBox(height: 4),
             GridView.count(
               crossAxisCount: 7,
@@ -428,21 +430,25 @@ class _NavButton extends StatelessWidget {
 }
 
 class _WeekdayHeader extends StatelessWidget {
-  const _WeekdayHeader({required this.colors});
+  const _WeekdayHeader({required this.colors, required this.startDay});
 
   final KadenceColors colors;
+  final int startDay;
 
   @override
   Widget build(BuildContext context) {
+    final labels = KDate.orderedMinWeekdays(startDay);
     return Row(
-      children: List<Widget>.generate(KDate.minWeekdays.length, (i) {
-        final isWeekend = i >= 5;
+      children: List<Widget>.generate(labels.length, (i) {
+        final weekday = (startDay - 1 + i) % 7 + 1;
+        final isWeekend =
+            weekday == DateTime.saturday || weekday == DateTime.sunday;
         return Expanded(
           child: Center(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 3),
               child: Text(
-                KDate.minWeekdays[i],
+                labels[i],
                 style: KText.caption.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,

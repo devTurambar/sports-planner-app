@@ -53,8 +53,8 @@ class PlanController extends ChangeNotifier {
 
   // ── public reads ──────────────────────────────────────────────────────
 
-  List<Activity> weekFor(DateTime date) {
-    final week = KDate.weekFor(date);
+  List<Activity> weekFor(DateTime date, [int startDay = DateTime.monday]) {
+    final week = KDate.weekFor(date, startDay);
     return week.map(_primaryFor).toList(growable: false);
   }
 
@@ -122,7 +122,7 @@ class PlanController extends ChangeNotifier {
         );
         list[index] = updated;
         ActivityDb.upsert(updated);
-        CalendarService.updateEvent(updated);
+        _syncUpdatedEvent(updated, key, index);
         _pushToCloud(updated);
         notifyListeners();
         return;
@@ -145,6 +145,19 @@ class PlanController extends ChangeNotifier {
     _syncNewEvent(activity, key, list.length - 1);
     notifyListeners();
     ReviewService.tryRequestReview(totalActivities: _totalActivities);
+  }
+
+  void _syncUpdatedEvent(Activity activity, String key, int index) {
+    CalendarService.updateEvent(activity).then((eventId) {
+      if (eventId != null) {
+        final list = _byDate[key];
+        if (list != null && index < list.length && list[index].id == activity.id) {
+          final updated = list[index].copyWith(calendarEventId: eventId);
+          list[index] = updated;
+          ActivityDb.upsert(updated);
+        }
+      }
+    });
   }
 
   void _syncNewEvent(Activity activity, String key, int index) {

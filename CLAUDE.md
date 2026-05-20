@@ -20,6 +20,8 @@ sheet, Empty State, Stats, Settings.
 - `path` for database path resolution
 - `google_fonts` (Sora, tabular figures)
 - `lucide_icons_flutter` for outline icons
+- `flutter_svg` for brand logo assets (Google, Apple)
+- `share_plus` + `file_picker` for export/import backup
 - No external charting library — stats heatmap is built with custom widgets
 
 ## Architecture at a glance
@@ -30,11 +32,11 @@ lib/
   app.dart                # MaterialApp + TodayScope + onboarding gate
   theme/                  # Design tokens (colors, spacing, text, theme)
   models/                 # Activity + DayStatus + ActivityType
-  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color) + ActivityDb
+  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color) + ActivityDb + BackupService
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
-    onboarding/           # 3-step flow (welcome, calendar sync, sign-in)
+    onboarding/           # 3-step flow (welcome, calendar sync, data backup)
     home/                 # Shell (IndexedStack + bottom nav)
     week/                 # Week view + day card
     month/                # Month grid + selected-day detail
@@ -227,6 +229,25 @@ lib/
 - **Icons**: Lucide names are camelCase in `lucide_icons_flutter`
   (`LucideIcons.chevronLeft`). If the package version differs, the
   compile error will be obvious — adjust casing.
+- **Brand logos**: Google and Apple logos are SVG assets in
+  `assets/icons/` rendered via `flutter_svg`. Apple has separate
+  `apple_dark.svg` (white) and `apple_light.svg` (black) variants
+  selected by theme brightness.
+- **OAuth buttons**: `KOAuthButton` (`lib/widgets/k_oauth_button.dart`)
+  is the single shared widget for Google/Apple sign-in across all
+  screens (onboarding, settings sheet, login screen). Uses real brand
+  SVG logos. `KOAuthButton.showApple` returns `true` only on iOS —
+  Android shows Google-only. Always use this widget for sign-in
+  buttons; don't recreate inline.
+- **Export/Import**: `BackupService` (`lib/state/backup_service.dart`)
+  handles JSON serialization of activities. Export writes a temp file
+  (`kadence-backup-YYYY-MM-DD.json`) and opens the system share sheet
+  via `share_plus`. Import uses `file_picker` filtered to `.json`,
+  validates structure, and replaces all local data via
+  `PlanController.replaceAll()` + `ActivityDb`. If signed in, also
+  pushes to Supabase via `SyncService.pushAll()`. JSON format:
+  `{ version: 1, exported_at: ISO8601, activities: [...] }`. Settings
+  screen has "Export data" and "Import data" rows in their own group.
 - **Week view always shows the day grid** — there is no full-screen
   empty state. Even with zero activities, the week nav arrows, stat
   tiles (showing 0/0/0%), and all seven day rows are rendered so the
@@ -339,6 +360,10 @@ without discussion.
 - ✅ Deleting an activity in the app also deletes the calendar event
   (app is source of truth). Calendar events use `Activity.timeOfDay`
   for the start time (falls back to 08:00 when unset).
+- ✅ Editing an activity updates its calendar event. If the activity
+  has no linked event yet (created before sync was enabled),
+  `updateEvent` creates one and persists the new `calendarEventId`
+  back via `_syncUpdatedEvent`.
 - **TODO**: multi-select calendar picker (checkboxes instead of
   single-select / all).
 - **TODO**: consider optional "keep on calendar?" prompt when deleting
@@ -376,8 +401,9 @@ without discussion.
   Supabase auth client, listens to `onAuthStateChange`, exposes
   `isSignedIn`, `user`, `displayName`, `signInWithGoogle()`,
   `signInWithApple()`, `signOut()`.
-- ✅ `LoginScreen` (`lib/screens/auth/login_screen.dart`): Google +
-  Apple sign-in buttons, Kadence design tokens.
+- ✅ `LoginScreen` (`lib/screens/auth/login_screen.dart`): uses
+  `KOAuthButton` with real brand logos, Kadence design tokens.
+  Apple button shown only on iOS.
 - ✅ Auth is optional — no gate. Users sign in from Settings or the
   3rd onboarding step. App is fully usable without an account.
 - ✅ Deep link URL scheme (`io.supabase.kadence://login-callback/`)
@@ -385,7 +411,10 @@ without discussion.
 - ✅ Settings: prominent account card at top (avatar + name + sign out
   when signed in; "Sign in to sync" CTA when signed out). Sign-in
   opens a bottom sheet with Google/Apple buttons.
-- ✅ Onboarding: 3rd step offers sign-in with "Skip for now" option.
+- ✅ Onboarding: 3rd step ("Keep your data safe") presents two
+  equal-weight cards — Manual backup (first) with "Continue without
+  account" button, and Cloud sync (second) with Google/Apple sign-in.
+  No "Skip" — the manual path is the positive non-login option.
   Auto-advances to the app when OAuth sign-in succeeds.
 - ✅ Sign out row added to settings screen.
 
@@ -434,6 +463,17 @@ without discussion.
   silently skip the dialog even when our eligibility passes. There is
   no callback to know if the user reviewed or dismissed — our app
   treats every prompt as a "dismiss" for counting purposes.
+
+### Export/Import backup (done)
+- ✅ `BackupService` (`lib/state/backup_service.dart`): JSON
+  serialization with version metadata.
+- ✅ Export via system share sheet (`share_plus`). Filename:
+  `kadence-backup-YYYY-MM-DD.json`.
+- ✅ Import via file picker (`file_picker`, `.json` filter).
+  Destructive replace with confirmation dialog. Pushes to Supabase
+  if signed in.
+- ✅ Settings screen: "Export data" / "Import data" rows in a
+  dedicated group between calendar sync and type colors.
 
 ### Strava integration (after auth)
 - **Read from Strava**: poll for completed Strava activities via

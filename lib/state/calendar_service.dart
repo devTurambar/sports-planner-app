@@ -99,9 +99,14 @@ class CalendarService {
     return map.isEmpty ? null : jsonEncode(map);
   }
 
-  static Future<void> updateEvent(Activity activity) async {
-    if (!_isSupported || !syncEnabled) return;
-    if (activity.calendarEventId == null) return;
+  /// Updates existing calendar events, or creates them if none exist yet.
+  /// Returns a new calendarEventId when events were created (null otherwise).
+  static Future<String?> updateEvent(Activity activity) async {
+    if (!_isSupported || !syncEnabled) return null;
+
+    if (activity.calendarEventId == null) {
+      return createEvent(activity);
+    }
 
     final existing = _parseEventIds(activity.calendarEventId!);
     for (final entry in existing.entries) {
@@ -109,6 +114,7 @@ class CalendarService {
         ..eventId = entry.value;
       await _plugin.createOrUpdateEvent(event);
     }
+    return null;
   }
 
   static Future<void> deleteEvent(Activity activity) async {

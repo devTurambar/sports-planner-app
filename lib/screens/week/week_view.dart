@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
+import '../../state/theme_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -57,17 +58,18 @@ class WeekViewState extends State<WeekView> {
   Widget build(BuildContext context) {
     final today = TodayScope.of(context);
     final plan = context.watch<PlanController>();
+    final startDay = context.watch<ThemeController>().weekStartDay;
 
     return PageView.builder(
       controller: _pageCtrl,
       onPageChanged: (page) => setState(() => _currentPage = page),
       itemBuilder: (context, page) {
         final cursor = _cursorForPage(page, today);
-        final week = plan.weekFor(cursor);
+        final week = plan.weekFor(cursor, startDay);
 
         final isCurrentWeek = KDate.isSameDay(
-          KDate.mondayOfWeek(cursor),
-          KDate.mondayOfWeek(today),
+          KDate.startOfWeek(cursor, startDay),
+          KDate.startOfWeek(today, startDay),
         );
 
         var planned = 0;
@@ -93,7 +95,7 @@ class WeekViewState extends State<WeekView> {
           physics: const BouncingScrollPhysics(),
           children: <Widget>[
             _WeekNav(
-              monday: KDate.mondayOfWeek(cursor),
+              weekStart: KDate.startOfWeek(cursor, startDay),
               isCurrent: isCurrentWeek,
               onPrev: () => _shiftWeek(-1),
               onNext: () => _shiftWeek(1),
@@ -334,8 +336,11 @@ class _WeekDotCell extends StatelessWidget {
     final all = plan.activitiesFor(activity.date);
     final secondaryType = all.length > 1 ? all[1].type : null;
 
-    final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    final dayIndex = activity.date.weekday - 1;
+    final startDay = context.watch<ThemeController>().weekStartDay;
+    final dayLabels = startDay == DateTime.sunday
+        ? const ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+        : const ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final dayIndex = (activity.date.weekday - startDay + 7) % 7;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -389,13 +394,13 @@ class _WeekDotCell extends StatelessWidget {
 
 class _WeekNav extends StatelessWidget {
   const _WeekNav({
-    required this.monday,
+    required this.weekStart,
     required this.isCurrent,
     required this.onPrev,
     required this.onNext,
   });
 
-  final DateTime monday;
+  final DateTime weekStart;
   final bool isCurrent;
   final VoidCallback onPrev;
   final VoidCallback onNext;
@@ -403,8 +408,8 @@ class _WeekNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final sunday = monday.add(const Duration(days: 6));
-    final label = _formatRange(monday, sunday);
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    final label = _formatRange(weekStart, weekEnd);
 
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 4),
@@ -447,12 +452,12 @@ class _WeekNav extends StatelessWidget {
     );
   }
 
-  String _formatRange(DateTime monday, DateTime sunday) {
-    if (monday.month == sunday.month) {
-      return '${monday.shortMonth} ${monday.day} – ${sunday.day}';
+  String _formatRange(DateTime start, DateTime end) {
+    if (start.month == end.month) {
+      return '${start.shortMonth} ${start.day} – ${end.day}';
     }
-    return '${monday.shortMonth} ${monday.day} – '
-        '${sunday.shortMonth} ${sunday.day}';
+    return '${start.shortMonth} ${start.day} – '
+        '${end.shortMonth} ${end.day}';
   }
 }
 

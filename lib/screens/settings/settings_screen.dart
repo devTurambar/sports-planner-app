@@ -207,8 +207,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             _StaticRow(
               label: 'Week starts on',
-              value: 'Monday',
-              onTap: () {},
+              value: theme.weekStartsOnSunday ? 'Sunday' : 'Monday',
+              onTap: () => theme.toggleWeekStart(),
             ),
             _StaticRow(
               label: 'Reminders',
@@ -217,7 +217,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 enabled: !onboarding.remindersEnabled,
               ),
             ),
-            const _AccentColorRow(isLast: true),
+            const _AccentColorRow(label: 'Theme color', isLast: true),
           ],
         ),
         const SizedBox(height: KSpace.s3),
@@ -1004,8 +1004,9 @@ class _TypeColorRow extends StatelessWidget {
 }
 
 class _AccentColorRow extends StatelessWidget {
-  const _AccentColorRow({this.isLast = false});
+  const _AccentColorRow({this.label = 'Accent color', this.isLast = false});
 
+  final String label;
   final bool isLast;
 
   @override
@@ -1027,7 +1028,7 @@ class _AccentColorRow extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: Text(
-              'Accent color',
+              label,
               style: KText.body.copyWith(color: colors.fgPrimary),
             ),
           ),

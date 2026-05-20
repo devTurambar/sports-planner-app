@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
+import '../../state/theme_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -26,7 +27,8 @@ class _StatsViewState extends State<StatsView> {
   Widget build(BuildContext context) {
     final today = TodayScope.of(context);
     final plan = context.watch<PlanController>();
-    final data = _StatsData.compute(plan, today);
+    final startDay = context.watch<ThemeController>().weekStartDay;
+    final data = _StatsData.compute(plan, today, startDay);
 
     final hasAnyActivity = data.dayCells.any((c) => !c.isEmpty);
     if (data.totalSessions == 0 && !hasAnyActivity) {
@@ -154,13 +156,13 @@ class _StatsData {
   final List<_DayCell> dayCells;
   final List<DateTime> weekStarts;
 
-  static _StatsData compute(PlanController plan, DateTime today) {
+  static _StatsData compute(PlanController plan, DateTime today, [int startDay = DateTime.monday]) {
     final done = plan
         .allActivities()
         .where((a) => a.status == DayStatus.done)
         .toList(growable: false);
 
-    final mondayThis = KDate.mondayOfWeek(today);
+    final thisWeekStart = KDate.startOfWeek(today, startDay);
     bool inWeek(Activity a, DateTime weekStart) {
       final end = weekStart.add(const Duration(days: 7));
       return !a.date.isBefore(weekStart) && a.date.isBefore(end);
@@ -168,7 +170,7 @@ class _StatsData {
 
     final weekStarts = <DateTime>[];
     for (var i = _kWeekCount - 1; i >= 0; i--) {
-      weekStarts.add(mondayThis.subtract(Duration(days: 7 * i)));
+      weekStarts.add(thisWeekStart.subtract(Duration(days: 7 * i)));
     }
 
     final all = plan.allActivities().toList(growable: false);
@@ -197,11 +199,11 @@ class _StatsData {
       }
     }
 
-    final currentDone = done.any((a) => inWeek(a, mondayThis));
+    final currentDone = done.any((a) => inWeek(a, thisWeekStart));
     var streak = 0;
     final startOffset = currentDone ? 0 : 1;
     for (var i = startOffset; i < 520; i++) {
-      final weekStart = mondayThis.subtract(Duration(days: 7 * i));
+      final weekStart = thisWeekStart.subtract(Duration(days: 7 * i));
       final hasDone = done.any((a) => inWeek(a, weekStart));
       if (hasDone) {
         streak++;
