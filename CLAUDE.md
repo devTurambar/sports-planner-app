@@ -411,6 +411,30 @@ without discussion.
 - Required foundation for Strava integration (need a backend to
   securely store OAuth tokens and handle callbacks).
 
+### In-app review prompt (done)
+- ✅ `in_app_review` package added. Uses StoreKit (iOS) and Google
+  Play In-App Review API (Android) — native OS dialogs.
+- ✅ `ReviewService` (`lib/state/review_service.dart`): static
+  singleton initialized in `main.dart` with SharedPreferences.
+- **Eligibility** (all must be true before prompting):
+  - App installed 5+ days ago (`kadence.first_launch` timestamp).
+  - 3+ activities saved (counted from `PlanController`).
+  - Not dismissed 3 times already (`kadence.review_dismiss_count`).
+  - Cooldown since last prompt has elapsed (`kadence.review_last_asked`).
+- **Cooldown schedule**:
+  - After 1st prompt: 30-day cooldown.
+  - After 2nd prompt: 90-day cooldown.
+  - After 3rd prompt: never again.
+- **Trigger**: called after saving a new activity, `toggleDone`, and
+  `toggleAllDone` in `PlanController`. Fire-and-forget — checks
+  eligibility synchronously, then calls `requestReview()` only if
+  `isAvailable()` returns true.
+- **OS-level throttle on top**: Apple caps to 3 prompts per 365 days
+  per Apple ID; Google has its own undocumented quota. The OS may
+  silently skip the dialog even when our eligibility passes. There is
+  no callback to know if the user reviewed or dismissed — our app
+  treats every prompt as a "dismiss" for counting purposes.
+
 ### Strava integration (after auth)
 - **Read from Strava**: poll for completed Strava activities via
   `GET /api/v3/athlete/activities`. Match by date + activity type

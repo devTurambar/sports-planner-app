@@ -5,6 +5,7 @@ import '../models/activity.dart';
 import '../utils/date_utils.dart';
 import 'activity_db.dart';
 import 'calendar_service.dart';
+import 'review_service.dart';
 import 'sync_service.dart';
 
 class PlanController extends ChangeNotifier {
@@ -143,6 +144,7 @@ class PlanController extends ChangeNotifier {
     _pushToCloud(activity);
     _syncNewEvent(activity, key, list.length - 1);
     notifyListeners();
+    ReviewService.tryRequestReview(totalActivities: _totalActivities);
   }
 
   void _syncNewEvent(Activity activity, String key, int index) {
@@ -178,6 +180,7 @@ class PlanController extends ChangeNotifier {
     ActivityDb.upsert(updated);
     _pushToCloud(updated);
     notifyListeners();
+    ReviewService.tryRequestReview(totalActivities: _totalActivities);
   }
 
   void toggleAllDone(DateTime date) {
@@ -197,6 +200,7 @@ class PlanController extends ChangeNotifier {
       _pushToCloud(a);
     }
     notifyListeners();
+    ReviewService.tryRequestReview(totalActivities: _totalActivities);
   }
 
   void clear(DateTime date) {
@@ -290,6 +294,9 @@ class PlanController extends ChangeNotifier {
   }
 
   bool _isToday(DateTime date) => KDate.isSameDay(date, _today);
+
+  int get _totalActivities =>
+      _byDate.values.fold(0, (sum, list) => sum + list.length);
 
   String _nextId() => 'a${++_idSeed}';
 
