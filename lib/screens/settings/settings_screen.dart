@@ -15,6 +15,7 @@ import '../../state/type_color_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
+import '../../widgets/k_oauth_button.dart';
 import '../../widgets/k_type_tile.dart';
 import '../../state/activity_db.dart';
 
@@ -845,68 +846,24 @@ class _SignInSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: KSpace.s6),
-            _SignInButton(
-              label: 'Continue with Google',
-              icon: LucideIcons.globe,
+            KOAuthButton(
+              provider: OAuthProvider.google,
               onTap: () {
                 Navigator.of(context).pop();
                 auth.signInWithGoogle();
               },
             ),
-            const SizedBox(height: KSpace.s3),
-            _SignInButton(
-              label: 'Continue with Apple',
-              icon: LucideIcons.apple,
-              onTap: () {
-                Navigator.of(context).pop();
-                auth.signInWithApple();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SignInButton extends StatelessWidget {
-  const _SignInButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KRadius.lg),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: KSpace.s4),
-          decoration: BoxDecoration(
-            color: colors.bgSubtle,
-            border: Border.all(color: colors.border),
-            borderRadius: BorderRadius.circular(KRadius.lg),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18, color: colors.fgPrimary),
-              const SizedBox(width: KSpace.s3),
-              Text(
-                label,
-                style: KText.button.copyWith(color: colors.fgPrimary),
+            if (KOAuthButton.showApple) ...[
+              const SizedBox(height: KSpace.s3),
+              KOAuthButton(
+                provider: OAuthProvider.apple,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  auth.signInWithApple();
+                },
               ),
             ],
-          ),
+          ],
         ),
       ),
     );

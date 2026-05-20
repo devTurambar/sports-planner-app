@@ -6,6 +6,7 @@ import '../../state/auth_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
+import '../../widgets/k_oauth_button.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -13,6 +14,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final auth = context.read<AuthController>();
     return Scaffold(
       backgroundColor: colors.bgBase,
       body: SafeArea(
@@ -37,17 +39,17 @@ class LoginScreen extends StatelessWidget {
                 style: KText.body.copyWith(color: colors.fgTertiary),
               ),
               const Spacer(flex: 2),
-              _OAuthButton(
-                label: 'Continue with Google',
-                icon: LucideIcons.globe,
-                onTap: () => context.read<AuthController>().signInWithGoogle(),
+              KOAuthButton(
+                provider: OAuthProvider.google,
+                onTap: () => auth.signInWithGoogle(),
               ),
-              const SizedBox(height: KSpace.s3),
-              _OAuthButton(
-                label: 'Continue with Apple',
-                icon: LucideIcons.apple,
-                onTap: () => context.read<AuthController>().signInWithApple(),
-              ),
+              if (KOAuthButton.showApple) ...[
+                const SizedBox(height: KSpace.s3),
+                KOAuthButton(
+                  provider: OAuthProvider.apple,
+                  onTap: () => auth.signInWithApple(),
+                ),
+              ],
               const Spacer(flex: 1),
               Text(
                 'By continuing you agree to our Terms of Service',
@@ -55,50 +57,6 @@ class LoginScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: KSpace.s6),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OAuthButton extends StatelessWidget {
-  const _OAuthButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KRadius.lg),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: KSpace.s4),
-          decoration: BoxDecoration(
-            color: colors.bgElevated,
-            border: Border.all(color: colors.border),
-            borderRadius: BorderRadius.circular(KRadius.lg),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18, color: colors.fgPrimary),
-              const SizedBox(width: KSpace.s3),
-              Text(
-                label,
-                style: KText.button.copyWith(color: colors.fgPrimary),
-              ),
             ],
           ),
         ),
