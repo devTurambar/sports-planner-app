@@ -43,6 +43,7 @@ class KActivityCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(KRadius.lg + 4),
       child: InkWell(
         onTap: onTap,
+        onDoubleTap: onCheckTap,
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(KRadius.lg + 4),
         child: Container(

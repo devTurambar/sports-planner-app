@@ -198,6 +198,11 @@ lib/
   inside `Visibility(maintainSize: true)` so cards in a list stack at
   equal height even when time/duration are absent — don't collapse it
   back to a conditional `if (meta != null)`.
+- **Double-tap to toggle done**: double-tapping a `KActivityCard` or
+  a `DayCard` fires the same handler as the check button
+  (`onCheckTap`). On a `DayCard` this is `toggleAllDone`; on a
+  `KActivityCard` it toggles the individual activity. Future dates
+  are silently ignored (enforced in `PlanController`).
 - **Long-press to delete**: every tappable activity surface also
   supports `onLongPress` → confirmation dialog → delete.
   - **Single activity**: long-press a `KActivityCard` in the day

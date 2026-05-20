@@ -47,6 +47,7 @@ class DayCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        onDoubleTap: onCheckTap,
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(KRadius.lg),
         child: Ink(
