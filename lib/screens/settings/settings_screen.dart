@@ -5,14 +5,18 @@ import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/auth_controller.dart';
+import '../../state/backup_service.dart';
 import '../../state/calendar_service.dart';
 import '../../state/onboarding_controller.dart';
+import '../../state/plan_controller.dart';
+import '../../state/sync_service.dart';
 import '../../state/theme_controller.dart';
 import '../../state/type_color_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../widgets/k_type_tile.dart';
+import '../../state/activity_db.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -90,6 +94,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '${_selectedIds.length} calendars';
   }
 
+  Future<void> _exportData() async {
+    final plan = context.read<PlanController>();
+    try {
+      await BackupService.exportData(plan.byDate);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Export failed')),
+      );
+    }
+  }
+
+  Future<void> _importData() async {
+    final activities = await BackupService.pickAndParse();
+    if (activities == null || !mounted) return;
+
+    final colors = context.colors;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        title: Text(
+          'Replace all data?',
+          style: KText.h3.copyWith(color: colors.fgPrimary),
+        ),
+        content: Text(
+          'This will replace all your current data with the imported data (${activities.length} activities).',
+          style: KText.body.copyWith(color: colors.fgSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: KText.button.copyWith(color: colors.fgTertiary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Replace',
+              style: KText.button.copyWith(color: const Color(0xFFB5443A)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final plan = context.read<PlanController>();
+    final auth = context.read<AuthController>();
+    final grouped = BackupService.groupByDate(activities);
+
+    await ActivityDb.deleteAll();
+    for (final list in grouped.values) {
+      await ActivityDb.upsertAll(list);
+    }
+    plan.replaceAll(grouped);
+
+    if (auth.isSignedIn && plan.userId != null) {
+      await SyncService.pushAll(grouped, plan.userId!);
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Imported ${activities.length} activities')),
+    );
+  }
+
   void _showTypeColorPicker(BuildContext context) {
     final colors = context.colors;
     showModalBottomSheet<void>(
@@ -162,6 +236,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             if (!_calendarSync)
               const SizedBox.shrink(),
+          ],
+        ),
+        const SizedBox(height: KSpace.s3),
+        _Group(
+          rows: <Widget>[
+            _StaticRow(
+              label: 'Export data',
+              value: 'Share',
+              onTap: _exportData,
+            ),
+            _StaticRow(
+              label: 'Import data',
+              value: 'Load',
+              onTap: _importData,
+              isLast: true,
+            ),
           ],
         ),
         const SizedBox(height: KSpace.s3),
