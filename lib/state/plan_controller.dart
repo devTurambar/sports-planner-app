@@ -102,6 +102,7 @@ class PlanController extends ChangeNotifier {
     String? id,
     required String name,
     ActivityType? type,
+    String? subType,
     String? duration,
     String? timeOfDay,
     String? notes,
@@ -131,6 +132,7 @@ class PlanController extends ChangeNotifier {
         final updated = list[index].copyWith(
           name: trimmed,
           type: type,
+          subType: subType,
           duration: duration,
           timeOfDay: timeOfDay,
           notes: notes,
@@ -150,6 +152,7 @@ class PlanController extends ChangeNotifier {
       status: _isToday(date) ? DayStatus.today : DayStatus.planned,
       name: trimmed,
       type: type,
+      subType: subType,
       duration: duration,
       timeOfDay: timeOfDay,
       notes: notes,

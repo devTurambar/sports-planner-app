@@ -143,14 +143,19 @@ class ShareableRecap extends StatelessWidget {
     );
   }
 
-  ActivityType? _topType(List<Activity> done) {
+  ({ActivityType type, String label})? _topType(List<Activity> done) {
     if (done.isEmpty) return null;
-    final counts = <ActivityType, int>{};
+    final counts = <String, int>{};
+    final typeFor = <String, ActivityType>{};
     for (final a in done) {
-      if (a.type != null) counts[a.type!] = (counts[a.type!] ?? 0) + 1;
+      if (a.type == null) continue;
+      final lbl = a.typeLabel;
+      counts[lbl] = (counts[lbl] ?? 0) + 1;
+      typeFor[lbl] = a.type!;
     }
     if (counts.isEmpty) return null;
-    return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+    final top = counts.entries.reduce((a, b) => a.value >= b.value ? a : b);
+    return (type: typeFor[top.key]!, label: top.key);
   }
 
   String _monthHeadline(int sessions, int activeDays) {
@@ -176,7 +181,7 @@ class ShareableRecap extends StatelessWidget {
     BuildContext context, {
     required String period,
     required String headline,
-    required ActivityType? topType,
+    required ({ActivityType type, String label})? topType,
     required List<_RecapStat> stats,
     required List<_MiniCell> dayCells,
     required int? streak,
@@ -278,7 +283,7 @@ class _RecapPreviewSheet extends StatefulWidget {
 
   final String period;
   final String headline;
-  final ActivityType? topType;
+  final ({ActivityType type, String label})? topType;
   final List<_RecapStat> stats;
   final List<_MiniCell> dayCells;
   final int? streak;
@@ -431,7 +436,7 @@ class _RecapCard extends StatelessWidget {
 
   final String period;
   final String headline;
-  final ActivityType? topType;
+  final ({ActivityType type, String label})? topType;
   final List<_RecapStat> stats;
   final List<_MiniCell> dayCells;
   final int? streak;
@@ -538,7 +543,8 @@ class _RecapCard extends StatelessWidget {
               children: [
                 // Top activity badge
                 if (topType != null) ...[
-                  _TopActivityBadge(type: topType!),
+                  _TopActivityBadge(
+                      type: topType!.type, label: topType!.label),
                   const SizedBox(height: 14),
                 ],
 
@@ -582,9 +588,10 @@ class _RecapCard extends StatelessWidget {
 }
 
 class _TopActivityBadge extends StatelessWidget {
-  const _TopActivityBadge({required this.type});
+  const _TopActivityBadge({required this.type, required this.label});
 
   final ActivityType type;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -604,7 +611,7 @@ class _TopActivityBadge extends StatelessWidget {
           Icon(KTypeTile.iconFor(type), size: 16, color: tc.tint),
           const SizedBox(width: 8),
           Text(
-            'Top activity: ${type.label}',
+            'Top activity: $label',
             style: KText.bodySm.copyWith(
               fontWeight: FontWeight.w600,
               color: colors.fgPrimary,

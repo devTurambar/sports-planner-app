@@ -36,19 +36,28 @@ class DayCell {
 }
 
 class CellActivity {
-  const CellActivity({required this.type, required this.status});
+  const CellActivity({
+    required this.type,
+    this.subType,
+    required this.status,
+  });
 
   final ActivityType? type;
+  final String? subType;
   final DayStatus status;
 }
 
 class TypeBucket {
-  const TypeBucket({required this.type, required this.count});
+  const TypeBucket({required this.type, this.subType, required this.count});
 
   final ActivityType? type;
+  final String? subType;
   final int count;
 
-  String get label => type?.label ?? 'Other';
+  String get label {
+    if (type == ActivityType.other && subType != null) return subType!;
+    return type?.label ?? 'Other';
+  }
 }
 
 class StatsData {
@@ -108,7 +117,8 @@ class StatsData {
             date: date,
             primaryType: plan.forDate(date).type,
             activities: dayActivities
-                .map((a) => CellActivity(type: a.type, status: a.status))
+                .map((a) => CellActivity(
+                    type: a.type, subType: a.subType, status: a.status))
                 .toList(growable: false),
           ));
         }
@@ -147,12 +157,16 @@ class StatsData {
   }
 
   static List<TypeBucket> _buildTypeBuckets(List<Activity> activities) {
-    final typeMap = <ActivityType?, int>{};
+    final bucketMap = <(ActivityType?, String?), int>{};
     for (final a in activities) {
-      typeMap[a.type] = (typeMap[a.type] ?? 0) + 1;
+      final key = a.type == ActivityType.other
+          ? (a.type, a.subType)
+          : (a.type, null);
+      bucketMap[key] = (bucketMap[key] ?? 0) + 1;
     }
-    return typeMap.entries
-        .map((e) => TypeBucket(type: e.key, count: e.value))
+    return bucketMap.entries
+        .map((e) =>
+            TypeBucket(type: e.key.$1, subType: e.key.$2, count: e.value))
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
   }

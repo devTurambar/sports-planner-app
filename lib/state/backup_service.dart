@@ -102,6 +102,7 @@ class BackupService {
         'status': a.status.name,
         'name': a.name,
         'type': a.type?.name,
+        'sub_type': a.subType,
         'duration': a.duration,
         'time_of_day': a.timeOfDay,
         'notes': a.notes,
@@ -121,6 +122,7 @@ class BackupService {
       type: json['type'] != null
           ? ActivityType.values.byName(json['type'] as String)
           : null,
+      subType: json['sub_type'] as String?,
       duration: json['duration'] as String?,
       timeOfDay: json['time_of_day'] as String?,
       notes: json['notes'] as String?,

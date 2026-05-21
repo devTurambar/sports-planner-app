@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -92,24 +91,24 @@ class Insights extends StatelessWidget {
     }
 
     // 3. Variety insight
-    final recentTypes = done
+    final recentDone = done
         .where((a) =>
             a.date.isAfter(now.subtract(const Duration(days: 30))) &&
             a.type != null)
-        .map((a) => a.type!)
-        .toSet();
-    if (recentTypes.length >= 4) {
+        .toList();
+    final recentTypeLabels = recentDone.map((a) => a.typeLabel).toSet();
+    if (recentTypeLabels.length >= 4) {
       insights.add(_Insight(
         icon: LucideIcons.shuffle,
         text:
-            'Great variety! You did ${recentTypes.length} different activities in the last 30 days.',
+            'Great variety! You did ${recentTypeLabels.length} different activities in the last 30 days.',
         color: _InsightColor.purple,
       ));
-    } else if (recentTypes.length == 1 && done.length > 5) {
+    } else if (recentTypeLabels.length == 1 && done.length > 5) {
       insights.add(_Insight(
         icon: LucideIcons.repeat,
         text:
-            'You\'ve been focused on ${recentTypes.first.label} lately. Try mixing it up!',
+            'You\'ve been focused on ${recentTypeLabels.first} lately. Try mixing it up!',
         color: _InsightColor.coral,
       ));
     }

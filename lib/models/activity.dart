@@ -27,6 +27,7 @@ enum ActivityType {
   tennis,
   padel,
   dance,
+  combat,
   elliptical,
   other,
 }
@@ -68,6 +69,8 @@ extension ActivityTypeLabel on ActivityType {
         return 'Padel';
       case ActivityType.dance:
         return 'Dance';
+      case ActivityType.combat:
+        return 'Combat';
       case ActivityType.elliptical:
         return 'Elliptical';
       case ActivityType.other:
@@ -95,6 +98,7 @@ class Activity {
     required this.status,
     this.name,
     this.type,
+    this.subType,
     this.duration,
     this.timeOfDay,
     this.notes,
@@ -106,6 +110,7 @@ class Activity {
   final DayStatus status;
   final String? name;
   final ActivityType? type;
+  final String? subType;
   final String? duration;
   final String? timeOfDay;
   final String? notes;
@@ -132,10 +137,16 @@ class Activity {
     return '$hour12:$m $period';
   }
 
+  String get typeLabel {
+    if (type == ActivityType.other && subType != null) return subType!;
+    return type?.label ?? 'Other';
+  }
+
   Activity copyWith({
     DayStatus? status,
     String? name,
     ActivityType? type,
+    String? subType,
     String? duration,
     String? timeOfDay,
     String? notes,
@@ -147,6 +158,7 @@ class Activity {
       status: status ?? this.status,
       name: name ?? this.name,
       type: type ?? this.type,
+      subType: subType ?? this.subType,
       duration: duration ?? this.duration,
       timeOfDay: timeOfDay ?? this.timeOfDay,
       notes: notes ?? this.notes,

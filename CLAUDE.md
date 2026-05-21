@@ -134,7 +134,7 @@ lib/
     it in Settings via the theme color row.
   - **Settings UI**: the Settings screen has a "Theme color" row
     with 7 inline palette dots, and a "Type colors" row that opens a
-    bottom sheet listing all 19 activity types with 7 swatches each.
+    bottom sheet listing all 21 activity types with 7 swatches each.
 - **Multiple activities per day**: `PlanController` stores
   `Map<String, List<Activity>>` — each date can hold N entries. APIs:
   - `forDate(date) → Activity` returns the *primary* (priority order:
@@ -176,10 +176,24 @@ lib/
   `replaceAll()` — it only tracks the `aNN` format, so imported
   `i`-prefixed IDs don't interfere with the counter.
 - **Activity fields**: `Activity` has `name`, `type` (`ActivityType?`),
-  `timeOfDay` (`String?`, stored as `"HH:mm"` 24-hour format),
-  `duration` (`String?`, stored as `"N min"` e.g. `"45 min"`), `notes`,
-  and `calendarEventId`. There is no `intensity` field. The `meta`
-  getter formats as `"time · duration"`.
+  `subType` (`String?`), `timeOfDay` (`String?`, stored as `"HH:mm"`
+  24-hour format), `duration` (`String?`, stored as `"N min"` e.g.
+  `"45 min"`), `notes`, and `calendarEventId`. There is no `intensity`
+  field. The `meta` getter formats as `"time · duration"`. The
+  `typeLabel` getter returns `subType` when type is `other` and
+  `subType` is set, otherwise `type.label`.
+- **Sub-types (the "More…" system)**: `ActivityType` has 21 core
+  values (run, trailRun, hike, walk, cycle, mtb, swim, gym, yoga,
+  hiit, row, ski, surf, climb, tennis, padel, dance, combat,
+  elliptical, other). When the user taps the "More…" chip (which
+  is `ActivityType.other` under the hood), a searchable bottom sheet
+  (`sub_type_sheet.dart`) opens with ~40 additional Strava-derived
+  sport types (Alpine Ski, Crossfit, Golf, Pilates, Volleyball, etc.).
+  The selected name is stored in `Activity.subType`. All sub-typed
+  activities use `ActivityType.other` for color/icon resolution but
+  display their specific sub-type label in stats, heatmap breakdowns,
+  and the type selector chip. Stats widgets group by `(type, subType)`
+  so sub-types appear as separate entries in breakdowns.
 - **Time display is always 12-hour AM/PM**. Even though `timeOfDay`
   is stored internally as 24-hour `"HH:mm"`, all UI surfaces call
   `formattedMeta(false)` which converts to 12h format via `_to12h`.
@@ -332,7 +346,7 @@ without discussion.
   `android/` scaffolding.
 - **Local persistence via SQLite**: `ActivityDb`
   (`lib/state/activity_db.dart`) wraps `sqflite` with a single
-  `activities` table (schema version 3). `PlanController` is created
+  `activities` table (schema version 4). `PlanController` is created
   via an async factory (`PlanController.create()`) that loads from the
   DB at startup and fire-and-forgets writes on every mutation. **On web**,
   `sqflite` is not supported — `ActivityDb` detects `kIsWeb` and
@@ -403,8 +417,8 @@ without discussion.
   own row only.
 - ✅ `activities` table: mirrors local SQLite schema + cloud fields.
   Columns: `id` (text, PK), `user_id` (uuid, FK → auth.users),
-  `date`, `status`, `name`, `type`, `duration`, `time_of_day`,
-  `notes`, `calendar_event_id`, `created_at`, `updated_at`
+  `date`, `status`, `name`, `type`, `sub_type`, `duration`,
+  `time_of_day`, `notes`, `calendar_event_id`, `created_at`, `updated_at`
   (auto-bumped via trigger). Index on `(user_id, date)`. RLS: full
   CRUD scoped to own `user_id`.
   - **PK is `id` alone** (not composite with `user_id`). Local IDs
@@ -631,23 +645,50 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
 
 #### Free features
 - Core views (week, month, day detail)
-- Basic stats (3 KPIs, 26-week heatmap, type breakdown)
+- Basic stats: 3 KPIs, 26-week heatmap, type breakdown
 - Export/import backup
 - Calendar sync
+- Weekly goals & progress rings (core motivational loop)
+- Most stat widgets (see free/premium split below)
 
-#### Premium features (under review — not finalized)
-- Cloud sync (Supabase)
-- Advanced stats (see pro stat widgets below)
-- Custom type colors + theme color
-- Strava integration
-- Weekly goals & progress rings
-- Full-year heatmap
-- Insights / nudges
-- Shareable recap cards
+#### Premium features (5 pillars)
+1. **Date filtering on stats** — filter all graphs and data by
+   custom date range. Becomes very powerful with historical data.
+2. **Advanced stats** — full-year heatmap, insights/nudges,
+   shareable recap cards, weekly patterns (see premium stat widgets
+   below).
+3. **Cloud sync** — Supabase-backed. Peace of mind, cross-device.
+4. **Custom colors** — custom type colors + theme color picker.
+5. **Strava integration** — the killer feature. Two directions:
+   - **Import history**: sync all past Strava activities into
+     Kadence. Instantly populates the stats screen with years of
+     data — heatmaps light up, streaks appear, insights become
+     meaningful. This is the "wow" moment that justifies the
+     purchase.
+   - **Auto-mark done**: when a Strava activity is recorded,
+     auto-mark the matching planned session as done (or create it
+     if it wasn't planned).
+   - **Write to Strava**: optionally send manual activities to
+     Strava when marked done.
 
-**TODO**: review which features stay premium vs. free. Some premium
-stat widgets may need visual tweaks or be removed. The current set
-is a draft — user hasn't finalized the list yet.
+#### Free vs premium stat widget split
+**Free stat widgets** (generous free tier to drive adoption):
+- Personal records (best streak, best week, best day)
+- Weekly activity chart (12-week bars)
+- Best day of week (7 bars)
+- Completion rate (arc ring)
+- Monthly trends (12-month bars)
+- Activity variety (types per week)
+- Longest gap (break between sessions)
+- Month vs month (current vs previous)
+- Most consistent (top 5 types by completion)
+- Year in review (annual summary)
+
+**Premium stat widgets** (shine with historical/Strava data):
+- Full-year heatmap — dramatically better with Strava import
+- Insights / nudges — smarter with more history
+- Shareable recap cards — social/vanity, impressive with real data
+- Weekly patterns — power-user depth (type × weekday heatmap)
 
 #### Paywall screen (done)
 - ✅ `PaywallScreen` (`lib/screens/paywall/paywall_screen.dart`):
@@ -702,16 +743,23 @@ Built widgets (11 chart-based + 3 experiential):
   Accent color resolved from `TypeColorController` so the card
   matches the user's chosen theme color.
 
-All pro widgets appear below a "Pro Stats" divider in
-`stats_view.dart`. They are currently **not gated** — visible to
-all users. Locks/badges will be added in a future pass.
+All stat widgets currently appear below a "Pro Stats" divider in
+`stats_view.dart`. They are **not gated yet** — visible to all
+users. The free/premium split above is the plan; gating will be
+implemented when purchase infrastructure is wired up.
 
 #### TODO
-- **TODO**: review and finalize which premium features to keep,
-  tweak, or remove — current set is a draft.
-- **TODO**: add pro badges/locks on gated features so free users
-  see a preview with a lock icon + "Upgrade" tap target.
+- **TODO**: move free stat widgets above the "Pro Stats" divider
+  (or remove the divider and only show locks on premium ones).
+- **TODO**: add pro badges/locks on premium stat widgets and
+  premium features (custom colors, cloud sync, date filtering)
+  so free users see a preview with a lock icon + "Upgrade" tap.
 - **TODO**: wire up purchase infrastructure (RevenueCat or
-  `in_app_purchase`) to replace stubbed handlers.
-- **TODO**: gate premium features behind purchase state (a
-  `ProController` or similar that checks entitlements).
+  `in_app_purchase`) to replace stubbed handlers in PaywallScreen.
+- **TODO**: build `ProController` (or similar) that checks
+  entitlements and gates premium features.
+- **TODO**: implement date filtering UI for stats (date range
+  picker that scopes all graphs to a custom period).
+- **TODO**: build Strava integration — OAuth flow, history import,
+  auto-mark done, optional write-back. Requires backend for
+  secure token storage.

@@ -75,20 +75,24 @@ class WeeklyPatterns extends StatelessWidget {
   }
 
   List<_TypePattern> _compute() {
-    final typeMap = <ActivityType, List<int>>{};
+    final typeMap = <(ActivityType, String?), List<int>>{};
+    final labels = <(ActivityType, String?), String>{};
 
     for (final a in data.allDone) {
       if (a.type == null) continue;
-      typeMap.putIfAbsent(a.type!, () => List<int>.filled(7, 0));
+      final key = (a.type!, a.type == ActivityType.other ? a.subType : null);
+      typeMap.putIfAbsent(key, () => List<int>.filled(7, 0));
+      labels[key] = a.typeLabel;
       final dayIndex = startDay == DateTime.sunday
           ? (a.date.weekday % 7)
           : (a.date.weekday - 1);
-      typeMap[a.type!]![dayIndex]++;
+      typeMap[key]![dayIndex]++;
     }
 
     final patterns = typeMap.entries.map((e) {
       final total = e.value.fold<int>(0, (s, v) => s + v);
-      return _TypePattern(type: e.key, counts: e.value, total: total);
+      return _TypePattern(
+          type: e.key.$1, label: labels[e.key]!, counts: e.value, total: total);
     }).toList()
       ..sort((a, b) => b.total.compareTo(a.total));
 
@@ -99,11 +103,13 @@ class WeeklyPatterns extends StatelessWidget {
 class _TypePattern {
   const _TypePattern({
     required this.type,
+    required this.label,
     required this.counts,
     required this.total,
   });
 
   final ActivityType type;
+  final String label;
   final List<int> counts;
   final int total;
 }
@@ -128,7 +134,7 @@ class _PatternRow extends StatelessWidget {
         SizedBox(
           width: 48,
           child: Text(
-            pattern.type.label,
+            pattern.label,
             style: KText.caption.copyWith(
               fontSize: 10,
               fontWeight: FontWeight.w500,

@@ -51,6 +51,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
       TextEditingController(text: widget.existing?.notes ?? '');
 
   late ActivityType? _type = widget.existing?.type;
+  late String? _subType = widget.existing?.subType;
   late TimeOfDay? _selectedTime = _parseTimeOfDay(widget.existing?.timeOfDay);
   late int? _durationMinutes = _parseDuration(widget.existing?.duration);
 
@@ -196,6 +197,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
         id: widget.existing!.id,
         name: _name.text,
         type: _type,
+        subType: _type == ActivityType.other ? _subType : null,
         duration: duration,
         timeOfDay: timeOfDay,
         notes: notes,
@@ -208,6 +210,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
           date: date,
           name: _name.text,
           type: _type,
+          subType: _type == ActivityType.other ? _subType : null,
           duration: duration,
           timeOfDay: timeOfDay,
           notes: notes,
@@ -308,8 +311,18 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                     const SizedBox(height: KSpace.s3 + 2),
                     TypeSelector(
                       value: _type,
-                      onChanged: (v) =>
-                          setState(() => _type = (v == _type) ? null : v),
+                      subType: _subType,
+                      onChanged: (v) => setState(() {
+                        if (v == _type && v != ActivityType.other) {
+                          _type = null;
+                          _subType = null;
+                        } else {
+                          _type = v;
+                          if (v != ActivityType.other) _subType = null;
+                        }
+                      }),
+                      onSubTypeChanged: (v) =>
+                          setState(() => _subType = v),
                     ),
                     const SizedBox(height: KSpace.s3 + 2),
                     Row(

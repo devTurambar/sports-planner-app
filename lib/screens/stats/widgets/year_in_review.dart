@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -117,23 +116,24 @@ class YearInReview extends StatelessWidget {
       }
     }
 
-    // Top activity type
-    final typeCounts = <ActivityType, int>{};
+    // Top activity type (keyed by label to split sub-types)
+    final typeLabelCounts = <String, int>{};
     for (final a in yearDone) {
       if (a.type != null) {
-        typeCounts[a.type!] = (typeCounts[a.type!] ?? 0) + 1;
+        final lbl = a.typeLabel;
+        typeLabelCounts[lbl] = (typeLabelCounts[lbl] ?? 0) + 1;
       }
     }
-    ActivityType? topType;
+    String? topTypeLabel;
     var topTypeCount = 0;
-    for (final e in typeCounts.entries) {
+    for (final e in typeLabelCounts.entries) {
       if (e.value > topTypeCount) {
         topTypeCount = e.value;
-        topType = e.key;
+        topTypeLabel = e.key;
       }
     }
 
-    final typesUsed = typeCounts.keys.length;
+    final typesUsed = typeLabelCounts.keys.length;
 
     return _YearReview(
       year: year,
@@ -142,7 +142,7 @@ class YearInReview extends StatelessWidget {
       topMonth: topMonthIdx > 0
           ? KDate.shortMonths[topMonthIdx - 1]
           : '—',
-      topType: topType?.label ?? '—',
+      topType: topTypeLabel ?? '—',
       typesUsed: typesUsed,
     );
   }

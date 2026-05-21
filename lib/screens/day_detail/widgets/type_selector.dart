@@ -5,12 +5,21 @@ import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
 import '../../../widgets/k_type_tile.dart';
+import 'sub_type_sheet.dart';
 
 class TypeSelector extends StatelessWidget {
-  const TypeSelector({required this.value, required this.onChanged, super.key});
+  const TypeSelector({
+    required this.value,
+    required this.onChanged,
+    this.subType,
+    this.onSubTypeChanged,
+    super.key,
+  });
 
   final ActivityType? value;
   final ValueChanged<ActivityType> onChanged;
+  final String? subType;
+  final ValueChanged<String?>? onSubTypeChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +42,18 @@ class TypeSelector extends StatelessWidget {
               .map((t) => _TypeChip(
                     type: t,
                     selected: value == t,
-                    onTap: () => onChanged(t),
+                    subTypeLabel:
+                        t == ActivityType.other && value == t ? subType : null,
+                    onTap: () async {
+                      if (t == ActivityType.other) {
+                        onChanged(t);
+                        final picked = await showSubTypeSheet(context);
+                        onSubTypeChanged?.call(picked);
+                      } else {
+                        onSubTypeChanged?.call(null);
+                        onChanged(t);
+                      }
+                    },
                   ))
               .toList(growable: false),
         ),
@@ -47,11 +67,13 @@ class _TypeChip extends StatelessWidget {
     required this.type,
     required this.selected,
     required this.onTap,
+    this.subTypeLabel,
   });
 
   final ActivityType type;
   final bool selected;
   final VoidCallback onTap;
+  final String? subTypeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +82,9 @@ class _TypeChip extends StatelessWidget {
     final bg = selected ? tc.bg : colors.bgSubtle;
     final border = selected ? tc.tint : Colors.transparent;
     final fg = selected ? tc.tint : colors.fgSecondary;
+
+    final label = subTypeLabel ??
+        (type == ActivityType.other ? 'More…' : type.label);
 
     return Material(
       color: bg,
@@ -80,7 +105,7 @@ class _TypeChip extends StatelessWidget {
               Icon(KTypeTile.iconFor(type), size: 14, color: fg),
               const SizedBox(width: 5),
               Text(
-                type.label,
+                label,
                 style: KText.bodySm.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,

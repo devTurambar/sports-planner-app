@@ -300,6 +300,7 @@ class SyncService {
         'status': a.status.name,
         'name': a.name,
         'type': a.type?.name,
+        'sub_type': a.subType,
         'duration': a.duration,
         'time_of_day': a.timeOfDay,
         'notes': a.notes,
@@ -321,6 +322,7 @@ class SyncService {
       type: row['type'] != null
           ? ActivityType.values.byName(row['type'] as String)
           : null,
+      subType: row['sub_type'] as String?,
       duration: row['duration'] as String?,
       timeOfDay: row['time_of_day'] as String?,
       notes: row['notes'] as String?,

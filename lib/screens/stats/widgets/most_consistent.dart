@@ -54,20 +54,24 @@ class MostConsistent extends StatelessWidget {
     final all = data.allActivities
         .where((a) => a.status != DayStatus.empty && a.type != null);
 
-    final planned = <ActivityType, int>{};
-    final done = <ActivityType, int>{};
+    final planned = <(ActivityType, String?), int>{};
+    final done = <(ActivityType, String?), int>{};
+    final labels = <(ActivityType, String?), String>{};
 
     for (final a in all) {
-      planned[a.type!] = (planned[a.type!] ?? 0) + 1;
+      final key = (a.type!, a.type == ActivityType.other ? a.subType : null);
+      planned[key] = (planned[key] ?? 0) + 1;
+      labels[key] = a.typeLabel;
       if (a.status == DayStatus.done) {
-        done[a.type!] = (done[a.type!] ?? 0) + 1;
+        done[key] = (done[key] ?? 0) + 1;
       }
     }
 
     final entries = planned.entries.map((e) {
       final d = done[e.key] ?? 0;
       return _ConsistencyEntry(
-        type: e.key,
+        type: e.key.$1,
+        label: labels[e.key]!,
         planned: e.value,
         done: d,
         rate: e.value == 0 ? 0.0 : d / e.value,
@@ -82,12 +86,14 @@ class MostConsistent extends StatelessWidget {
 class _ConsistencyEntry {
   const _ConsistencyEntry({
     required this.type,
+    required this.label,
     required this.planned,
     required this.done,
     required this.rate,
   });
 
   final ActivityType type;
+  final String label;
   final int planned;
   final int done;
   final double rate;
@@ -132,7 +138,7 @@ class _ConsistencyRow extends StatelessWidget {
         SizedBox(
           width: 60,
           child: Text(
-            entry.type.label,
+            entry.label,
             style: KText.bodySm.copyWith(
               fontWeight: FontWeight.w500,
               color: colors.fgPrimary,
