@@ -1,5 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +19,7 @@ import '../../theme/kadence_text_styles.dart';
 import '../../widgets/k_oauth_button.dart';
 import '../../widgets/k_type_tile.dart';
 import '../../state/activity_db.dart';
+import '../paywall/paywall_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -193,6 +195,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: <Widget>[
         _AccountCard(auth: auth),
         const SizedBox(height: KSpace.s3),
+        _ProCard(onTap: () => PaywallScreen.show(context)),
+        const SizedBox(height: KSpace.s3),
         _Group(
           rows: <Widget>[
             _ToggleRow(
@@ -201,21 +205,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (_) => theme.toggleDark(),
             ),
             _StaticRow(
-              label: 'Default view',
-              value: 'Week',
-              onTap: () {},
-            ),
-            _StaticRow(
               label: 'Week starts on',
               value: theme.weekStartsOnSunday ? 'Sunday' : 'Monday',
               onTap: () => theme.toggleWeekStart(),
-            ),
-            _StaticRow(
-              label: 'Reminders',
-              value: onboarding.remindersEnabled ? 'On' : 'Off',
-              onTap: () => onboarding.setReminders(
-                enabled: !onboarding.remindersEnabled,
-              ),
             ),
             const _AccentColorRow(label: 'Theme color', isLast: true),
           ],
@@ -262,6 +254,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: 'Type colors',
               value: 'Customize',
               onTap: () => _showTypeColorPicker(context),
+              isLast: true,
+            ),
+          ],
+        ),
+        const SizedBox(height: KSpace.s3),
+        _Group(
+          rows: <Widget>[
+            _StaticRow(
+              label: 'Rate Kadence',
+              value: '',
+              onTap: () => InAppReview.instance.openStoreListing(),
               isLast: true,
             ),
           ],
@@ -998,6 +1001,89 @@ class _TypeColorRow extends StatelessWidget {
             }),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProCard extends StatelessWidget {
+  const _ProCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: Container(
+          padding: const EdgeInsets.all(KSpace.s4),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colors.accent.withValues(alpha: 0.15),
+                colors.accent.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: colors.accent.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(KRadius.lg),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: colors.accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(KRadius.md),
+                ),
+                child: Icon(
+                  LucideIcons.crown,
+                  size: 20,
+                  color: colors.accent,
+                ),
+              ),
+              const SizedBox(width: KSpace.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Kadence ',
+                            style: KText.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colors.fgPrimary,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Pro',
+                            style: KText.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colors.accent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      'Unlock advanced stats and more',
+                      style: KText.caption.copyWith(color: colors.fgTertiary),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: colors.accent),
+            ],
+          ),
+        ),
       ),
     );
   }

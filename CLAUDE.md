@@ -96,6 +96,12 @@ lib/
 - **Dates**: always run user-supplied dates through
   `KDate.startOfDay(...)` before storing or comparing. The plan map is
   keyed by `KDate.keyFor(date)` (YYYY-MM-DD).
+- **Week start day**: user-configurable (Monday or Sunday), persisted
+  as `kadence.week_start_day` in SharedPreferences via
+  `ThemeController.weekStartDay`. Use `KDate.startOfWeek(date, startDay)`
+  and `KDate.weekFor(date, startDay)` instead of the legacy
+  `KDate.mondayOfWeek(date)`. Read the setting from
+  `context.watch<ThemeController>().weekStartDay` in UI code.
 - **Today**: read "today" from `TodayScope.of(context)`, not
   `DateTime.now()` directly, so widgets rebuild on app resume / date
   rollover.
@@ -118,12 +124,13 @@ lib/
     to the type's default palette color. **Never** call
     `colors.typeColors(type)` directly — always go through the
     extension so overrides are respected.
-  - **Accent color**: fixed per-user (not dynamic per screen). Read
-    via `TypeColorController.accentTint(colors)`. Used for the FAB,
-    bottom nav active tab, top bar underline, and toggle accents.
+  - **Theme color** (labeled "Theme color" in Settings, internally
+    called accent color): fixed per-user (not dynamic per screen).
+    Read via `TypeColorController.accentTint(colors)`. Used for the
+    FAB, bottom nav active tab, top bar underline, and toggle accents.
     Default is Coral (#FF7A45 dark / #E85F2C light). Users can change
-    it in Settings via the accent color row.
-  - **Settings UI**: the Settings screen has an "Accent color" row
+    it in Settings via the theme color row.
+  - **Settings UI**: the Settings screen has a "Theme color" row
     with 7 inline palette dots, and a "Type colors" row that opens a
     bottom sheet listing all 19 activity types with 7 swatches each.
 - **Multiple activities per day**: `PlanController` stores
@@ -463,6 +470,10 @@ without discussion.
   silently skip the dialog even when our eligibility passes. There is
   no callback to know if the user reviewed or dismissed — our app
   treats every prompt as a "dismiss" for counting purposes.
+- ✅ **Manual "Rate Kadence" row** in Settings opens the store listing
+  via `InAppReview.instance.openStoreListing()` — no eligibility
+  checks, always available. This is separate from the automatic
+  in-app review prompt.
 
 ### Export/Import backup (done)
 - ✅ `BackupService` (`lib/state/backup_service.dart`): JSON
