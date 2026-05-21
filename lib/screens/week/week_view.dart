@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
+import '../../state/goal_controller.dart';
 import '../../state/plan_controller.dart';
 import '../../state/theme_controller.dart';
 import '../../theme/kadence_colors.dart';
@@ -58,6 +59,7 @@ class WeekViewState extends State<WeekView> {
   Widget build(BuildContext context) {
     final today = TodayScope.of(context);
     final plan = context.watch<PlanController>();
+    final goal = context.watch<GoalController>();
     final startDay = context.watch<ThemeController>().weekStartDay;
 
     return PageView.builder(
@@ -108,6 +110,7 @@ class WeekViewState extends State<WeekView> {
               planned: planned,
               onTrack: onTrack,
               today: today,
+              weeklyGoal: goal.goal,
             ),
             const SizedBox(height: KSpace.s3 + 2),
             for (final item in week) ...<Widget>[
@@ -221,6 +224,7 @@ class _WeekSummaryCard extends StatelessWidget {
     required this.planned,
     required this.onTrack,
     required this.today,
+    this.weeklyGoal,
   });
 
   final List<Activity> week;
@@ -229,10 +233,13 @@ class _WeekSummaryCard extends StatelessWidget {
   final int planned;
   final int onTrack;
   final DateTime today;
+  final int? weeklyGoal;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final hasGoal = weeklyGoal != null && weeklyGoal! > 0;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -242,6 +249,10 @@ class _WeekSummaryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
+          if (hasGoal) ...[
+            _GoalRing(done: done, goal: weeklyGoal!),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +270,7 @@ class _WeekSummaryCard extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: '/$planned',
+                        text: hasGoal ? '/$weeklyGoal' : '/$planned',
                         style: KText.h2.copyWith(
                           fontSize: 22,
                           fontWeight: FontWeight.w500,
@@ -272,7 +283,9 @@ class _WeekSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'sessions done · $onTrack% on track',
+                  hasGoal
+                      ? 'weekly goal · $onTrack% on track'
+                      : 'sessions done · $onTrack% on track',
                   style: KText.caption.copyWith(
                     fontSize: 11,
                     color: colors.fgSecondary,
@@ -299,6 +312,95 @@ class _WeekSummaryCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _GoalRing extends StatelessWidget {
+  const _GoalRing({required this.done, required this.goal});
+
+  final int done;
+  final int goal;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final fraction = (done / goal).clamp(0.0, 1.0);
+    final hit = done >= goal;
+
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: CustomPaint(
+        painter: _RingPainter(
+          fraction: fraction,
+          trackColor: colors.bgSubtle,
+          fillColor: hit ? colors.typeWalk.tint : colors.accent,
+        ),
+        child: Center(
+          child: hit
+              ? Icon(LucideIcons.check, size: 18, color: colors.typeWalk.tint)
+              : Text(
+                  '${(fraction * 100).round()}%',
+                  style: KText.caption.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: colors.fgPrimary,
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  _RingPainter({
+    required this.fraction,
+    required this.trackColor,
+    required this.fillColor,
+  });
+
+  final double fraction;
+  final Color trackColor;
+  final Color fillColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.shortestSide / 2) - 3;
+    const strokeWidth = 5.0;
+    const startAngle = -3.14159265 / 2;
+    const fullSweep = 2 * 3.14159265;
+
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = trackColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round,
+    );
+
+    if (fraction > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        fullSweep * fraction,
+        false,
+        Paint()
+          ..color = fillColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) =>
+      old.fraction != fraction ||
+      old.trackColor != trackColor ||
+      old.fillColor != fillColor;
 }
 
 class _WeekDotCell extends StatelessWidget {

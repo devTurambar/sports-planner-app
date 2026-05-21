@@ -32,7 +32,7 @@ lib/
   app.dart                # MaterialApp + TodayScope + onboarding gate
   theme/                  # Design tokens (colors, spacing, text, theme)
   models/                 # Activity + DayStatus + ActivityType
-  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color) + ActivityDb + BackupService
+  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color, goal) + ActivityDb + BackupService
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
@@ -43,7 +43,9 @@ lib/
     day_detail/           # Day overview sheet + add/edit form sheet
       widgets/            # Extracted form widgets (type selector, pickers, etc.)
     empty/                # Empty state
-    stats/                # Stats screen (KPIs + heatmap + type breakdown)
+    stats/                # Stats screen (KPIs + heatmap + type breakdown + pro stats)
+      widgets/            # Pro stat widgets (personal records, charts, insights, etc.)
+    paywall/              # Paywall screen (pricing tiers + feature list)
     settings/             # Settings screen
 ```
 
@@ -499,3 +501,105 @@ without discussion.
 - Garmin Connect has no public API for individual devs — most Garmin
   users sync to Strava anyway, so Strava covers the majority of
   devices (Garmin, Apple Watch, Polar, Wahoo, etc.).
+
+### Monetization — Kadence Pro (in progress)
+
+Freemium model. Core app is fully usable for free; premium features
+are gated behind a one-time or subscription purchase ("Kadence Pro").
+
+#### Pricing tiers
+- **Android**: Monthly €0.99, Annual €4.99, Lifetime €12.99
+- **iOS**: Monthly €1.49, Annual €7.99, Lifetime €19.99
+- iOS prices are higher because Apple users tend to spend more on
+  apps, and Apple's 30% cut is steeper (15% via Small Business
+  Program). Google also takes 30% (15% automatic on first $1M/yr).
+- Prices can be increased in the future via App Store Connect /
+  Google Play Console — existing subscribers keep their locked-in
+  price, new subscribers see the new price.
+
+#### Free features
+- Core views (week, month, day detail)
+- Basic stats (3 KPIs, 26-week heatmap, type breakdown)
+- Export/import backup
+- Calendar sync
+
+#### Premium features (under review — not finalized)
+- Cloud sync (Supabase)
+- Advanced stats (see pro stat widgets below)
+- Custom type colors + theme color
+- Strava integration
+- Weekly goals & progress rings
+- Full-year heatmap
+- Insights / nudges
+- Shareable recap cards
+
+**TODO**: review which features stay premium vs. free. Some premium
+stat widgets may need visual tweaks or be removed. The current set
+is a draft — user hasn't finalized the list yet.
+
+#### Paywall screen (done)
+- ✅ `PaywallScreen` (`lib/screens/paywall/paywall_screen.dart`):
+  back arrow + "Kadence Pro" title, 3 pricing tier cards
+  (Monthly/Annual/Lifetime) with radio selection, restore purchase
+  link, 6 feature rows with colored icons, "Continue" CTA pinned
+  at bottom. Annual pre-selected.
+- Purchase handlers are **stubbed** (`_handlePurchase` /
+  `_restorePurchases`) — no real purchase infrastructure yet.
+- Prices hardcoded as Android tier for now.
+- Navigated to from the `_ProCard` widget in Settings.
+
+#### Weekly goals (done)
+- ✅ `GoalController` (`lib/state/goal_controller.dart`): simple
+  ChangeNotifier persisting weekly goal to SharedPreferences key
+  `kadence.weekly_goal`. Getter `goal` (int?), `hasGoal`,
+  `setGoal(int?)` clamped 1–14.
+- ✅ Registered as `ChangeNotifierProvider` in `main.dart`.
+- ✅ Settings screen: "Weekly goal" row opens `_GoalPickerSheet`
+  bottom sheet with options [Off, 2, 3, 4, 5, 6, 7].
+- ✅ Week view: `_WeekSummaryCard` shows `_GoalRing` (44×44
+  progress ring with percentage or check icon) when a goal is set.
+  Denominator changes from `/planned` to `/weeklyGoal`, label from
+  "sessions done" to "weekly goal".
+
+#### Pro stat widgets (done — visual review pending)
+All live in `lib/screens/stats/widgets/` and use the shared
+`ProStatCard` wrapper. Data comes from `StatsData`
+(`lib/screens/stats/stats_data.dart`), a public class extracted
+from the formerly private `_StatsData`.
+
+Built widgets (11 chart-based + 3 experiential):
+- `personal_records.dart` — best streak, best week, best day
+- `weekly_activity_chart.dart` — Strava-style 12-week bar chart
+- `best_day_of_week.dart` — 7 vertical bars for weekdays
+- `completion_rate.dart` — arc ring with planned/done/missed
+- `monthly_trends.dart` — 12-month bar chart
+- `activity_variety.dart` — types per week (12 weeks)
+- `longest_gap.dart` — longest break between sessions
+- `month_vs_month.dart` — current vs previous month comparison
+- `most_consistent.dart` — top 5 types by completion rate
+- `weekly_patterns.dart` — mini heatmap per type (top 6 × 7 days)
+- `year_in_review.dart` — annual summary card
+- `full_year_heatmap.dart` — GitHub-style full-year heatmap,
+  scrollable, color-coded by activity type
+- `insights.dart` — up to 4 dynamic text insights from a pool of
+  5 (favorite day, month trend, variety, streak, best month ever)
+- `shareable_recap.dart` — monthly/yearly share cards with gradient
+  accent header, motivational headline, top activity badge, stats
+  grid with icons, mini heatmap strip, streak badge. Uses
+  `RepaintBoundary` + `toImage` for PNG export via `share_plus`.
+  Accent color resolved from `TypeColorController` so the card
+  matches the user's chosen theme color.
+
+All pro widgets appear below a "Pro Stats" divider in
+`stats_view.dart`. They are currently **not gated** — visible to
+all users. Locks/badges will be added in a future pass.
+
+#### TODO
+- **TODO**: review and finalize which premium features to keep,
+  tweak, or remove — current set is a draft.
+- **TODO**: add pro badges/locks on gated features so free users
+  see a preview with a lock icon + "Upgrade" tap target.
+- **TODO**: wire up purchase infrastructure (RevenueCat or
+  `in_app_purchase`) to replace stubbed handlers.
+- **TODO**: gate premium features behind purchase state (a
+  `ProController` or similar that checks entitlements).

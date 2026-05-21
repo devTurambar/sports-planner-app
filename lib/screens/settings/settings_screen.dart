@@ -19,6 +19,7 @@ import '../../theme/kadence_text_styles.dart';
 import '../../widgets/k_oauth_button.dart';
 import '../../widgets/k_type_tile.dart';
 import '../../state/activity_db.dart';
+import '../../state/goal_controller.dart';
 import '../paywall/paywall_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -167,6 +168,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  void _showGoalPicker(BuildContext context) {
+    final colors = context.colors;
+    final goalCtrl = context.read<GoalController>();
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: colors.scrim,
+      builder: (_) => _GoalPickerSheet(
+        current: goalCtrl.goal,
+        onSelected: (value) {
+          goalCtrl.setGoal(value);
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
   void _showTypeColorPicker(BuildContext context) {
     final colors = context.colors;
     showModalBottomSheet<void>(
@@ -184,6 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = context.watch<ThemeController>();
     final onboarding = context.watch<OnboardingController>();
     final auth = context.watch<AuthController>();
+    final goalCtrl = context.watch<GoalController>();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -214,6 +233,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: 'Week starts on',
               value: theme.weekStartsOnSunday ? 'Sunday' : 'Monday',
               onTap: () => theme.toggleWeekStart(),
+            ),
+            _StaticRow(
+              icon: LucideIcons.target,
+              iconBg: const Color(0xFFFF3B30),
+              label: 'Weekly goal',
+              value: goalCtrl.hasGoal ? '${goalCtrl.goal} sessions' : 'Off',
+              onTap: () => _showGoalPicker(context),
             ),
             const _AccentColorRow(
               label: 'Theme color',
@@ -1163,6 +1189,105 @@ class _ProCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _GoalPickerSheet extends StatelessWidget {
+  const _GoalPickerSheet({
+    required this.current,
+    required this.onSelected,
+  });
+
+  final int? current;
+  final ValueChanged<int?> onSelected;
+
+  static const _options = [0, 2, 3, 4, 5, 6, 7];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 10),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colors.border,
+              borderRadius: BorderRadius.circular(KRadius.full),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              'Weekly goal',
+              style: KText.h3.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: colors.fgPrimary,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'How many sessions per week do you want to complete?',
+              style: KText.bodySm.copyWith(color: colors.fgTertiary),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: KSpace.s4),
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, KSpace.s4 + bottomSafe),
+            child: Wrap(
+              spacing: KSpace.s2,
+              runSpacing: KSpace.s2,
+              children: _options.map((n) {
+                final isOff = n == 0;
+                final selected = isOff ? current == null : current == n;
+                return GestureDetector(
+                  onTap: () => onSelected(isOff ? null : n),
+                  child: AnimatedContainer(
+                    duration: KMotion.fast,
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? colors.accent.withValues(alpha: 0.12)
+                          : colors.bgSubtle,
+                      borderRadius: BorderRadius.circular(KRadius.lg),
+                      border: Border.all(
+                        color: selected ? colors.accent : colors.border,
+                        width: selected ? 2 : 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        isOff ? 'Off' : '$n',
+                        style: KText.body.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: selected ? colors.accent : colors.fgPrimary,
+                          fontSize: isOff ? 14 : 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

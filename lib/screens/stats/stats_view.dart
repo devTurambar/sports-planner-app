@@ -9,9 +9,21 @@ import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
-
-
-const int _kWeekCount = 26;
+import 'stats_data.dart';
+import 'widgets/personal_records.dart';
+import 'widgets/best_day_of_week.dart';
+import 'widgets/completion_rate.dart';
+import 'widgets/monthly_trends.dart';
+import 'widgets/weekly_activity_chart.dart';
+import 'widgets/activity_variety.dart';
+import 'widgets/longest_gap.dart';
+import 'widgets/month_vs_month.dart';
+import 'widgets/most_consistent.dart';
+import 'widgets/weekly_patterns.dart';
+import 'widgets/year_in_review.dart';
+import 'widgets/full_year_heatmap.dart';
+import 'widgets/insights.dart';
+import 'widgets/shareable_recap.dart';
 
 class StatsView extends StatefulWidget {
   const StatsView({super.key});
@@ -25,10 +37,11 @@ class _StatsViewState extends State<StatsView> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final today = TodayScope.of(context);
     final plan = context.watch<PlanController>();
     final startDay = context.watch<ThemeController>().weekStartDay;
-    final data = _StatsData.compute(plan, today, startDay);
+    final data = StatsData.compute(plan, today, startDay);
 
     final hasAnyActivity = data.dayCells.any((c) => !c.isEmpty);
     if (data.totalSessions == 0 && !hasAnyActivity) {
@@ -96,165 +109,79 @@ class _StatsViewState extends State<StatsView> {
               ? () => setState(() => _typeFilter = null)
               : null,
         ),
+        const SizedBox(height: KSpace.s8),
+        _ProSectionHeader(colors: colors),
+        const SizedBox(height: KSpace.s3),
+        PersonalRecords(data: data),
+        const SizedBox(height: KSpace.s3),
+        WeeklyActivityChart(data: data, startDay: startDay),
+        const SizedBox(height: KSpace.s3),
+        BestDayOfWeek(data: data, startDay: startDay),
+        const SizedBox(height: KSpace.s3),
+        CompletionRate(data: data),
+        const SizedBox(height: KSpace.s3),
+        MonthlyTrends(data: data),
+        const SizedBox(height: KSpace.s3),
+        ActivityVariety(data: data, startDay: startDay),
+        const SizedBox(height: KSpace.s3),
+        LongestGap(data: data),
+        const SizedBox(height: KSpace.s3),
+        MonthVsMonth(data: data),
+        const SizedBox(height: KSpace.s3),
+        MostConsistent(data: data),
+        const SizedBox(height: KSpace.s3),
+        WeeklyPatterns(data: data, startDay: startDay),
+        const SizedBox(height: KSpace.s3),
+        YearInReview(data: data),
+        const SizedBox(height: KSpace.s3),
+        FullYearHeatmap(data: data, startDay: startDay),
+        const SizedBox(height: KSpace.s3),
+        Insights(data: data, startDay: startDay),
+        const SizedBox(height: KSpace.s3),
+        ShareableRecap(data: data),
       ],
     );
   }
 }
 
-// ── data ─────────────────────────────────────────────────────────────────
+class _ProSectionHeader extends StatelessWidget {
+  const _ProSectionHeader({required this.colors});
 
-class _DayCell {
-  const _DayCell({
-    this.primaryType,
-    this.activities = const <_CellActivity>[],
-  });
+  final KadenceColors colors;
 
-  final ActivityType? primaryType;
-  final List<_CellActivity> activities;
-
-  bool get isEmpty => activities.isEmpty;
-
-  int get doneCount =>
-      activities.where((a) => a.status == DayStatus.done).length;
-  int get plannedCount =>
-      activities.where((a) => a.status != DayStatus.done).length;
-  bool get hasPlannedOnly => doneCount == 0 && plannedCount > 0;
-
-  ({ActivityType? type, bool dimmed})? renderForFilter(ActivityType? filter) {
-    if (isEmpty) return null;
-    if (filter == null) {
-      return (type: primaryType, dimmed: hasPlannedOnly);
-    }
-    final matches = activities.where((a) => a.type == filter).toList();
-    if (matches.isEmpty) return null;
-    final done = matches.where((a) => a.status == DayStatus.done).length;
-    return (type: filter, dimmed: done == 0);
-  }
-}
-
-class _CellActivity {
-  const _CellActivity({required this.type, required this.status});
-
-  final ActivityType? type;
-  final DayStatus status;
-}
-
-class _StatsData {
-  const _StatsData({
-    required this.totalSessions,
-    required this.currentStreak,
-    required this.avgPerWeek,
-    required this.typeCounts,
-    required this.dayCells,
-    required this.weekStarts,
-  });
-
-  final int totalSessions;
-  final int currentStreak;
-  final double avgPerWeek;
-  final List<_TypeBucket> typeCounts;
-  final List<_DayCell> dayCells;
-  final List<DateTime> weekStarts;
-
-  static _StatsData compute(PlanController plan, DateTime today, [int startDay = DateTime.monday]) {
-    final done = plan
-        .allActivities()
-        .where((a) => a.status == DayStatus.done)
-        .toList(growable: false);
-
-    final thisWeekStart = KDate.startOfWeek(today, startDay);
-    bool inWeek(Activity a, DateTime weekStart) {
-      final end = weekStart.add(const Duration(days: 7));
-      return !a.date.isBefore(weekStart) && a.date.isBefore(end);
-    }
-
-    final weekStarts = <DateTime>[];
-    for (var i = _kWeekCount - 1; i >= 0; i--) {
-      weekStarts.add(thisWeekStart.subtract(Duration(days: 7 * i)));
-    }
-
-    final all = plan.allActivities().toList(growable: false);
-
-    final todayStart = KDate.startOfDay(today);
-    final dayCells = <_DayCell>[];
-    for (final ws in weekStarts) {
-      for (var d = 0; d < 7; d++) {
-        final date = ws.add(Duration(days: d));
-        if (date.isAfter(todayStart)) break;
-        final dayActivities = all
-            .where((a) =>
-                KDate.isSameDay(a.date, date) &&
-                a.status != DayStatus.empty)
-            .toList();
-        if (dayActivities.isEmpty) {
-          dayCells.add(const _DayCell());
-        } else {
-          dayCells.add(_DayCell(
-            primaryType: plan.forDate(date).type,
-            activities: dayActivities
-                .map((a) => _CellActivity(type: a.type, status: a.status))
-                .toList(growable: false),
-          ));
-        }
-      }
-    }
-
-    final currentDone = done.any((a) => inWeek(a, thisWeekStart));
-    var streak = 0;
-    final startOffset = currentDone ? 0 : 1;
-    for (var i = startOffset; i < 520; i++) {
-      final weekStart = thisWeekStart.subtract(Duration(days: 7 * i));
-      final hasDone = done.any((a) => inWeek(a, weekStart));
-      if (hasDone) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-
-    final weeksWithData = weekStarts.where((ws) {
-      return done.any((a) => inWeek(a, ws));
-    }).length;
-    final avgPerWeek =
-        weeksWithData == 0 ? 0.0 : done.length / weeksWithData;
-
-    return _StatsData(
-      totalSessions: done.length,
-      currentStreak: streak,
-      avgPerWeek: avgPerWeek,
-      typeCounts: _buildTypeBuckets(done),
-      dayCells: dayCells,
-      weekStarts: weekStarts,
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(LucideIcons.crown, size: 14, color: colors.accent),
+        const SizedBox(width: 6),
+        Text(
+          'Pro Stats',
+          style: KText.body.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colors.accent,
+          ),
+        ),
+        const SizedBox(width: KSpace.s3),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: colors.accent.withValues(alpha: 0.2),
+          ),
+        ),
+      ],
     );
   }
-
-  static List<_TypeBucket> _buildTypeBuckets(List<Activity> activities) {
-    final typeMap = <ActivityType?, int>{};
-    for (final a in activities) {
-      typeMap[a.type] = (typeMap[a.type] ?? 0) + 1;
-    }
-    return typeMap.entries
-        .map((e) => _TypeBucket(type: e.key, count: e.value))
-        .toList()
-      ..sort((a, b) => b.count.compareTo(a.count));
-  }
 }
 
-class _TypeBucket {
-  const _TypeBucket({required this.type, required this.count});
-
-  final ActivityType? type;
-  final int count;
-
-  String get label => type?.label ?? 'Other';
-}
+// Data classes are in stats_data.dart
 
 // ── 26-week contribution heatmap ─────────────────────────────────────────
 
 class _HeatmapCard extends StatelessWidget {
   const _HeatmapCard({required this.data, this.typeFilter});
 
-  final _StatsData data;
+  final StatsData data;
   final ActivityType? typeFilter;
 
   @override
@@ -285,7 +212,7 @@ class _HeatmapCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$_kWeekCount-week activity',
+                      '$kStatsWeekCount-week activity',
                       style: KText.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.fgPrimary,
@@ -330,7 +257,7 @@ class _HeatmapCard extends StatelessWidget {
 class _HeatmapGrid extends StatelessWidget {
   const _HeatmapGrid({required this.cells, this.typeFilter});
 
-  final List<_DayCell> cells;
+  final List<DayCell> cells;
   final ActivityType? typeFilter;
 
   @override
@@ -340,8 +267,8 @@ class _HeatmapGrid extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const totalGap = (_kWeekCount - 1) * 2.0;
-        final cellSize = (constraints.maxWidth - totalGap) / _kWeekCount;
+        const totalGap = (kStatsWeekCount - 1) * 2.0;
+        final cellSize = (constraints.maxWidth - totalGap) / kStatsWeekCount;
         final clampedSize = cellSize.clamp(8.0, 14.0);
 
         return SizedBox(
@@ -504,8 +431,8 @@ class _TypeBreakdown extends StatelessWidget {
     this.onClear,
   });
 
-  final List<_TypeBucket> buckets;
-  final List<_TypeBucket> allBuckets;
+  final List<TypeBucket> buckets;
+  final List<TypeBucket> allBuckets;
   final int total;
   final int maxCount;
   final ActivityType? typeFilter;
@@ -585,7 +512,7 @@ class _TypeRow extends StatelessWidget {
     required this.onTap,
   });
 
-  final _TypeBucket bucket;
+  final TypeBucket bucket;
   final int maxCount;
   final bool active;
   final bool dim;
