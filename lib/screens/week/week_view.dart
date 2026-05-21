@@ -6,10 +6,12 @@ import '../../models/activity.dart';
 import '../../state/goal_controller.dart';
 import '../../state/plan_controller.dart';
 import '../../state/theme_controller.dart';
+import '../../state/tip_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/k_tip_banner.dart';
 import '../day_detail/day_detail_sheet.dart';
 import '../day_detail/day_overview_sheet.dart';
 import 'widgets/day_card.dart';
@@ -26,6 +28,8 @@ class WeekViewState extends State<WeekView> {
   late final PageController _pageCtrl =
       PageController(initialPage: _initialPage);
   int _currentPage = _initialPage;
+  bool _swipeTipShown = false;
+  bool _activityTipsShown = false;
 
   void jumpToToday() {
     _pageCtrl.animateToPage(
@@ -55,12 +59,84 @@ class WeekViewState extends State<WeekView> {
     return today.add(Duration(days: offset * 7));
   }
 
+  void _showOverlay(
+    TutorialGesture gesture,
+    String title,
+    String subtitle,
+    TipKey key, {
+    VoidCallback? then,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final tips = context.read<TipController>();
+      if (!tips.shouldShow(key)) return;
+      KTutorialOverlay.show(
+        context: context,
+        gesture: gesture,
+        title: title,
+        subtitle: subtitle,
+        onDismiss: () {
+          tips.markSeen(key);
+          if (then != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) then();
+            });
+          }
+        },
+      );
+    });
+  }
+
+  void _showSwipeTip() {
+    _showOverlay(
+      TutorialGesture.swipe,
+      'Swipe to browse weeks',
+      'Slide left or right to see past and upcoming weeks',
+      TipKey.weekSwipe,
+    );
+  }
+
+  void _showDoubleTapTip() {
+    _showOverlay(
+      TutorialGesture.doubleTap,
+      'Double-tap to check off',
+      'Quickly mark a day\'s sessions as done with a double-tap',
+      TipKey.doubleTap,
+      then: _showLongPressTip,
+    );
+  }
+
+  void _showLongPressTip() {
+    _showOverlay(
+      TutorialGesture.longPress,
+      'Long-press to delete',
+      'Press and hold a day to remove all its sessions',
+      TipKey.longPress,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final today = TodayScope.of(context);
     final plan = context.watch<PlanController>();
     final goal = context.watch<GoalController>();
+    final tips = context.watch<TipController>();
     final startDay = context.watch<ThemeController>().weekStartDay;
+
+    // Swipe tip: once, on first ever build
+    if (!_swipeTipShown && tips.shouldShow(TipKey.weekSwipe)) {
+      _swipeTipShown = true;
+      _showSwipeTip();
+    }
+
+    // Double-tap + long-press: only when firstActivityCreated transitions
+    if (!_activityTipsShown &&
+        tips.firstActivityCreated &&
+        tips.wasSeen(TipKey.weekSwipe) &&
+        tips.shouldShow(TipKey.doubleTap)) {
+      _activityTipsShown = true;
+      _showDoubleTapTip();
+    }
 
     return PageView.builder(
       controller: _pageCtrl,

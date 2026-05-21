@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
+import '../../state/tip_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -200,6 +201,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
         notes: notes,
       );
     } else {
+      context.read<TipController>().onActivityCreated();
       final dates = _recurrence.expand(widget.date, _weeks);
       for (final date in dates) {
         plan.save(

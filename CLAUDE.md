@@ -32,7 +32,7 @@ lib/
   app.dart                # MaterialApp + TodayScope + onboarding gate
   theme/                  # Design tokens (colors, spacing, text, theme)
   models/                 # Activity + DayStatus + ActivityType
-  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color, goal) + ActivityDb + BackupService
+  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color, goal, tip) + ActivityDb + BackupService
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
@@ -521,6 +521,39 @@ without discussion.
   via `InAppReview.instance.openStoreListing()` — no eligibility
   checks, always available. This is separate from the automatic
   in-app review prompt.
+
+### Contextual tutorials (done)
+- ✅ `TipController` (`lib/state/tip_controller.dart`): ChangeNotifier
+  backed by SharedPreferences (`kadence.tip.*` keys). Tracks which
+  tutorials have been seen and whether the user has created their
+  first activity (`kadence.tip.first_activity_created`).
+- ✅ `KTutorialOverlay` (`lib/widgets/k_tip_banner.dart`): full-screen
+  overlay with animated gesture illustrations, title + subtitle text,
+  and "Tap anywhere to continue" dismiss. Four gesture types:
+  - `swipe` — finger dot sliding left/right with trail dots.
+  - `doubleTap` — finger bouncing twice with ripple rings + "×2"
+    badge.
+  - `longPress` — finger pressing down with a progress arc ring.
+  - `tap` — single tap with ripple expansion.
+- **Trigger rules** (all tips show once per install, persisted):
+  - **Swipe tip** (`TipKey.weekSwipe`): first time the week view
+    is displayed, immediately after onboarding.
+  - **Double-tap tip** (`TipKey.doubleTap`): shown only after the
+    user creates their first activity and returns to the week view.
+    Triggered by `TipController.onActivityCreated()` called from
+    `day_detail_sheet.dart` on new activity save.
+  - **Long-press tip** (`TipKey.longPress`): chains immediately
+    after dismissing the double-tap tip.
+  - **Stats filter tip** (`TipKey.statsFilter`): first time the
+    stats tab is active (`StatsView.isActive`) with 2+ activity
+    types logged.
+- **IndexedStack visibility**: `StatsView` receives `isActive` from
+  `HomeScreen` to avoid firing its overlay while the tab is hidden
+  in the `IndexedStack`.
+- Tips are shown via `KTutorialOverlay.show()` which inserts an
+  `OverlayEntry`. Each tip is gated by `tips.shouldShow(key)` and
+  guarded by a local `bool` flag in the widget state to prevent
+  re-firing on rebuild.
 
 ### Export/Import backup (done)
 - ✅ `BackupService` (`lib/state/backup_service.dart`): JSON

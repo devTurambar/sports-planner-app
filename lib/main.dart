@@ -13,6 +13,7 @@ import 'state/plan_controller.dart';
 import 'state/theme_controller.dart';
 import 'state/review_service.dart';
 import 'state/goal_controller.dart';
+import 'state/tip_controller.dart';
 import 'state/type_color_controller.dart';
 
 Future<void> main() async {
@@ -56,6 +57,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<GoalController>(
           create: (_) => GoalController(prefs),
+        ),
+        ChangeNotifierProvider<TipController>(
+          create: (_) => TipController(prefs),
         ),
         ChangeNotifierProvider<PlanController>.value(
           value: planController,

@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: <Widget>[
           WeekView(key: _weekKey),
           const MonthView(),
-          const StatsView(),
+          StatsView(isActive: _tab == HomeTab.stats),
           const SettingsScreen(),
         ],
       ),

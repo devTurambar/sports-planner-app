@@ -5,10 +5,12 @@ import 'package:provider/provider.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../state/theme_controller.dart';
+import '../../state/tip_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/k_tip_banner.dart';
 import 'stats_data.dart';
 import 'widgets/personal_records.dart';
 import 'widgets/best_day_of_week.dart';
@@ -26,7 +28,9 @@ import 'widgets/insights.dart';
 import 'widgets/shareable_recap.dart';
 
 class StatsView extends StatefulWidget {
-  const StatsView({super.key});
+  const StatsView({required this.isActive, super.key});
+
+  final bool isActive;
 
   @override
   State<StatsView> createState() => _StatsViewState();
@@ -34,6 +38,25 @@ class StatsView extends StatefulWidget {
 
 class _StatsViewState extends State<StatsView> {
   ActivityType? _typeFilter;
+  bool _tipShown = false;
+
+  void _checkStatsTip(bool hasMultipleTypes) {
+    if (_tipShown || !hasMultipleTypes || !widget.isActive) return;
+    _tipShown = true;
+    final tips = context.read<TipController>();
+    if (!tips.shouldShow(TipKey.statsFilter)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      KTutorialOverlay.show(
+        context: context,
+        gesture: TutorialGesture.tap,
+        title: 'Filter by activity',
+        subtitle:
+            'Tap any activity type in "By activity" to highlight only that type on the heatmap',
+        onDismiss: () => tips.markSeen(TipKey.statsFilter),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +70,10 @@ class _StatsViewState extends State<StatsView> {
     if (data.totalSessions == 0 && !hasAnyActivity) {
       return const _StatsEmpty();
     }
+
+    context.watch<TipController>();
+    final hasMultipleTypes = data.typeCounts.length > 1;
+    _checkStatsTip(hasMultipleTypes);
 
     final filteredBreakdown = _typeFilter != null
         ? data.typeCounts.where((b) => b.type == _typeFilter).toList()
