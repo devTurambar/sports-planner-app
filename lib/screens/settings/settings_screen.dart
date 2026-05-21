@@ -196,61 +196,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _AccountCard(auth: auth),
         const SizedBox(height: KSpace.s3),
         _ProCard(onTap: () => PaywallScreen.show(context)),
-        const SizedBox(height: KSpace.s3),
+
+        // ── App ───────────────────────────────────────────
+        const _SectionHeader(label: 'App'),
         _Group(
           rows: <Widget>[
             _ToggleRow(
+              icon: LucideIcons.moon,
+              iconBg: const Color(0xFF5856D6),
               label: 'Dark mode',
               value: theme.isDark,
               onChanged: (_) => theme.toggleDark(),
             ),
             _StaticRow(
+              icon: LucideIcons.calendarDays,
+              iconBg: const Color(0xFFFF9500),
               label: 'Week starts on',
               value: theme.weekStartsOnSunday ? 'Sunday' : 'Monday',
               onTap: () => theme.toggleWeekStart(),
             ),
-            const _AccentColorRow(label: 'Theme color', isLast: true),
-          ],
-        ),
-        const SizedBox(height: KSpace.s3),
-        _Group(
-          rows: <Widget>[
+            const _AccentColorRow(
+              label: 'Theme color',
+              icon: LucideIcons.palette,
+              iconBg: Color(0xFFFF2D55),
+            ),
             _ToggleRow(
+              icon: LucideIcons.calendarSync,
+              iconBg: const Color(0xFF34C759),
               label: 'Calendar sync',
               value: _calendarSync,
               onChanged: _toggleCalendarSync,
             ),
             if (_calendarSync)
               _StaticRow(
+                icon: LucideIcons.calendarCheck,
+                iconBg: const Color(0xFF30B0C7),
                 label: 'Calendars',
                 value: _calendarLabel,
                 onTap: _pickCalendars,
-                isLast: true,
               ),
-            if (!_calendarSync)
-              const SizedBox.shrink(),
-          ],
-        ),
-        const SizedBox(height: KSpace.s3),
-        _Group(
-          rows: <Widget>[
             _StaticRow(
-              label: 'Export data',
-              value: 'Share',
-              onTap: _exportData,
-            ),
-            _StaticRow(
-              label: 'Import data',
-              value: 'Load',
-              onTap: _importData,
-              isLast: true,
-            ),
-          ],
-        ),
-        const SizedBox(height: KSpace.s3),
-        _Group(
-          rows: <Widget>[
-            _StaticRow(
+              icon: LucideIcons.paintbrush,
+              iconBg: const Color(0xFFAF52DE),
               label: 'Type colors',
               value: 'Customize',
               onTap: () => _showTypeColorPicker(context),
@@ -258,26 +245,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-        const SizedBox(height: KSpace.s3),
+
+        // ── Data ──────────────────────────────────────────
+        const _SectionHeader(label: 'Data'),
         _Group(
           rows: <Widget>[
             _StaticRow(
-              label: 'Rate Kadence',
-              value: '',
-              onTap: () => InAppReview.instance.openStoreListing(),
+              icon: LucideIcons.upload,
+              iconBg: const Color(0xFF007AFF),
+              label: 'Export data',
+              value: 'Share',
+              onTap: _exportData,
+            ),
+            _StaticRow(
+              icon: LucideIcons.download,
+              iconBg: const Color(0xFF5856D6),
+              label: 'Import data',
+              value: 'Load',
+              onTap: _importData,
               isLast: true,
             ),
           ],
         ),
-        const SizedBox(height: KSpace.s3),
+
+        // ── About ─────────────────────────────────────────
+        const _SectionHeader(label: 'About'),
         _Group(
           rows: <Widget>[
             _StaticRow(
+              icon: LucideIcons.refreshCw,
+              iconBg: const Color(0xFFFF9500),
               label: 'Redo onboarding',
-              value: 'Start',
+              value: '',
               onTap: () async {
                 await onboarding.reset();
               },
+            ),
+            _StaticRow(
+              icon: LucideIcons.shieldCheck,
+              iconBg: const Color(0xFF34C759),
+              label: 'Privacy Policy',
+              value: '',
+              onTap: () {},
+            ),
+            _StaticRow(
+              icon: LucideIcons.star,
+              iconBg: const Color(0xFFFFCC00),
+              label: 'Rate Kadence',
+              value: '',
+              onTap: () => InAppReview.instance.openStoreListing(),
               isLast: true,
             ),
           ],
@@ -318,16 +334,67 @@ class _Group extends StatelessWidget {
   }
 }
 
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: KSpace.s1,
+        top: KSpace.s5,
+        bottom: KSpace.s2,
+      ),
+      child: Text(
+        label,
+        style: KText.caption.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: colors.fgTertiary,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
+class _RowIcon extends StatelessWidget {
+  const _RowIcon({required this.icon, required this.bg});
+
+  final IconData icon;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Icon(icon, size: 16, color: Colors.white),
+    );
+  }
+}
+
 class _ToggleRow extends StatelessWidget {
   const _ToggleRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.icon,
+    this.iconBg,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+  final IconData? icon;
+  final Color? iconBg;
 
   @override
   Widget build(BuildContext context) {
@@ -342,6 +409,10 @@ class _ToggleRow extends StatelessWidget {
           const EdgeInsets.symmetric(horizontal: KSpace.s4, vertical: 13),
       child: Row(
         children: <Widget>[
+          if (icon != null) ...[
+            _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Text(
               label,
@@ -361,12 +432,16 @@ class _StaticRow extends StatelessWidget {
     required this.value,
     required this.onTap,
     this.isLast = false,
+    this.icon,
+    this.iconBg,
   });
 
   final String label;
   final String value;
   final VoidCallback onTap;
   final bool isLast;
+  final IconData? icon;
+  final Color? iconBg;
 
   @override
   Widget build(BuildContext context) {
@@ -388,6 +463,10 @@ class _StaticRow extends StatelessWidget {
               horizontal: KSpace.s4, vertical: 13),
           child: Row(
             children: <Widget>[
+              if (icon != null) ...[
+                _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: Text(
                   label,
@@ -1090,10 +1169,15 @@ class _ProCard extends StatelessWidget {
 }
 
 class _AccentColorRow extends StatelessWidget {
-  const _AccentColorRow({this.label = 'Accent color', this.isLast = false});
+  const _AccentColorRow({
+    this.label = 'Accent color',
+    this.icon,
+    this.iconBg,
+  });
 
   final String label;
-  final bool isLast;
+  final IconData? icon;
+  final Color? iconBg;
 
   @override
   Widget build(BuildContext context) {
@@ -1103,15 +1187,17 @@ class _AccentColorRow extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(color: colors.borderSubtle, width: 1),
-              ),
+        border: Border(
+          bottom: BorderSide(color: colors.borderSubtle, width: 1),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: KSpace.s4, vertical: 13),
       child: Row(
         children: <Widget>[
+          if (icon != null) ...[
+            _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Text(
               label,
