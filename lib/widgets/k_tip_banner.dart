@@ -6,7 +6,7 @@ import '../theme/kadence_colors.dart';
 import '../theme/kadence_spacing.dart';
 import '../theme/kadence_text_styles.dart';
 
-enum TutorialGesture { swipe, doubleTap, longPress, tap }
+enum TutorialGesture { swipe, doubleTap, longPress, tap, titleTap }
 
 class KTutorialOverlay extends StatefulWidget {
   const KTutorialOverlay({
@@ -14,6 +14,7 @@ class KTutorialOverlay extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.onDismiss,
+    this.animationHint,
     super.key,
   });
 
@@ -21,6 +22,7 @@ class KTutorialOverlay extends StatefulWidget {
   final String title;
   final String subtitle;
   final VoidCallback onDismiss;
+  final String? animationHint;
 
   static void show({
     required BuildContext context,
@@ -28,6 +30,7 @@ class KTutorialOverlay extends StatefulWidget {
     required String title,
     required String subtitle,
     required VoidCallback onDismiss,
+    String? animationHint,
   }) {
     final entry = OverlayEntry(builder: (_) => const SizedBox.shrink());
     late final OverlayEntry realEntry;
@@ -36,6 +39,7 @@ class KTutorialOverlay extends StatefulWidget {
         gesture: gesture,
         title: title,
         subtitle: subtitle,
+        animationHint: animationHint,
         onDismiss: () {
           realEntry.remove();
           onDismiss();
@@ -71,6 +75,7 @@ class _KTutorialOverlayState extends State<KTutorialOverlay>
         TutorialGesture.doubleTap => const Duration(milliseconds: 1400),
         TutorialGesture.longPress => const Duration(milliseconds: 2000),
         TutorialGesture.tap => const Duration(milliseconds: 1200),
+        TutorialGesture.titleTap => const Duration(milliseconds: 2200),
       };
 
   @override
@@ -93,9 +98,290 @@ class _KTutorialOverlayState extends State<KTutorialOverlay>
     super.dispose();
   }
 
+  Widget _buildDefault(BuildContext context, KadenceColors colors) {
+    return Container(
+      color: colors.bgBase.withValues(alpha: 0.88),
+      child: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(flex: 3),
+            SizedBox(
+              height: 160,
+              width: 240,
+              child: _GestureAnimation(
+                gesture: widget.gesture,
+                controller: _gestureCtrl,
+                hint: widget.animationHint,
+              ),
+            ),
+            const SizedBox(height: KSpace.s8),
+            _tutorialText(colors),
+            const Spacer(flex: 2),
+            _dismissHint(colors),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleTap(BuildContext context, KadenceColors colors) {
+    final mq = MediaQuery.of(context);
+    final topPad = mq.padding.top;
+    final screenH = mq.size.height;
+    final screenW = mq.size.width;
+
+    // Real title origin: SafeArea top + KTopBar padding
+    final originY = topPad + 6.0 + 4.0; // top pad + bar padding + vertical centering
+    const originX = 16.0;
+
+    // Meet point: center of screen, shifted up a bit
+    final meetY = screenH * 0.38;
+    final meetX = (screenW - 160) / 2; // roughly center the pill
+
+    // Finger start: below center
+    final fingerStartY = screenH * 0.62;
+    final fingerStartX = screenW / 2;
+
+    final titleText = widget.animationHint ?? 'This week';
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Container(color: colors.bgBase.withValues(alpha: 0.88)),
+        ),
+        // Animated title clone + finger
+        AnimatedBuilder(
+          animation: _gestureCtrl,
+          builder: (_, __) {
+            final t = _gestureCtrl.value;
+
+            // Phases:
+            // 0.00–0.10  pause
+            // 0.10–0.40  slide in (title from origin → meet, finger up)
+            // 0.40–0.50  tap press
+            // 0.50–0.70  ripple + glow hold
+            // 0.70–0.90  slide out (both return)
+            // 0.90–1.00  pause
+
+            double titleX, titleY, fingerX, fingerY;
+            double fingerScale, titleGlow, rippleOp, rippleS;
+
+            if (t < 0.10) {
+              titleX = originX;
+              titleY = originY;
+              fingerX = fingerStartX;
+              fingerY = fingerStartY;
+              fingerScale = 1.0;
+              titleGlow = 0;
+              rippleOp = 0;
+              rippleS = 0;
+            } else if (t < 0.40) {
+              final mt = Curves.easeOutCubic.transform((t - 0.10) / 0.30);
+              titleX = originX + (meetX - originX) * mt;
+              titleY = originY + (meetY - originY) * mt;
+              fingerX = fingerStartX + (screenW / 2 - fingerStartX) * mt;
+              fingerY = fingerStartY + (meetY + 48 - fingerStartY) * mt;
+              fingerScale = 1.0;
+              titleGlow = 0;
+              rippleOp = 0;
+              rippleS = 0;
+            } else if (t < 0.50) {
+              final tt = Curves.easeIn.transform((t - 0.40) / 0.10);
+              titleX = meetX;
+              titleY = meetY;
+              fingerX = screenW / 2;
+              fingerY = meetY + 48;
+              fingerScale = 1.0 - tt * 0.15;
+              titleGlow = tt;
+              rippleOp = 0;
+              rippleS = 0;
+            } else if (t < 0.70) {
+              final rt = (t - 0.50) / 0.20;
+              titleX = meetX;
+              titleY = meetY;
+              fingerX = screenW / 2;
+              fingerY = meetY + 48;
+              fingerScale = 0.85 +
+                  Curves.easeOut.transform(math.min(rt * 2, 1.0)) * 0.15;
+              titleGlow = 1.0 - rt;
+              rippleOp = (1 - rt) * 0.5;
+              rippleS = 0.4 + rt * 1.2;
+            } else if (t < 0.90) {
+              final mt = Curves.easeInCubic.transform((t - 0.70) / 0.20);
+              titleX = meetX + (originX - meetX) * mt;
+              titleY = meetY + (originY - meetY) * mt;
+              fingerX = screenW / 2 + (fingerStartX - screenW / 2) * mt;
+              fingerY = (meetY + 48) + (fingerStartY - meetY - 48) * mt;
+              fingerScale = 1.0;
+              titleGlow = 0;
+              rippleOp = 0;
+              rippleS = 0;
+            } else {
+              titleX = originX;
+              titleY = originY;
+              fingerX = fingerStartX;
+              fingerY = fingerStartY;
+              fingerScale = 1.0;
+              titleGlow = 0;
+              rippleOp = 0;
+              rippleS = 0;
+            }
+
+            return Stack(
+              children: [
+                // Title clone pill
+                Positioned(
+                  left: titleX,
+                  top: titleY,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: colors.bgCard.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: titleGlow > 0
+                            ? colors.accent
+                                .withValues(alpha: titleGlow * 0.7)
+                            : colors.borderSubtle
+                                .withValues(alpha: 0.5),
+                        width: titleGlow > 0 ? 1.5 : 1,
+                      ),
+                      boxShadow: titleGlow > 0
+                          ? [
+                              BoxShadow(
+                                color: colors.accent
+                                    .withValues(alpha: titleGlow * 0.3),
+                                blurRadius: 20,
+                                spreadRadius: 4,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: titleText,
+                            style: KText.h2.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: colors.fgPrimary,
+                              letterSpacing: -0.4,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '.',
+                            style: KText.h2.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: colors.accent,
+                              letterSpacing: -0.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Ripple at meet point
+                if (rippleOp > 0)
+                  Positioned(
+                    left: screenW / 2 - 30 * rippleS,
+                    top: meetY + 24 - 30 * rippleS,
+                    child: Container(
+                      width: 60 * rippleS,
+                      height: 60 * rippleS,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colors.accent
+                              .withValues(alpha: rippleOp),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                // Finger
+                Positioned(
+                  left: fingerX - 18,
+                  top: fingerY - 18,
+                  child: Transform.scale(
+                    scale: fingerScale,
+                    child: _FingerDot(color: colors.accent, size: 36),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        // Text content
+        Positioned.fill(
+          child: SafeArea(
+            child: Column(
+              children: [
+                const Spacer(flex: 3),
+                _tutorialText(colors),
+                const Spacer(flex: 2),
+                _dismissHint(colors),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _tutorialText(KadenceColors colors) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: KSpace.s8),
+          child: Text(
+            widget.title,
+            textAlign: TextAlign.center,
+            style: KText.h3.copyWith(
+              color: colors.fgPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(height: KSpace.s2),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: KSpace.s10),
+          child: Text(
+            widget.subtitle,
+            textAlign: TextAlign.center,
+            style: KText.bodySm.copyWith(
+              color: colors.fgSecondary,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _dismissHint(KadenceColors colors) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KSpace.s8),
+      child: Text(
+        'Tap anywhere to continue',
+        style: KText.caption.copyWith(
+          color: colors.fgTertiary,
+          fontSize: 11,
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isTitleTap = widget.gesture == TutorialGesture.titleTap;
 
     return FadeTransition(
       opacity: _fade,
@@ -104,60 +390,9 @@ class _KTutorialOverlayState extends State<KTutorialOverlay>
         child: GestureDetector(
           onTap: _dismiss,
           behavior: HitTestBehavior.opaque,
-          child: Container(
-            color: colors.bgBase.withValues(alpha: 0.88),
-            child: SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(flex: 3),
-                  SizedBox(
-                    height: 160,
-                    width: 200,
-                    child: _GestureAnimation(
-                      gesture: widget.gesture,
-                      controller: _gestureCtrl,
-                    ),
-                  ),
-                  const SizedBox(height: KSpace.s8),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: KSpace.s8),
-                    child: Text(
-                      widget.title,
-                      textAlign: TextAlign.center,
-                      style: KText.h3.copyWith(
-                        color: colors.fgPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: KSpace.s2),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: KSpace.s10),
-                    child: Text(
-                      widget.subtitle,
-                      textAlign: TextAlign.center,
-                      style: KText.bodySm.copyWith(
-                        color: colors.fgSecondary,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  const Spacer(flex: 2),
-                  Text(
-                    'Tap anywhere to continue',
-                    style: KText.caption.copyWith(
-                      color: colors.fgTertiary,
-                      fontSize: 11,
-                    ),
-                  ),
-                  const SizedBox(height: KSpace.s8),
-                ],
-              ),
-            ),
-          ),
+          child: isTitleTap
+              ? _buildTitleTap(context, colors)
+              : _buildDefault(context, colors),
         ),
       ),
     );
@@ -168,10 +403,12 @@ class _GestureAnimation extends StatelessWidget {
   const _GestureAnimation({
     required this.gesture,
     required this.controller,
+    this.hint,
   });
 
   final TutorialGesture gesture;
   final AnimationController controller;
+  final String? hint;
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +418,7 @@ class _GestureAnimation extends StatelessWidget {
       TutorialGesture.longPress =>
         _LongPressAnimation(controller: controller),
       TutorialGesture.tap => _TapAnimation(controller: controller),
+      TutorialGesture.titleTap => const SizedBox.shrink(),
     };
   }
 }
@@ -451,6 +689,7 @@ class _TapAnimation extends AnimatedWidget {
     );
   }
 }
+
 
 class _FingerDot extends StatelessWidget {
   const _FingerDot({required this.color, required this.size});

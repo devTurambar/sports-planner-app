@@ -367,9 +367,13 @@ without discussion.
 - **Week view navigation**: `WeekView` is a `StatefulWidget` whose
   state class is exported (`WeekViewState`) so the parent shell can
   reach it via a `GlobalKey<WeekViewState>` and call `jumpToToday()`.
-  The "Today" button in `KTopBar` from `home_screen.dart` is wired
-  this way. `_cursor` is a date *inside* the displayed week — null
-  means "show today's week".
+  `MonthView` follows the same pattern — `MonthViewState` is public,
+  with its own `jumpToToday()`.
+- **Title-tap navigation**: tapping the `KTopBar` title on the week
+  or month tabs calls `jumpToToday()` on the respective view, jumping
+  back to the current week/month. Wired via `KTopBar.onTitleTap`
+  callback in `home_screen.dart`. Stats and settings tabs pass `null`
+  (no action).
 - **Hot reload vs hot restart**: changing a const class's constructor
   shape (renaming/adding/removing fields) is rejected by hot reload
   with "Const class cannot remove fields". Press `R` (capital — hot
@@ -543,12 +547,18 @@ without discussion.
   first activity (`kadence.tip.first_activity_created`).
 - ✅ `KTutorialOverlay` (`lib/widgets/k_tip_banner.dart`): full-screen
   overlay with animated gesture illustrations, title + subtitle text,
-  and "Tap anywhere to continue" dismiss. Four gesture types:
+  and "Tap anywhere to continue" dismiss. Five gesture types:
   - `swipe` — finger dot sliding left/right with trail dots.
   - `doubleTap` — finger bouncing twice with ripple rings + "×2"
     badge.
   - `longPress` — finger pressing down with a progress arc ring.
   - `tap` — single tap with ripple expansion.
+  - `titleTap` — full-screen layout (not the standard animation box).
+    A clone of the real title pill starts at the KTopBar position
+    (top-left) and slides down to center; a finger dot rises from
+    below to meet it. On contact: tap press, accent glow + ripple,
+    then both return. Uses `animationHint` to show the correct title
+    text (e.g. "This week" vs "May 2025").
 - **Trigger rules** (all tips show once per install, persisted):
   - **Swipe tip** (`TipKey.weekSwipe`): first time the week view
     is displayed, immediately after onboarding.
@@ -561,6 +571,12 @@ without discussion.
   - **Stats filter tip** (`TipKey.statsFilter`): first time the
     stats tab is active (`StatsView.isActive`) with 2+ activity
     types logged.
+  - **Week title-nav tip** (`TipKey.weekTitleNav`): first time the
+    user swipes away from the current week. Uses `titleTap` gesture
+    to show the title clone sliding from the real KTopBar position.
+  - **Month title-nav tip** (`TipKey.monthTitleNav`): same as above
+    but for the month view. `animationHint` is set to the current
+    month + year so the clone shows the correct title text.
 - **IndexedStack visibility**: `StatsView` receives `isActive` from
   `HomeScreen` to avoid firing its overlay while the tab is hidden
   in the `IndexedStack`.

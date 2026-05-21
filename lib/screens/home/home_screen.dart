@@ -27,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   HomeTab _tab = HomeTab.week;
   final GlobalKey<WeekViewState> _weekKey = GlobalKey<WeekViewState>();
+  final GlobalKey<MonthViewState> _monthKey = GlobalKey<MonthViewState>();
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
         title: title,
         accentColor: accentColor,
         actions: const <Widget>[KDarkModeToggle()],
+        onTitleTap: switch (_tab) {
+          HomeTab.week => () => _weekKey.currentState?.jumpToToday(),
+          HomeTab.month => () => _monthKey.currentState?.jumpToToday(),
+          _ => null,
+        },
       ),
       body: IndexedStack(
         index: _tab.index,
         children: <Widget>[
           WeekView(key: _weekKey),
-          const MonthView(),
+          MonthView(key: _monthKey),
           StatsView(isActive: _tab == HomeTab.stats),
           const SettingsScreen(),
         ],

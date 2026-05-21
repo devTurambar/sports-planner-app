@@ -30,6 +30,7 @@ class WeekViewState extends State<WeekView> {
   int _currentPage = _initialPage;
   bool _swipeTipShown = false;
   bool _activityTipsShown = false;
+  bool _titleNavTipShown = false;
 
   void jumpToToday() {
     _pageCtrl.animateToPage(
@@ -65,6 +66,7 @@ class WeekViewState extends State<WeekView> {
     String subtitle,
     TipKey key, {
     VoidCallback? then,
+    String? animationHint,
   }) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -75,6 +77,7 @@ class WeekViewState extends State<WeekView> {
         gesture: gesture,
         title: title,
         subtitle: subtitle,
+        animationHint: animationHint,
         onDismiss: () {
           tips.markSeen(key);
           if (then != null) {
@@ -115,6 +118,15 @@ class WeekViewState extends State<WeekView> {
     );
   }
 
+  void _showTitleNavTip() {
+    _showOverlay(
+      TutorialGesture.titleTap,
+      'Tap the title to go back',
+      'Tap "This week." at the top to jump back to the current week',
+      TipKey.weekTitleNav,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final today = TodayScope.of(context);
@@ -140,7 +152,16 @@ class WeekViewState extends State<WeekView> {
 
     return PageView.builder(
       controller: _pageCtrl,
-      onPageChanged: (page) => setState(() => _currentPage = page),
+      onPageChanged: (page) {
+        setState(() => _currentPage = page);
+        if (!_titleNavTipShown && page != _initialPage) {
+          final tips = context.read<TipController>();
+          if (tips.shouldShow(TipKey.weekTitleNav)) {
+            _titleNavTipShown = true;
+            _showTitleNavTip();
+          }
+        }
+      },
       itemBuilder: (context, page) {
         final cursor = _cursorForPage(page, today);
         final week = plan.weekFor(cursor, startDay);

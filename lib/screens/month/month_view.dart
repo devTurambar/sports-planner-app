@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../state/theme_controller.dart';
+import '../../state/tip_controller.dart';
+import '../../widgets/k_tip_banner.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -17,21 +19,48 @@ class MonthView extends StatefulWidget {
   const MonthView({super.key});
 
   @override
-  State<MonthView> createState() => _MonthViewState();
+  State<MonthView> createState() => MonthViewState();
 }
 
-class _MonthViewState extends State<MonthView> {
+class MonthViewState extends State<MonthView> {
   static const _initialPage = 5200;
   late final PageController _pageCtrl =
       PageController(initialPage: _initialPage);
   int _currentPage = _initialPage;
   DateTime? _selected;
   final GlobalKey _detailKey = GlobalKey();
+  bool _titleNavTipShown = false;
 
   @override
   void dispose() {
     _pageCtrl.dispose();
     super.dispose();
+  }
+
+  void jumpToToday() {
+    _pageCtrl.animateToPage(
+      _initialPage,
+      duration: KMotion.base,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _showTitleNavTip() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final tips = context.read<TipController>();
+      if (!tips.shouldShow(TipKey.monthTitleNav)) return;
+      final today = DateTime.now();
+      final hint = '${today.fullMonth} ${today.year}';
+      KTutorialOverlay.show(
+        context: context,
+        gesture: TutorialGesture.titleTap,
+        title: 'Tap the title to go back',
+        subtitle: 'Tap the title at the top to jump back to the current month',
+        animationHint: hint,
+        onDismiss: () => tips.markSeen(TipKey.monthTitleNav),
+      );
+    });
   }
 
   void _shiftMonth(int delta) {
@@ -78,10 +107,19 @@ class _MonthViewState extends State<MonthView> {
 
     return PageView.builder(
       controller: _pageCtrl,
-      onPageChanged: (page) => setState(() {
-        _currentPage = page;
-        _selected = null;
-      }),
+      onPageChanged: (page) {
+        setState(() {
+          _currentPage = page;
+          _selected = null;
+        });
+        if (!_titleNavTipShown && page != _initialPage) {
+          final tips = context.read<TipController>();
+          if (tips.shouldShow(TipKey.monthTitleNav)) {
+            _titleNavTipShown = true;
+            _showTitleNavTip();
+          }
+        }
+      },
       itemBuilder: (context, page) {
         final cursor = _cursorForPage(page);
         final startDay = context.watch<ThemeController>().weekStartDay;

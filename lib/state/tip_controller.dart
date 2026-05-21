@@ -5,7 +5,9 @@ enum TipKey {
   weekSwipe('kadence.tip.week_swipe'),
   doubleTap('kadence.tip.double_tap'),
   longPress('kadence.tip.long_press'),
-  statsFilter('kadence.tip.stats_filter');
+  statsFilter('kadence.tip.stats_filter'),
+  weekTitleNav('kadence.tip.week_title_nav'),
+  monthTitleNav('kadence.tip.month_title_nav');
 
   const TipKey(this.prefsKey);
   final String prefsKey;
