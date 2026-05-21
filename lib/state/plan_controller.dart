@@ -45,6 +45,21 @@ class PlanController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Patch calendarEventIds onto existing activities (used after
+  /// bulk calendar sync on import).
+  void patchCalendarEventIds(Map<String, String> idToEventId) {
+    if (idToEventId.isEmpty) return;
+    for (final list in _byDate.values) {
+      for (var i = 0; i < list.length; i++) {
+        final eventId = idToEventId[list[i].id];
+        if (eventId != null) {
+          list[i] = list[i].copyWith(calendarEventId: eventId);
+          ActivityDb.upsert(list[i]);
+        }
+      }
+    }
+  }
+
   /// Expose internal map for sync reads.
   Map<String, List<Activity>> get byDate =>
       Map<String, List<Activity>>.unmodifiable(_byDate);

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -66,6 +67,25 @@ class BackupService {
 
     final list = data['activities'] as List;
     return list.map((e) => _activityFromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  static List<Activity> reassignIds(List<Activity> activities) {
+    final rng = Random();
+    final prefix = 'i${DateTime.now().millisecondsSinceEpoch}'
+        '${rng.nextInt(9000) + 1000}';
+    return [
+      for (var i = 0; i < activities.length; i++)
+        Activity(
+          id: '${prefix}_$i',
+          date: activities[i].date,
+          status: activities[i].status,
+          name: activities[i].name,
+          type: activities[i].type,
+          duration: activities[i].duration,
+          timeOfDay: activities[i].timeOfDay,
+          notes: activities[i].notes,
+        ),
+    ];
   }
 
   static Map<String, List<Activity>> groupByDate(List<Activity> activities) {

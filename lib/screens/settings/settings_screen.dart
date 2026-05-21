@@ -1,5 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -150,7 +151,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final plan = context.read<PlanController>();
     final auth = context.read<AuthController>();
-    final grouped = BackupService.groupByDate(activities);
+    final fresh = BackupService.reassignIds(activities);
+    final grouped = BackupService.groupByDate(fresh);
 
     await ActivityDb.deleteAll();
     for (final list in grouped.values) {
@@ -159,12 +161,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
     plan.replaceAll(grouped);
 
     if (auth.isSignedIn && plan.userId != null) {
-      await SyncService.pushAll(grouped, plan.userId!);
+      await SyncService.replaceAllCloud(grouped, plan.userId!);
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await SyncService.clearOwner(prefs);
     }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Imported ${activities.length} activities')),
+    );
+
+    if (CalendarService.syncEnabled) {
+      await _offerCalendarSync(fresh, plan);
+    }
+  }
+
+  Future<void> _offerCalendarSync(
+    List<Activity> activities,
+    PlanController plan,
+  ) async {
+    if (!mounted) return;
+    final colors = context.colors;
+    final syncToCalendar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        title: Text(
+          'Sync to calendar?',
+          style: KText.h3.copyWith(color: colors.fgPrimary),
+        ),
+        content: Text(
+          'Add the imported activities to your device calendar? '
+          'Existing matching events will be skipped.',
+          style: KText.body.copyWith(color: colors.fgSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'No thanks',
+              style: KText.button.copyWith(color: colors.fgTertiary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Sync',
+              style: KText.button.copyWith(color: colors.fgPrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (syncToCalendar != true || !mounted) return;
+
+    final eventIds = await CalendarService.syncImportedBatch(activities);
+    plan.patchCalendarEventIds(eventIds);
+
+    if (!mounted) return;
+    final synced = eventIds.length;
+    final skipped = activities.length - synced;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          skipped > 0
+              ? 'Synced $synced events ($skipped already on calendar)'
+              : 'Synced $synced events to calendar',
+        ),
+      ),
     );
   }
 

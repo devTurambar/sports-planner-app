@@ -117,6 +117,57 @@ class CalendarService {
     return null;
   }
 
+  /// Creates calendar events for a batch of imported activities,
+  /// skipping any that already have a matching event (same title +
+  /// start time on the same day). Returns a map of activity ID →
+  /// calendarEventId for activities that got new events.
+  static Future<Map<String, String>> syncImportedBatch(
+    List<Activity> activities,
+  ) async {
+    if (!_isSupported || !syncEnabled) return const {};
+    final calIds = await _targetCalendarIds();
+    if (calIds.isEmpty) return const {};
+
+    final result = <String, String>{};
+
+    for (final activity in activities) {
+      final builtEvent = _buildEvent(calIds.first, activity);
+      final isDuplicate = await _hasDuplicate(calIds, builtEvent);
+      if (isDuplicate) continue;
+
+      final eventId = await createEvent(activity);
+      if (eventId != null) {
+        result[activity.id] = eventId;
+      }
+    }
+
+    return result;
+  }
+
+  static Future<bool> _hasDuplicate(
+    List<String> calendarIds,
+    Event reference,
+  ) async {
+    final start = reference.start!;
+    final dayStart = tz.TZDateTime(start.location, start.year, start.month, start.day);
+    final dayEnd = dayStart.add(const Duration(days: 1));
+
+    final params = RetrieveEventsParams(startDate: dayStart, endDate: dayEnd);
+
+    for (final calId in calendarIds) {
+      final result = await _plugin.retrieveEvents(calId, params);
+      if (result.isSuccess && result.data != null) {
+        for (final existing in result.data!) {
+          if (existing.title == reference.title &&
+              existing.start == reference.start) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   static Future<void> deleteEvent(Activity activity) async {
     if (!_isSupported || !syncEnabled) return;
     if (activity.calendarEventId == null) return;
