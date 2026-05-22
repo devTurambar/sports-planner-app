@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:device_calendar/device_calendar.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../models/activity.dart';
+import '../theme/kadence_colors.dart';
 import '../utils/date_utils.dart';
 
 const _kCalendarIdsKey = 'kadence.calendar.ids';
@@ -17,7 +19,21 @@ class CalendarService {
   static final _plugin = DeviceCalendarPlugin();
   static SharedPreferences? _prefs;
 
+  static const _channel = MethodChannel('com.example.kadence/calendar_color');
+
   static bool get _isSupported => !kIsWeb;
+  static bool get _isAndroid =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  static const _paletteTints = [
+    0xFFFF7A45, // Coral
+    0xFF3B82F6, // Blue
+    0xFFF43F5E, // Rose
+    0xFFB16CF4, // Purple
+    0xFF22B8D9, // Teal
+    0xFF34C77B, // Green
+    0xFFF0B43A, // Amber
+  ];
 
   static Future<void> init(SharedPreferences prefs) async {
     _prefs = prefs;
@@ -94,6 +110,7 @@ class CalendarService {
       final result = await _plugin.createOrUpdateEvent(event);
       if (result?.isSuccess == true && result!.data != null) {
         map[calId] = result.data!;
+        _setEventColor(result.data!, activity.type);
       }
     }
     return map.isEmpty ? null : jsonEncode(map);
@@ -113,6 +130,7 @@ class CalendarService {
       final event = _buildEvent(entry.key, activity)
         ..eventId = entry.value;
       await _plugin.createOrUpdateEvent(event);
+      _setEventColor(entry.value, activity.type);
     }
     return null;
   }
@@ -245,5 +263,30 @@ class CalendarService {
     final m = _timeRe.firstMatch(raw);
     if (m == null) return 0;
     return int.parse(m.group(2)!).clamp(0, 59);
+  }
+
+  static int _colorForType(ActivityType? type) {
+    if (type == null) return _paletteTints[6];
+    final overrides = _prefs?.getStringList('kadence.type_colors');
+    if (overrides != null) {
+      for (final entry in overrides) {
+        final parts = entry.split(':');
+        if (parts.length == 2 && parts[0] == type.name) {
+          final idx = int.tryParse(parts[1]);
+          if (idx != null && idx >= 0 && idx < 7) return _paletteTints[idx];
+        }
+      }
+    }
+    return _paletteTints[KadenceColors.defaultIndexFor(type)];
+  }
+
+  static Future<void> _setEventColor(String eventId, ActivityType? type) async {
+    if (!_isAndroid) return;
+    try {
+      await _channel.invokeMethod('setEventColor', {
+        'eventId': eventId,
+        'color': _colorForType(type),
+      });
+    } catch (_) {}
   }
 }
