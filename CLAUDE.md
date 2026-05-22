@@ -399,6 +399,11 @@ without discussion.
   has no linked event yet (created before sync was enabled),
   `updateEvent` creates one and persists the new `calendarEventId`
   back via `_syncUpdatedEvent`.
+- ✅ `_syncNewEvent` and `_syncUpdatedEvent` push the patched
+  `calendarEventId` to Supabase after updating local state. This
+  ensures cloud rows have the correct calendar reference so that
+  activities synced back from cloud (e.g. after account switching)
+  can still delete their linked device calendar events.
 - **TODO**: multi-select calendar picker (checkboxes instead of
   single-select / all).
 - **TODO**: consider optional "keep on calendar?" prompt when deleting

@@ -173,6 +173,7 @@ class PlanController extends ChangeNotifier {
           final updated = list[index].copyWith(calendarEventId: eventId);
           list[index] = updated;
           ActivityDb.upsert(updated);
+          _pushToCloud(updated);
         }
       }
     });
@@ -186,6 +187,7 @@ class PlanController extends ChangeNotifier {
           final updated = list[index].copyWith(calendarEventId: eventId);
           list[index] = updated;
           ActivityDb.upsert(updated);
+          _pushToCloud(updated);
         }
       }
     });
