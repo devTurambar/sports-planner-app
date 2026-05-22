@@ -6,11 +6,9 @@ import '../../../state/auth_controller.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
-import '../../../widgets/k_button.dart';
+import '../../../widgets/k_oauth_button.dart';
 import '../widgets/progress_dots.dart';
 
-/// Optional sign-in step shown after the week preview. The user can
-/// sign in with Google/Apple or skip to use the app offline-only.
 class SignInStep extends StatefulWidget {
   const SignInStep({required this.onSkip, super.key});
 
@@ -34,86 +32,137 @@ class _SignInStepState extends State<SignInStep> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, KSpace.s8),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, KSpace.s6),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: colors.accentLight,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    LucideIcons.cloudUpload,
-                    size: 26,
-                    color: colors.accent,
-                  ),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: colors.accentLight,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        LucideIcons.shieldCheck,
+                        size: 26,
+                        color: colors.accent,
+                      ),
+                    ),
+                    const SizedBox(height: KSpace.s5),
+                    Text(
+                      'Keep your data safe',
+                      textAlign: TextAlign.center,
+                      style: KText.h2.copyWith(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: colors.fgPrimary,
+                        letterSpacing: -0.44,
+                      ),
+                    ),
+                    const SizedBox(height: KSpace.s1 + 2),
+                    Text(
+                      'Choose how you\'d like to back up your sessions.\n'
+                      'You can change this anytime in Settings.',
+                      textAlign: TextAlign.center,
+                      style: KText.bodySm.copyWith(
+                        color: colors.fgSecondary,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: KSpace.s6),
+                    _OptionCard(
+                      icon: LucideIcons.hardDriveDownload,
+                      title: 'Manual backup',
+                      description:
+                          'Export and import your data as a file from Settings whenever you want.',
+                      action: _ManualAction(onTap: widget.onSkip),
+                    ),
+                    const SizedBox(height: KSpace.s3),
+                    _OptionCard(
+                      icon: LucideIcons.cloud,
+                      title: 'Cloud sync',
+                      description:
+                          'Sign in with your account to sync across devices automatically.',
+                      action: _CloudActions(auth: auth),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: KSpace.s5),
-                Text(
-                  'Back up your data',
-                  textAlign: TextAlign.center,
-                  style: KText.h2.copyWith(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: colors.fgPrimary,
-                    letterSpacing: -0.44,
-                  ),
-                ),
-                const SizedBox(height: KSpace.s1 + 2),
-                Text(
-                  'Sign in to sync your sessions across devices. '
-                  'You can always do this later in Settings.',
-                  textAlign: TextAlign.center,
-                  style: KText.bodySm.copyWith(
-                    color: colors.fgSecondary,
-                    height: 1.6,
-                  ),
-                ),
-                const SizedBox(height: KSpace.s8),
-                _OAuthButton(
-                  label: 'Continue with Google',
-                  icon: LucideIcons.globe,
-                  onTap: () => auth.signInWithGoogle(),
-                ),
-                const SizedBox(height: KSpace.s3),
-                _OAuthButton(
-                  label: 'Continue with Apple',
-                  icon: LucideIcons.apple,
-                  onTap: () => auth.signInWithApple(),
-                ),
-              ],
+              ),
             ),
           ),
           const ProgressDots(total: 3, current: 2),
-          const SizedBox(height: KSpace.s1 + 2),
-          KButton(
-            label: 'Skip for now',
-            variant: KButtonVariant.ghost,
-            onPressed: widget.onSkip,
-          ),
         ],
       ),
     );
   }
 }
 
-class _OAuthButton extends StatelessWidget {
-  const _OAuthButton({
-    required this.label,
+class _OptionCard extends StatelessWidget {
+  const _OptionCard({
     required this.icon,
-    required this.onTap,
+    required this.title,
+    required this.description,
+    required this.action,
   });
 
-  final String label;
   final IconData icon;
+  final String title;
+  final String description;
+  final Widget action;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KSpace.s4),
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        border: Border.all(color: colors.border),
+        borderRadius: BorderRadius.circular(KRadius.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: [
+              Icon(icon, size: 16, color: colors.fgSecondary),
+              const SizedBox(width: KSpace.s2),
+              Text(
+                title,
+                style: KText.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colors.fgPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KSpace.s2),
+          Text(
+            description,
+            style: KText.bodySm.copyWith(
+              color: colors.fgTertiary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: KSpace.s4),
+          action,
+        ],
+      ),
+    );
+  }
+}
+
+class _ManualAction extends StatelessWidget {
+  const _ManualAction({required this.onTap});
+
   final VoidCallback onTap;
 
   @override
@@ -126,28 +175,44 @@ class _OAuthButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(KRadius.lg),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            vertical: 14,
-            horizontal: KSpace.s4,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: colors.bgElevated,
+            color: colors.bgSubtle,
             border: Border.all(color: colors.border),
             borderRadius: BorderRadius.circular(KRadius.lg),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18, color: colors.fgPrimary),
-              const SizedBox(width: KSpace.s3),
-              Text(
-                label,
-                style: KText.button.copyWith(color: colors.fgPrimary),
-              ),
-            ],
+          alignment: Alignment.center,
+          child: Text(
+            'Continue without account',
+            style: KText.button.copyWith(color: colors.fgPrimary),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CloudActions extends StatelessWidget {
+  const _CloudActions({required this.auth});
+
+  final AuthController auth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        KOAuthButton(
+          provider: OAuthProvider.google,
+          onTap: () => auth.signInWithGoogle(),
+        ),
+        if (KOAuthButton.showApple) ...[
+          const SizedBox(height: KSpace.s3),
+          KOAuthButton(
+            provider: OAuthProvider.apple,
+            onTap: () => auth.signInWithApple(),
+          ),
+        ],
+      ],
     );
   }
 }

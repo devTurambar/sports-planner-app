@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -98,7 +99,7 @@ class SyncService {
 
   /// Push a single activity to Supabase (upsert).
   static Future<void> pushActivity(Activity a, String userId) async {
-    await _client.from('activities').upsert(_toCloud(a, userId));
+    await _client.from('activities').upsert(toCloud(a, userId));
   }
 
   /// Push all local activities to Supabase.
@@ -109,11 +110,34 @@ class SyncService {
     final rows = <Map<String, dynamic>>[];
     for (final list in byDate.values) {
       for (final a in list) {
-        rows.add(_toCloud(a, userId));
+        rows.add(toCloud(a, userId));
       }
     }
     if (rows.isEmpty) return;
     await _client.from('activities').upsert(rows);
+  }
+
+  /// Replace all cloud activities for a user (delete + insert).
+  /// Used by import to ensure stale cloud rows are removed.
+  static Future<void> replaceAllCloud(
+    Map<String, List<Activity>> byDate,
+    String userId,
+  ) async {
+    await _client.from('activities').delete().eq('user_id', userId);
+    final rows = <Map<String, dynamic>>[];
+    for (final list in byDate.values) {
+      for (final a in list) {
+        rows.add(toCloud(a, userId));
+      }
+    }
+    if (rows.isNotEmpty) {
+      await _client.from('activities').upsert(rows);
+    }
+  }
+
+  /// Clear the ownership tag so next sign-in treats local data as unowned.
+  static Future<void> clearOwner(SharedPreferences prefs) async {
+    await prefs.remove(_lastUserKey);
   }
 
   /// Delete an activity from Supabase.
@@ -145,7 +169,7 @@ class SyncService {
         await clearPendingDeletes(prefs);
         await ActivityDb.deleteAll();
         final cloud = await fetchCloud(userId);
-        final merged = _cloudToMap(cloud);
+        final merged = cloudToMap(cloud);
         await _writeLocalMap(merged);
         await setOwner(prefs, userId);
         return merged;
@@ -156,7 +180,7 @@ class SyncService {
         // handles the case where the user signed up on another device).
         await pushAll(localData, userId);
         final cloud = await fetchCloud(userId);
-        final merged = _mergeLastWriteWins(localData, cloud, userId);
+        final merged = mergeLastWriteWins(localData, cloud, userId);
         await _writeLocalMap(merged);
         await setOwner(prefs, userId);
         return merged;
@@ -165,7 +189,7 @@ class SyncService {
         // Flush any deletes made while signed out, then merge.
         await _flushPendingDeletes(prefs);
         final cloud = await fetchCloud(userId);
-        final merged = _mergeLastWriteWins(localData, cloud, userId);
+        final merged = mergeLastWriteWins(localData, cloud, userId);
         // Push any local-only activities to cloud.
         await _pushLocalOnly(merged, cloud, userId);
         await _writeLocalMap(merged);
@@ -186,8 +210,8 @@ class SyncService {
 
   // ── merge helpers ──────────────────────────────────────────────────────
 
-  /// Merge local data with cloud rows using last-write-wins.
-  static Map<String, List<Activity>> _mergeLastWriteWins(
+  @visibleForTesting
+  static Map<String, List<Activity>> mergeLastWriteWins(
     Map<String, List<Activity>> local,
     List<Map<String, dynamic>> cloudRows,
     String userId,
@@ -209,7 +233,7 @@ class SyncService {
         if (cloudRow != null) {
           // Both exist — cloud wins (it has the authoritative updated_at).
           // After first sync they stay in lockstep.
-          final winner = _fromCloudRow(cloudRow);
+          final winner = fromCloudRow(cloudRow);
           final key = KDate.keyFor(winner.date);
           merged.putIfAbsent(key, () => <Activity>[]).add(winner);
         } else {
@@ -223,7 +247,7 @@ class SyncService {
     for (final row in cloudRows) {
       final id = row['id'] as String;
       if (!seenIds.contains(id)) {
-        final a = _fromCloudRow(row);
+        final a = fromCloudRow(row);
         final key = KDate.keyFor(a.date);
         merged.putIfAbsent(key, () => <Activity>[]).add(a);
       }
@@ -243,7 +267,7 @@ class SyncService {
     for (final list in merged.values) {
       for (final a in list) {
         if (!cloudIds.contains(a.id)) {
-          toPush.add(_toCloud(a, userId));
+          toPush.add(toCloud(a, userId));
         }
       }
     }
@@ -268,20 +292,23 @@ class SyncService {
 
   // ── row mapping ────────────────────────────────────────────────────────
 
-  static Map<String, dynamic> _toCloud(Activity a, String userId) => {
+  @visibleForTesting
+  static Map<String, dynamic> toCloud(Activity a, String userId) => {
         'id': a.id,
         'user_id': userId,
         'date': KDate.keyFor(a.date),
         'status': a.status.name,
         'name': a.name,
         'type': a.type?.name,
+        'sub_type': a.subType,
         'duration': a.duration,
         'time_of_day': a.timeOfDay,
         'notes': a.notes,
         'calendar_event_id': a.calendarEventId,
       };
 
-  static Activity _fromCloudRow(Map<String, dynamic> row) {
+  @visibleForTesting
+  static Activity fromCloudRow(Map<String, dynamic> row) {
     final dateParts = (row['date'] as String).split('-');
     return Activity(
       id: row['id'] as String,
@@ -295,6 +322,7 @@ class SyncService {
       type: row['type'] != null
           ? ActivityType.values.byName(row['type'] as String)
           : null,
+      subType: row['sub_type'] as String?,
       duration: row['duration'] as String?,
       timeOfDay: row['time_of_day'] as String?,
       notes: row['notes'] as String?,
@@ -302,12 +330,13 @@ class SyncService {
     );
   }
 
-  static Map<String, List<Activity>> _cloudToMap(
+  @visibleForTesting
+  static Map<String, List<Activity>> cloudToMap(
     List<Map<String, dynamic>> rows,
   ) {
     final map = <String, List<Activity>>{};
     for (final row in rows) {
-      final a = _fromCloudRow(row);
+      final a = fromCloudRow(row);
       final key = KDate.keyFor(a.date);
       map.putIfAbsent(key, () => <Activity>[]).add(a);
     }

@@ -106,6 +106,7 @@ class KadenceColors extends ThemeExtension<KadenceColors> {
     ActivityType.tennis: 3,
     ActivityType.padel: 3,
     ActivityType.dance: 3,
+    ActivityType.combat: 2,
     ActivityType.elliptical: 6,
     ActivityType.other: 6,
   };

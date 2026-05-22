@@ -1,18 +1,27 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/auth_controller.dart';
+import '../../state/backup_service.dart';
 import '../../state/calendar_service.dart';
 import '../../state/onboarding_controller.dart';
+import '../../state/plan_controller.dart';
+import '../../state/sync_service.dart';
 import '../../state/theme_controller.dart';
 import '../../state/type_color_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
+import '../../widgets/k_oauth_button.dart';
 import '../../widgets/k_type_tile.dart';
+import '../../state/activity_db.dart';
+import '../../state/goal_controller.dart';
+import '../paywall/paywall_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -90,6 +99,158 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '${_selectedIds.length} calendars';
   }
 
+  Future<void> _exportData() async {
+    final plan = context.read<PlanController>();
+    try {
+      await BackupService.exportData(plan.byDate);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Export failed')),
+      );
+    }
+  }
+
+  Future<void> _importData() async {
+    final activities = await BackupService.pickAndParse();
+    if (activities == null || !mounted) return;
+
+    final colors = context.colors;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        title: Text(
+          'Replace all data?',
+          style: KText.h3.copyWith(color: colors.fgPrimary),
+        ),
+        content: Text(
+          'This will replace all your current data with the imported data (${activities.length} activities).',
+          style: KText.body.copyWith(color: colors.fgSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: KText.button.copyWith(color: colors.fgTertiary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Replace',
+              style: KText.button.copyWith(color: const Color(0xFFB5443A)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final plan = context.read<PlanController>();
+    final auth = context.read<AuthController>();
+    final fresh = BackupService.reassignIds(activities);
+    final grouped = BackupService.groupByDate(fresh);
+
+    await ActivityDb.deleteAll();
+    for (final list in grouped.values) {
+      await ActivityDb.upsertAll(list);
+    }
+    plan.replaceAll(grouped);
+
+    if (auth.isSignedIn && plan.userId != null) {
+      await SyncService.replaceAllCloud(grouped, plan.userId!);
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await SyncService.clearOwner(prefs);
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Imported ${activities.length} activities')),
+    );
+
+    if (CalendarService.syncEnabled) {
+      await _offerCalendarSync(fresh, plan);
+    }
+  }
+
+  Future<void> _offerCalendarSync(
+    List<Activity> activities,
+    PlanController plan,
+  ) async {
+    if (!mounted) return;
+    final colors = context.colors;
+    final syncToCalendar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.bgElevated,
+        title: Text(
+          'Sync to calendar?',
+          style: KText.h3.copyWith(color: colors.fgPrimary),
+        ),
+        content: Text(
+          'Add the imported activities to your device calendar? '
+          'Existing matching events will be skipped.',
+          style: KText.body.copyWith(color: colors.fgSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'No thanks',
+              style: KText.button.copyWith(color: colors.fgTertiary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Sync',
+              style: KText.button.copyWith(color: colors.fgPrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (syncToCalendar != true || !mounted) return;
+
+    final eventIds = await CalendarService.syncImportedBatch(activities);
+    plan.patchCalendarEventIds(eventIds);
+
+    if (!mounted) return;
+    final synced = eventIds.length;
+    final skipped = activities.length - synced;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          skipped > 0
+              ? 'Synced $synced events ($skipped already on calendar)'
+              : 'Synced $synced events to calendar',
+        ),
+      ),
+    );
+  }
+
+  void _showGoalPicker(BuildContext context) {
+    final colors = context.colors;
+    final goalCtrl = context.read<GoalController>();
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: colors.scrim,
+      builder: (_) => _GoalPickerSheet(
+        current: goalCtrl.goal,
+        onSelected: (value) {
+          goalCtrl.setGoal(value);
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
   void _showTypeColorPicker(BuildContext context) {
     final colors = context.colors;
     showModalBottomSheet<void>(
@@ -107,6 +268,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = context.watch<ThemeController>();
     final onboarding = context.watch<OnboardingController>();
     final auth = context.watch<AuthController>();
+    final goalCtrl = context.watch<GoalController>();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -118,56 +280,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: <Widget>[
         _AccountCard(auth: auth),
         const SizedBox(height: KSpace.s3),
+        _ProCard(onTap: () => PaywallScreen.show(context)),
+
+        // ── App ───────────────────────────────────────────
+        const _SectionHeader(label: 'App'),
         _Group(
           rows: <Widget>[
             _ToggleRow(
+              icon: LucideIcons.moon,
+              iconBg: const Color(0xFF5856D6),
               label: 'Dark mode',
               value: theme.isDark,
               onChanged: (_) => theme.toggleDark(),
             ),
             _StaticRow(
-              label: 'Default view',
-              value: 'Week',
-              onTap: () {},
-            ),
-            _StaticRow(
+              icon: LucideIcons.calendarDays,
+              iconBg: const Color(0xFFFF9500),
               label: 'Week starts on',
-              value: 'Monday',
-              onTap: () {},
+              value: theme.weekStartsOnSunday ? 'Sunday' : 'Monday',
+              onTap: () => theme.toggleWeekStart(),
             ),
             _StaticRow(
-              label: 'Reminders',
-              value: onboarding.remindersEnabled ? 'On' : 'Off',
-              onTap: () => onboarding.setReminders(
-                enabled: !onboarding.remindersEnabled,
-              ),
+              icon: LucideIcons.target,
+              iconBg: const Color(0xFFFF3B30),
+              label: 'Weekly goal',
+              value: goalCtrl.hasGoal ? '${goalCtrl.goal} sessions' : 'Off',
+              onTap: () => _showGoalPicker(context),
             ),
-            const _AccentColorRow(isLast: true),
-          ],
-        ),
-        const SizedBox(height: KSpace.s3),
-        _Group(
-          rows: <Widget>[
+            const _AccentColorRow(
+              label: 'Theme color',
+              icon: LucideIcons.palette,
+              iconBg: Color(0xFFFF2D55),
+            ),
             _ToggleRow(
+              icon: LucideIcons.calendarSync,
+              iconBg: const Color(0xFF34C759),
               label: 'Calendar sync',
               value: _calendarSync,
               onChanged: _toggleCalendarSync,
             ),
             if (_calendarSync)
               _StaticRow(
+                icon: LucideIcons.calendarCheck,
+                iconBg: const Color(0xFF30B0C7),
                 label: 'Calendars',
                 value: _calendarLabel,
                 onTap: _pickCalendars,
-                isLast: true,
               ),
-            if (!_calendarSync)
-              const SizedBox.shrink(),
-          ],
-        ),
-        const SizedBox(height: KSpace.s3),
-        _Group(
-          rows: <Widget>[
             _StaticRow(
+              icon: LucideIcons.paintbrush,
+              iconBg: const Color(0xFFAF52DE),
               label: 'Type colors',
               value: 'Customize',
               onTap: () => _showTypeColorPicker(context),
@@ -175,15 +337,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-        const SizedBox(height: KSpace.s3),
+
+        // ── Data ──────────────────────────────────────────
+        const _SectionHeader(label: 'Data'),
         _Group(
           rows: <Widget>[
             _StaticRow(
+              icon: LucideIcons.upload,
+              iconBg: const Color(0xFF007AFF),
+              label: 'Export data',
+              value: 'Share',
+              onTap: _exportData,
+            ),
+            _StaticRow(
+              icon: LucideIcons.download,
+              iconBg: const Color(0xFF5856D6),
+              label: 'Import data',
+              value: 'Load',
+              onTap: _importData,
+              isLast: true,
+            ),
+          ],
+        ),
+
+        // ── About ─────────────────────────────────────────
+        const _SectionHeader(label: 'About'),
+        _Group(
+          rows: <Widget>[
+            _StaticRow(
+              icon: LucideIcons.refreshCw,
+              iconBg: const Color(0xFFFF9500),
               label: 'Redo onboarding',
-              value: 'Start',
+              value: '',
               onTap: () async {
                 await onboarding.reset();
               },
+            ),
+            _StaticRow(
+              icon: LucideIcons.shieldCheck,
+              iconBg: const Color(0xFF34C759),
+              label: 'Privacy Policy',
+              value: '',
+              onTap: () {},
+            ),
+            _StaticRow(
+              icon: LucideIcons.star,
+              iconBg: const Color(0xFFFFCC00),
+              label: 'Rate Kadence',
+              value: '',
+              onTap: () => InAppReview.instance.openStoreListing(),
               isLast: true,
             ),
           ],
@@ -224,16 +426,67 @@ class _Group extends StatelessWidget {
   }
 }
 
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: KSpace.s1,
+        top: KSpace.s5,
+        bottom: KSpace.s2,
+      ),
+      child: Text(
+        label,
+        style: KText.caption.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: colors.fgTertiary,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
+class _RowIcon extends StatelessWidget {
+  const _RowIcon({required this.icon, required this.bg});
+
+  final IconData icon;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Icon(icon, size: 16, color: Colors.white),
+    );
+  }
+}
+
 class _ToggleRow extends StatelessWidget {
   const _ToggleRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.icon,
+    this.iconBg,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+  final IconData? icon;
+  final Color? iconBg;
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +501,10 @@ class _ToggleRow extends StatelessWidget {
           const EdgeInsets.symmetric(horizontal: KSpace.s4, vertical: 13),
       child: Row(
         children: <Widget>[
+          if (icon != null) ...[
+            _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Text(
               label,
@@ -267,12 +524,16 @@ class _StaticRow extends StatelessWidget {
     required this.value,
     required this.onTap,
     this.isLast = false,
+    this.icon,
+    this.iconBg,
   });
 
   final String label;
   final String value;
   final VoidCallback onTap;
   final bool isLast;
+  final IconData? icon;
+  final Color? iconBg;
 
   @override
   Widget build(BuildContext context) {
@@ -294,6 +555,10 @@ class _StaticRow extends StatelessWidget {
               horizontal: KSpace.s4, vertical: 13),
           child: Row(
             children: <Widget>[
+              if (icon != null) ...[
+                _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: Text(
                   label,
@@ -755,68 +1020,24 @@ class _SignInSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: KSpace.s6),
-            _SignInButton(
-              label: 'Continue with Google',
-              icon: LucideIcons.globe,
+            KOAuthButton(
+              provider: OAuthProvider.google,
               onTap: () {
                 Navigator.of(context).pop();
                 auth.signInWithGoogle();
               },
             ),
-            const SizedBox(height: KSpace.s3),
-            _SignInButton(
-              label: 'Continue with Apple',
-              icon: LucideIcons.apple,
-              onTap: () {
-                Navigator.of(context).pop();
-                auth.signInWithApple();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SignInButton extends StatelessWidget {
-  const _SignInButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KRadius.lg),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: KSpace.s4),
-          decoration: BoxDecoration(
-            color: colors.bgSubtle,
-            border: Border.all(color: colors.border),
-            borderRadius: BorderRadius.circular(KRadius.lg),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18, color: colors.fgPrimary),
-              const SizedBox(width: KSpace.s3),
-              Text(
-                label,
-                style: KText.button.copyWith(color: colors.fgPrimary),
+            if (KOAuthButton.showApple) ...[
+              const SizedBox(height: KSpace.s3),
+              KOAuthButton(
+                provider: OAuthProvider.apple,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  auth.signInWithApple();
+                },
               ),
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -956,10 +1177,198 @@ class _TypeColorRow extends StatelessWidget {
   }
 }
 
-class _AccentColorRow extends StatelessWidget {
-  const _AccentColorRow({this.isLast = false});
+class _ProCard extends StatelessWidget {
+  const _ProCard({required this.onTap});
 
-  final bool isLast;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: Container(
+          padding: const EdgeInsets.all(KSpace.s4),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colors.accent.withValues(alpha: 0.15),
+                colors.accent.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: colors.accent.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(KRadius.lg),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: colors.accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(KRadius.md),
+                ),
+                child: Icon(
+                  LucideIcons.crown,
+                  size: 20,
+                  color: colors.accent,
+                ),
+              ),
+              const SizedBox(width: KSpace.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Kadence ',
+                            style: KText.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colors.fgPrimary,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Pro',
+                            style: KText.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colors.accent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      'Unlock advanced stats and more',
+                      style: KText.caption.copyWith(color: colors.fgTertiary),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: colors.accent),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GoalPickerSheet extends StatelessWidget {
+  const _GoalPickerSheet({
+    required this.current,
+    required this.onSelected,
+  });
+
+  final int? current;
+  final ValueChanged<int?> onSelected;
+
+  static const _options = [0, 2, 3, 4, 5, 6, 7];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 10),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colors.border,
+              borderRadius: BorderRadius.circular(KRadius.full),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              'Weekly goal',
+              style: KText.h3.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: colors.fgPrimary,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'How many sessions per week do you want to complete?',
+              style: KText.bodySm.copyWith(color: colors.fgTertiary),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: KSpace.s4),
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, KSpace.s4 + bottomSafe),
+            child: Wrap(
+              spacing: KSpace.s2,
+              runSpacing: KSpace.s2,
+              children: _options.map((n) {
+                final isOff = n == 0;
+                final selected = isOff ? current == null : current == n;
+                return GestureDetector(
+                  onTap: () => onSelected(isOff ? null : n),
+                  child: AnimatedContainer(
+                    duration: KMotion.fast,
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? colors.accent.withValues(alpha: 0.12)
+                          : colors.bgSubtle,
+                      borderRadius: BorderRadius.circular(KRadius.lg),
+                      border: Border.all(
+                        color: selected ? colors.accent : colors.border,
+                        width: selected ? 2 : 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        isOff ? 'Off' : '$n',
+                        style: KText.body.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: selected ? colors.accent : colors.fgPrimary,
+                          fontSize: isOff ? 14 : 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccentColorRow extends StatelessWidget {
+  const _AccentColorRow({
+    this.label = 'Accent color',
+    this.icon,
+    this.iconBg,
+  });
+
+  final String label;
+  final IconData? icon;
+  final Color? iconBg;
 
   @override
   Widget build(BuildContext context) {
@@ -969,18 +1378,20 @@ class _AccentColorRow extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(color: colors.borderSubtle, width: 1),
-              ),
+        border: Border(
+          bottom: BorderSide(color: colors.borderSubtle, width: 1),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: KSpace.s4, vertical: 13),
       child: Row(
         children: <Widget>[
+          if (icon != null) ...[
+            _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Text(
-              'Accent color',
+              label,
               style: KText.body.copyWith(color: colors.fgPrimary),
             ),
           ),

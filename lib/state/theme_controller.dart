@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Persists the user's light/dark preference.
+/// Persists the user's light/dark preference and week-start day.
 class ThemeController extends ChangeNotifier {
   ThemeController(this._prefs)
-      : _mode = _modeFromString(_prefs.getString(_prefKey));
+      : _mode = _modeFromString(_prefs.getString(_prefKey)),
+        _weekStartDay = _prefs.getInt(_weekStartKey) ?? DateTime.monday;
 
   static const String _prefKey = 'kadence.theme_mode';
+  static const String _weekStartKey = 'kadence.week_start_day';
 
   final SharedPreferences _prefs;
   ThemeMode _mode;
+  int _weekStartDay;
 
   ThemeMode get mode => _mode;
 
@@ -31,6 +34,21 @@ class ThemeController extends ChangeNotifier {
 
   Future<void> toggleDark() =>
       setMode(isDark ? ThemeMode.light : ThemeMode.dark);
+
+  /// DateTime.monday (1) or DateTime.sunday (7).
+  int get weekStartDay => _weekStartDay;
+
+  bool get weekStartsOnSunday => _weekStartDay == DateTime.sunday;
+
+  Future<void> setWeekStartDay(int day) async {
+    if (_weekStartDay == day) return;
+    _weekStartDay = day;
+    notifyListeners();
+    await _prefs.setInt(_weekStartKey, day);
+  }
+
+  Future<void> toggleWeekStart() =>
+      setWeekStartDay(weekStartsOnSunday ? DateTime.monday : DateTime.sunday);
 
   static ThemeMode _modeFromString(String? value) {
     switch (value) {

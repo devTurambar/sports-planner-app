@@ -12,6 +12,7 @@ class KTopBar extends StatelessWidget implements PreferredSizeWidget {
     this.accentColor,
     this.leading,
     this.actions,
+    this.onTitleTap,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class KTopBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? accentColor;
   final Widget? leading;
   final List<Widget>? actions;
+  final VoidCallback? onTitleTap;
 
   @override
   Size get preferredSize => const Size.fromHeight(60);
@@ -42,21 +44,25 @@ class KTopBar extends StatelessWidget implements PreferredSizeWidget {
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(text: title),
-                            TextSpan(
-                              text: '.',
-                              style: TextStyle(color: tint),
-                            ),
-                          ],
-                        ),
-                        style: KText.h2.copyWith(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: colors.fgPrimary,
-                          letterSpacing: -0.5,
+                      child: GestureDetector(
+                        onTap: onTitleTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: title),
+                              TextSpan(
+                                text: '.',
+                                style: TextStyle(color: tint),
+                              ),
+                            ],
+                          ),
+                          style: KText.h2.copyWith(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: colors.fgPrimary,
+                            letterSpacing: -0.5,
+                          ),
                         ),
                       ),
                     ),

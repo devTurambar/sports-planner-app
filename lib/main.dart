@@ -11,6 +11,9 @@ import 'state/calendar_service.dart';
 import 'state/onboarding_controller.dart';
 import 'state/plan_controller.dart';
 import 'state/theme_controller.dart';
+import 'state/review_service.dart';
+import 'state/goal_controller.dart';
+import 'state/tip_controller.dart';
 import 'state/type_color_controller.dart';
 
 Future<void> main() async {
@@ -31,6 +34,7 @@ Future<void> main() async {
   tz.initializeTimeZones();
   final prefs = await SharedPreferences.getInstance();
   await CalendarService.init(prefs);
+  ReviewService.init(prefs);
   final planController = await PlanController.create(prefs: prefs);
 
   runApp(
@@ -50,6 +54,12 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<TypeColorController>(
           create: (_) => TypeColorController(prefs),
+        ),
+        ChangeNotifierProvider<GoalController>(
+          create: (_) => GoalController(prefs),
+        ),
+        ChangeNotifierProvider<TipController>(
+          create: (_) => TipController(prefs),
         ),
         ChangeNotifierProvider<PlanController>.value(
           value: planController,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
+import '../../state/tip_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -50,6 +51,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
       TextEditingController(text: widget.existing?.notes ?? '');
 
   late ActivityType? _type = widget.existing?.type;
+  late String? _subType = widget.existing?.subType;
   late TimeOfDay? _selectedTime = _parseTimeOfDay(widget.existing?.timeOfDay);
   late int? _durationMinutes = _parseDuration(widget.existing?.duration);
 
@@ -195,17 +197,20 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
         id: widget.existing!.id,
         name: _name.text,
         type: _type,
+        subType: _type == ActivityType.other ? _subType : null,
         duration: duration,
         timeOfDay: timeOfDay,
         notes: notes,
       );
     } else {
+      context.read<TipController>().onActivityCreated();
       final dates = _recurrence.expand(widget.date, _weeks);
       for (final date in dates) {
         plan.save(
           date: date,
           name: _name.text,
           type: _type,
+          subType: _type == ActivityType.other ? _subType : null,
           duration: duration,
           timeOfDay: timeOfDay,
           notes: notes,
@@ -306,8 +311,18 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                     const SizedBox(height: KSpace.s3 + 2),
                     TypeSelector(
                       value: _type,
-                      onChanged: (v) =>
-                          setState(() => _type = (v == _type) ? null : v),
+                      subType: _subType,
+                      onChanged: (v) => setState(() {
+                        if (v == _type && v != ActivityType.other) {
+                          _type = null;
+                          _subType = null;
+                        } else {
+                          _type = v;
+                          if (v != ActivityType.other) _subType = null;
+                        }
+                      }),
+                      onSubTypeChanged: (v) =>
+                          setState(() => _subType = v),
                     ),
                     const SizedBox(height: KSpace.s3 + 2),
                     Row(

@@ -21,6 +21,11 @@ dependencies:
   device_calendar: ^4.3.3
   timezone: ^0.9.4
   supabase_flutter: ^2.12.4
+  in_app_review: ^2.0.12
+  share_plus: ^10.1.4
+  file_picker: ^8.1.7
+  path_provider: ^2.1.5
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_lints: ^4.0.0
@@ -29,3 +34,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icons/

@@ -70,16 +70,29 @@ class KDate {
       DateTime(date.year, date.month, date.day);
 
   /// The Monday of the week that contains [date].
-  static DateTime mondayOfWeek(DateTime date) {
+  static DateTime mondayOfWeek(DateTime date) =>
+      startOfWeek(date, DateTime.monday);
+
+  /// The first day of the week that contains [date], given a
+  /// [startDay] (DateTime.monday or DateTime.sunday).
+  static DateTime startOfWeek(DateTime date, int startDay) {
     final d = startOfDay(date);
-    // DateTime.weekday: Monday == 1 .. Sunday == 7
-    return d.subtract(Duration(days: d.weekday - DateTime.monday));
+    final diff = (d.weekday - startDay + 7) % 7;
+    return d.subtract(Duration(days: diff));
   }
 
-  /// Seven consecutive days starting from the Monday of [date]'s week.
-  static List<DateTime> weekFor(DateTime date) {
-    final monday = mondayOfWeek(date);
-    return List<DateTime>.generate(7, (i) => monday.add(Duration(days: i)));
+  /// Seven consecutive days starting from the first day of [date]'s week.
+  static List<DateTime> weekFor(DateTime date, [int startDay = DateTime.monday]) {
+    final start = startOfWeek(date, startDay);
+    return List<DateTime>.generate(7, (i) => start.add(Duration(days: i)));
+  }
+
+  /// Weekday labels reordered so index 0 is [startDay].
+  static List<String> orderedMinWeekdays(int startDay) {
+    if (startDay == DateTime.sunday) {
+      return const ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    }
+    return minWeekdays;
   }
 
   static bool isSameDay(DateTime a, DateTime b) =>

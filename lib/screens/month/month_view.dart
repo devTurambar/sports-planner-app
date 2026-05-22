@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
+import '../../state/theme_controller.dart';
+import '../../state/tip_controller.dart';
+import '../../widgets/k_tip_banner.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -16,21 +19,48 @@ class MonthView extends StatefulWidget {
   const MonthView({super.key});
 
   @override
-  State<MonthView> createState() => _MonthViewState();
+  State<MonthView> createState() => MonthViewState();
 }
 
-class _MonthViewState extends State<MonthView> {
+class MonthViewState extends State<MonthView> {
   static const _initialPage = 5200;
   late final PageController _pageCtrl =
       PageController(initialPage: _initialPage);
   int _currentPage = _initialPage;
   DateTime? _selected;
   final GlobalKey _detailKey = GlobalKey();
+  bool _titleNavTipShown = false;
 
   @override
   void dispose() {
     _pageCtrl.dispose();
     super.dispose();
+  }
+
+  void jumpToToday() {
+    _pageCtrl.animateToPage(
+      _initialPage,
+      duration: KMotion.base,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _showTitleNavTip() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final tips = context.read<TipController>();
+      if (!tips.shouldShow(TipKey.monthTitleNav)) return;
+      final today = DateTime.now();
+      final hint = '${today.fullMonth} ${today.year}';
+      KTutorialOverlay.show(
+        context: context,
+        gesture: TutorialGesture.titleTap,
+        title: 'Tap the title to go back',
+        subtitle: 'Tap the title at the top to jump back to the current month',
+        animationHint: hint,
+        onDismiss: () => tips.markSeen(TipKey.monthTitleNav),
+      );
+    });
   }
 
   void _shiftMonth(int delta) {
@@ -77,14 +107,24 @@ class _MonthViewState extends State<MonthView> {
 
     return PageView.builder(
       controller: _pageCtrl,
-      onPageChanged: (page) => setState(() {
-        _currentPage = page;
-        _selected = null;
-      }),
+      onPageChanged: (page) {
+        setState(() {
+          _currentPage = page;
+          _selected = null;
+        });
+        if (!_titleNavTipShown && page != _initialPage) {
+          final tips = context.read<TipController>();
+          if (tips.shouldShow(TipKey.monthTitleNav)) {
+            _titleNavTipShown = true;
+            _showTitleNavTip();
+          }
+        }
+      },
       itemBuilder: (context, page) {
         final cursor = _cursorForPage(page);
+        final startDay = context.watch<ThemeController>().weekStartDay;
         final firstOfMonth = DateTime(cursor.year, cursor.month);
-        final offset = (firstOfMonth.weekday - DateTime.monday) % 7;
+        final offset = (firstOfMonth.weekday - startDay + 7) % 7;
         final totalDays = KDate.daysInMonth(cursor.year, cursor.month);
 
         final cells = <Widget>[
@@ -169,7 +209,7 @@ class _MonthViewState extends State<MonthView> {
               ],
             ),
             const SizedBox(height: KSpace.s2 + 2),
-            _WeekdayHeader(colors: colors),
+            _WeekdayHeader(colors: colors, startDay: startDay),
             const SizedBox(height: 4),
             GridView.count(
               crossAxisCount: 7,
@@ -428,21 +468,25 @@ class _NavButton extends StatelessWidget {
 }
 
 class _WeekdayHeader extends StatelessWidget {
-  const _WeekdayHeader({required this.colors});
+  const _WeekdayHeader({required this.colors, required this.startDay});
 
   final KadenceColors colors;
+  final int startDay;
 
   @override
   Widget build(BuildContext context) {
+    final labels = KDate.orderedMinWeekdays(startDay);
     return Row(
-      children: List<Widget>.generate(KDate.minWeekdays.length, (i) {
-        final isWeekend = i >= 5;
+      children: List<Widget>.generate(labels.length, (i) {
+        final weekday = (startDay - 1 + i) % 7 + 1;
+        final isWeekend =
+            weekday == DateTime.saturday || weekday == DateTime.sunday;
         return Expanded(
           child: Center(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 3),
               child: Text(
-                KDate.minWeekdays[i],
+                labels[i],
                 style: KText.caption.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,

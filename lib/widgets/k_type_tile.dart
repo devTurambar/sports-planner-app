@@ -52,6 +52,8 @@ class KTypeTile extends StatelessWidget {
         return LucideIcons.circle;
       case ActivityType.dance:
         return LucideIcons.music;
+      case ActivityType.combat:
+        return LucideIcons.swords;
       case ActivityType.elliptical:
         return LucideIcons.activity;
       case ActivityType.other:
