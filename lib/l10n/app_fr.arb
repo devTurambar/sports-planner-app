@@ -94,5 +94,31 @@
   "onboardingManualBody": "Exporte et importe tes données sous forme de fichier depuis les Paramètres quand tu veux.",
   "onboardingContinueWithoutAccount": "Continuer sans compte",
   "onboardingCloudTitle": "Synchronisation cloud",
-  "onboardingCloudBody": "Connecte-toi avec ton compte pour synchroniser automatiquement entre appareils."
+  "onboardingCloudBody": "Connecte-toi avec ton compte pour synchroniser automatiquement entre appareils.",
+
+  "navWeek": "Semaine",
+  "navMonth": "Mois",
+  "navStats": "Stats",
+  "navSettings": "Paramètres",
+
+  "weekThisWeek": "Cette semaine",
+  "weekSummaryCaption": "séances faites · {percent}% dans les temps",
+  "weekSummaryGoal": "{done}/{goal} objectif hebdo",
+
+  "dayEmptyPast": "Jour de repos",
+  "dayEmptyFuture": "Aucune séance",
+  "dayMoreBadge": "+{count}",
+
+  "tipSwipeTitle": "Glisse pour naviguer entre les semaines",
+  "tipSwipeBody": "Glisse vers la gauche ou la droite pour voir les semaines passées et à venir",
+  "tipDoubleTapTitle": "Double-tape pour cocher",
+  "tipDoubleTapBody": "Marque rapidement les séances du jour comme faites en double-tapant",
+  "tipLongPressTitle": "Appui long pour supprimer",
+  "tipLongPressBody": "Appuie longuement sur un jour pour supprimer toutes ses séances",
+  "tipTitleNavTitle": "Tape le titre pour revenir",
+  "tipTitleNavBody": "Tape \"{label}\" en haut pour revenir à la semaine actuelle",
+
+  "deleteDayTitle": "Supprimer toutes les séances ?",
+  "deleteDayBody": "Toutes les séances de ce jour seront supprimées. Cette action est irréversible.",
+  "actionDelete": "Supprimer"
 }

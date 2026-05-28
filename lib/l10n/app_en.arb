@@ -126,5 +126,48 @@
   "onboardingManualBody": "Export and import your data as a file from Settings whenever you want.",
   "onboardingContinueWithoutAccount": "Continue without account",
   "onboardingCloudTitle": "Cloud sync",
-  "onboardingCloudBody": "Sign in with your account to sync across devices automatically."
+  "onboardingCloudBody": "Sign in with your account to sync across devices automatically.",
+
+  "navWeek": "Week",
+  "navMonth": "Month",
+  "navStats": "Stats",
+  "navSettings": "Settings",
+
+  "weekThisWeek": "This week",
+  "weekSummaryCaption": "sessions done · {percent}% on track",
+  "@weekSummaryCaption": {
+    "description": "Caption under the done/planned count on the week summary card.",
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "weekSummaryGoal": "{done}/{goal} weekly goal",
+  "@weekSummaryGoal": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "goal": { "type": "int" }
+    }
+  },
+
+  "dayEmptyPast": "Rest day",
+  "dayEmptyFuture": "No session",
+  "dayMoreBadge": "+{count} more",
+  "@dayMoreBadge": {
+    "description": "Trailing badge on a day card showing how many extra sessions exist beyond the primary one.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "tipSwipeTitle": "Swipe to browse weeks",
+  "tipSwipeBody": "Slide left or right to see past and upcoming weeks",
+  "tipDoubleTapTitle": "Double-tap to check off",
+  "tipDoubleTapBody": "Quickly mark a day's sessions as done with a double-tap",
+  "tipLongPressTitle": "Long-press to delete",
+  "tipLongPressBody": "Press and hold a day to remove all its sessions",
+  "tipTitleNavTitle": "Tap the title to go back",
+  "tipTitleNavBody": "Tap \"{label}\" at the top to jump back to the current week",
+  "@tipTitleNavBody": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+
+  "deleteDayTitle": "Delete all sessions?",
+  "deleteDayBody": "Every session on this day will be removed. This can't be undone.",
+  "actionDelete": "Delete"
 }

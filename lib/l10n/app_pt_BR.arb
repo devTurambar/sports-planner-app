@@ -94,5 +94,31 @@
   "onboardingManualBody": "Exporte e importe seus dados como arquivo nas Configurações sempre que quiser.",
   "onboardingContinueWithoutAccount": "Continuar sem conta",
   "onboardingCloudTitle": "Sincronização na nuvem",
-  "onboardingCloudBody": "Faça login com sua conta para sincronizar entre dispositivos automaticamente."
+  "onboardingCloudBody": "Faça login com sua conta para sincronizar entre dispositivos automaticamente.",
+
+  "navWeek": "Semana",
+  "navMonth": "Mês",
+  "navStats": "Estatísticas",
+  "navSettings": "Configurações",
+
+  "weekThisWeek": "Esta semana",
+  "weekSummaryCaption": "sessões feitas · {percent}% no plano",
+  "weekSummaryGoal": "{done}/{goal} meta semanal",
+
+  "dayEmptyPast": "Dia de descanso",
+  "dayEmptyFuture": "Sem sessão",
+  "dayMoreBadge": "+{count}",
+
+  "tipSwipeTitle": "Deslize para navegar entre semanas",
+  "tipSwipeBody": "Deslize para a esquerda ou direita para ver semanas passadas e futuras",
+  "tipDoubleTapTitle": "Toque duas vezes para concluir",
+  "tipDoubleTapBody": "Marque rapidamente as sessões do dia como feitas com um toque duplo",
+  "tipLongPressTitle": "Pressione para excluir",
+  "tipLongPressBody": "Pressione e segure um dia para remover todas as sessões",
+  "tipTitleNavTitle": "Toque no título para voltar",
+  "tipTitleNavBody": "Toque em \"{label}\" no topo para voltar à semana atual",
+
+  "deleteDayTitle": "Excluir todas as sessões?",
+  "deleteDayBody": "Todas as sessões deste dia serão removidas. Essa ação não pode ser desfeita.",
+  "actionDelete": "Excluir"
 }

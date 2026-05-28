@@ -267,4 +267,79 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingCloudBody =>
       'Inicia sesión con tu cuenta para sincronizar entre dispositivos automáticamente.';
+
+  @override
+  String get navWeek => 'Semana';
+
+  @override
+  String get navMonth => 'Mes';
+
+  @override
+  String get navStats => 'Estadísticas';
+
+  @override
+  String get navSettings => 'Ajustes';
+
+  @override
+  String get weekThisWeek => 'Esta semana';
+
+  @override
+  String weekSummaryCaption(int percent) {
+    return 'sesiones hechas · $percent% en plan';
+  }
+
+  @override
+  String weekSummaryGoal(int done, int goal) {
+    return '$done/$goal objetivo semanal';
+  }
+
+  @override
+  String get dayEmptyPast => 'Día de descanso';
+
+  @override
+  String get dayEmptyFuture => 'Sin sesión';
+
+  @override
+  String dayMoreBadge(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get tipSwipeTitle => 'Desliza para cambiar de semana';
+
+  @override
+  String get tipSwipeBody =>
+      'Desliza a la izquierda o derecha para ver semanas pasadas y futuras';
+
+  @override
+  String get tipDoubleTapTitle => 'Toca dos veces para marcar';
+
+  @override
+  String get tipDoubleTapBody =>
+      'Marca rápidamente las sesiones del día como hechas con un doble toque';
+
+  @override
+  String get tipLongPressTitle => 'Mantén pulsado para eliminar';
+
+  @override
+  String get tipLongPressBody =>
+      'Mantén pulsado un día para eliminar todas sus sesiones';
+
+  @override
+  String get tipTitleNavTitle => 'Toca el título para volver';
+
+  @override
+  String tipTitleNavBody(String label) {
+    return 'Toca \"$label\" arriba para volver a la semana actual';
+  }
+
+  @override
+  String get deleteDayTitle => '¿Eliminar todas las sesiones?';
+
+  @override
+  String get deleteDayBody =>
+      'Todas las sesiones de este día se eliminarán. Esta acción no se puede deshacer.';
+
+  @override
+  String get actionDelete => 'Eliminar';
 }

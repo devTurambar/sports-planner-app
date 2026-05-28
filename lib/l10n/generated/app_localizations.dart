@@ -570,6 +570,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in with your account to sync across devices automatically.'**
   String get onboardingCloudBody;
+
+  /// No description provided for @navWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get navWeek;
+
+  /// No description provided for @navMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get navMonth;
+
+  /// No description provided for @navStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get navStats;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @weekThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get weekThisWeek;
+
+  /// Caption under the done/planned count on the week summary card.
+  ///
+  /// In en, this message translates to:
+  /// **'sessions done · {percent}% on track'**
+  String weekSummaryCaption(int percent);
+
+  /// No description provided for @weekSummaryGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{goal} weekly goal'**
+  String weekSummaryGoal(int done, int goal);
+
+  /// No description provided for @dayEmptyPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest day'**
+  String get dayEmptyPast;
+
+  /// No description provided for @dayEmptyFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'No session'**
+  String get dayEmptyFuture;
+
+  /// Trailing badge on a day card showing how many extra sessions exist beyond the primary one.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String dayMoreBadge(int count);
+
+  /// No description provided for @tipSwipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to browse weeks'**
+  String get tipSwipeTitle;
+
+  /// No description provided for @tipSwipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide left or right to see past and upcoming weeks'**
+  String get tipSwipeBody;
+
+  /// No description provided for @tipDoubleTapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-tap to check off'**
+  String get tipDoubleTapTitle;
+
+  /// No description provided for @tipDoubleTapBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickly mark a day\'s sessions as done with a double-tap'**
+  String get tipDoubleTapBody;
+
+  /// No description provided for @tipLongPressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press to delete'**
+  String get tipLongPressTitle;
+
+  /// No description provided for @tipLongPressBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Press and hold a day to remove all its sessions'**
+  String get tipLongPressBody;
+
+  /// No description provided for @tipTitleNavTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the title to go back'**
+  String get tipTitleNavTitle;
+
+  /// No description provided for @tipTitleNavBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"{label}\" at the top to jump back to the current week'**
+  String tipTitleNavBody(String label);
+
+  /// No description provided for @deleteDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all sessions?'**
+  String get deleteDayTitle;
+
+  /// No description provided for @deleteDayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every session on this day will be removed. This can\'t be undone.'**
+  String get deleteDayBody;
+
+  /// No description provided for @actionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get actionDelete;
 }
 
 class _AppLocalizationsDelegate

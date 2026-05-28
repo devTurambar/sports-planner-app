@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 
 import '../../../theme/kadence_colors.dart';
@@ -145,12 +147,15 @@ class _DayStamp extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isToday = activity.status == DayStatus.today;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final weekdayLabel =
+        DateFormat.E(localeName).format(activity.date).toUpperCase();
     return SizedBox(
       width: 30,
       child: Column(
         children: <Widget>[
           Text(
-            activity.date.weekdayShort.toUpperCase(),
+            weekdayLabel,
             style: KText.caption.copyWith(
               fontSize: 9,
               fontWeight: FontWeight.w700,
@@ -187,13 +192,14 @@ class _Content extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final status = activity.status;
 
     if (status == DayStatus.empty) {
       final today = TodayScope.of(context);
       final isPast = activity.date.isBefore(KDate.startOfDay(today));
       return Text(
-        isPast ? 'Rest day' : 'No session',
+        isPast ? loc.dayEmptyPast : loc.dayEmptyFuture,
         style: KText.body.copyWith(
           color: colors.fgTertiary,
           fontSize: 14,
@@ -250,6 +256,7 @@ class _MoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -257,7 +264,7 @@ class _MoreBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        '+$count more',
+        loc.dayMoreBadge(count),
         style: KText.caption.copyWith(
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -372,9 +379,3 @@ class _DashedBorderPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-extension on DateTime {
-  String get weekdayShort {
-    const names = <String>['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return names[weekday - 1];
-  }
-}

@@ -269,4 +269,79 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get onboardingCloudBody =>
       'Connecte-toi avec ton compte pour synchroniser automatiquement entre appareils.';
+
+  @override
+  String get navWeek => 'Semaine';
+
+  @override
+  String get navMonth => 'Mois';
+
+  @override
+  String get navStats => 'Stats';
+
+  @override
+  String get navSettings => 'Paramètres';
+
+  @override
+  String get weekThisWeek => 'Cette semaine';
+
+  @override
+  String weekSummaryCaption(int percent) {
+    return 'séances faites · $percent% dans les temps';
+  }
+
+  @override
+  String weekSummaryGoal(int done, int goal) {
+    return '$done/$goal objectif hebdo';
+  }
+
+  @override
+  String get dayEmptyPast => 'Jour de repos';
+
+  @override
+  String get dayEmptyFuture => 'Aucune séance';
+
+  @override
+  String dayMoreBadge(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get tipSwipeTitle => 'Glisse pour naviguer entre les semaines';
+
+  @override
+  String get tipSwipeBody =>
+      'Glisse vers la gauche ou la droite pour voir les semaines passées et à venir';
+
+  @override
+  String get tipDoubleTapTitle => 'Double-tape pour cocher';
+
+  @override
+  String get tipDoubleTapBody =>
+      'Marque rapidement les séances du jour comme faites en double-tapant';
+
+  @override
+  String get tipLongPressTitle => 'Appui long pour supprimer';
+
+  @override
+  String get tipLongPressBody =>
+      'Appuie longuement sur un jour pour supprimer toutes ses séances';
+
+  @override
+  String get tipTitleNavTitle => 'Tape le titre pour revenir';
+
+  @override
+  String tipTitleNavBody(String label) {
+    return 'Tape \"$label\" en haut pour revenir à la semaine actuelle';
+  }
+
+  @override
+  String get deleteDayTitle => 'Supprimer toutes les séances ?';
+
+  @override
+  String get deleteDayBody =>
+      'Toutes les séances de ce jour seront supprimées. Cette action est irréversible.';
+
+  @override
+  String get actionDelete => 'Supprimer';
 }

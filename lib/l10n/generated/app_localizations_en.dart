@@ -262,4 +262,79 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingCloudBody =>
       'Sign in with your account to sync across devices automatically.';
+
+  @override
+  String get navWeek => 'Week';
+
+  @override
+  String get navMonth => 'Month';
+
+  @override
+  String get navStats => 'Stats';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get weekThisWeek => 'This week';
+
+  @override
+  String weekSummaryCaption(int percent) {
+    return 'sessions done · $percent% on track';
+  }
+
+  @override
+  String weekSummaryGoal(int done, int goal) {
+    return '$done/$goal weekly goal';
+  }
+
+  @override
+  String get dayEmptyPast => 'Rest day';
+
+  @override
+  String get dayEmptyFuture => 'No session';
+
+  @override
+  String dayMoreBadge(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get tipSwipeTitle => 'Swipe to browse weeks';
+
+  @override
+  String get tipSwipeBody =>
+      'Slide left or right to see past and upcoming weeks';
+
+  @override
+  String get tipDoubleTapTitle => 'Double-tap to check off';
+
+  @override
+  String get tipDoubleTapBody =>
+      'Quickly mark a day\'s sessions as done with a double-tap';
+
+  @override
+  String get tipLongPressTitle => 'Long-press to delete';
+
+  @override
+  String get tipLongPressBody =>
+      'Press and hold a day to remove all its sessions';
+
+  @override
+  String get tipTitleNavTitle => 'Tap the title to go back';
+
+  @override
+  String tipTitleNavBody(String label) {
+    return 'Tap \"$label\" at the top to jump back to the current week';
+  }
+
+  @override
+  String get deleteDayTitle => 'Delete all sessions?';
+
+  @override
+  String get deleteDayBody =>
+      'Every session on this day will be removed. This can\'t be undone.';
+
+  @override
+  String get actionDelete => 'Delete';
 }

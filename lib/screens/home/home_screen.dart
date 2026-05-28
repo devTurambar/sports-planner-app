@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../state/plan_controller.dart';
 import '../../state/type_color_controller.dart';
 import '../../theme/kadence_colors.dart';
@@ -35,12 +37,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final today = TodayScope.of(context);
     final typeColors = context.watch<TypeColorController>();
     final accentTint = typeColors.accentTint(colors);
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     final String title = switch (_tab) {
-      HomeTab.week => 'This week',
-      HomeTab.month => '${today.fullMonth} ${today.year}',
-      HomeTab.stats => 'Stats',
-      HomeTab.settings => 'Settings',
+      HomeTab.week => loc.weekThisWeek,
+      HomeTab.month => DateFormat.yMMMM(localeName).format(today),
+      HomeTab.stats => loc.navStats,
+      HomeTab.settings => loc.navSettings,
     };
 
     final Color? accentColor = _tab == HomeTab.settings ? null : accentTint;

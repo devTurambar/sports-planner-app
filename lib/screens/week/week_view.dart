@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/goal_controller.dart';
 import '../../state/plan_controller.dart';
@@ -91,38 +93,42 @@ class WeekViewState extends State<WeekView> {
   }
 
   void _showSwipeTip() {
+    final loc = AppLocalizations.of(context)!;
     _showOverlay(
       TutorialGesture.swipe,
-      'Swipe to browse weeks',
-      'Slide left or right to see past and upcoming weeks',
+      loc.tipSwipeTitle,
+      loc.tipSwipeBody,
       TipKey.weekSwipe,
     );
   }
 
   void _showDoubleTapTip() {
+    final loc = AppLocalizations.of(context)!;
     _showOverlay(
       TutorialGesture.doubleTap,
-      'Double-tap to check off',
-      'Quickly mark a day\'s sessions as done with a double-tap',
+      loc.tipDoubleTapTitle,
+      loc.tipDoubleTapBody,
       TipKey.doubleTap,
       then: _showLongPressTip,
     );
   }
 
   void _showLongPressTip() {
+    final loc = AppLocalizations.of(context)!;
     _showOverlay(
       TutorialGesture.longPress,
-      'Long-press to delete',
-      'Press and hold a day to remove all its sessions',
+      loc.tipLongPressTitle,
+      loc.tipLongPressBody,
       TipKey.longPress,
     );
   }
 
   void _showTitleNavTip() {
+    final loc = AppLocalizations.of(context)!;
     _showOverlay(
       TutorialGesture.titleTap,
-      'Tap the title to go back',
-      'Tap "This week." at the top to jump back to the current week',
+      loc.tipTitleNavTitle,
+      loc.tipTitleNavBody(loc.weekThisWeek),
       TipKey.weekTitleNav,
     );
   }
@@ -246,6 +252,7 @@ class WeekViewState extends State<WeekView> {
   void _confirmClearDay(BuildContext context, DateTime date) {
     final plan = context.read<PlanController>();
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -254,7 +261,7 @@ class WeekViewState extends State<WeekView> {
           borderRadius: BorderRadius.circular(KRadius.md),
         ),
         title: Text(
-          'Delete all sessions?',
+          loc.deleteDayTitle,
           style: KText.h3.copyWith(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -262,14 +269,14 @@ class WeekViewState extends State<WeekView> {
           ),
         ),
         content: Text(
-          'Every session on this day will be removed. This can\'t be undone.',
+          loc.deleteDayBody,
           style: KText.bodySm.copyWith(color: colors.fgSecondary),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Cancel',
+              loc.actionCancel,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w500,
                 color: colors.fgSecondary,
@@ -279,7 +286,7 @@ class WeekViewState extends State<WeekView> {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Delete',
+              loc.actionDelete,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFFB5443A),
@@ -335,6 +342,7 @@ class _WeekSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final hasGoal = weeklyGoal != null && weeklyGoal! > 0;
 
     return Container(
@@ -380,7 +388,7 @@ class _WeekSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'sessions done · $onTrack% on track',
+                  loc.weekSummaryCaption(onTrack),
                   style: KText.caption.copyWith(
                     fontSize: 11,
                     color: colors.fgSecondary,
@@ -389,7 +397,7 @@ class _WeekSummaryCard extends StatelessWidget {
                 if (hasGoal) ...[
                   const SizedBox(height: 2),
                   Text(
-                    '$done/$weeklyGoal weekly goal',
+                    loc.weekSummaryGoal(done, weeklyGoal!),
                     style: KText.caption.copyWith(
                       fontSize: 11,
                       color: colors.fgTertiary,
@@ -543,11 +551,8 @@ class _WeekDotCell extends StatelessWidget {
     final all = plan.activitiesFor(activity.date);
     final secondaryType = all.length > 1 ? all[1].type : null;
 
-    final startDay = context.watch<ThemeController>().weekStartDay;
-    final dayLabels = startDay == DateTime.sunday
-        ? const ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-        : const ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    final dayIndex = (activity.date.weekday - startDay + 7) % 7;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final narrowFmt = DateFormat('EEEEE', localeName);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -587,7 +592,7 @@ class _WeekDotCell extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          dayLabels[dayIndex],
+          narrowFmt.format(activity.date).toUpperCase(),
           style: KText.caption.copyWith(
             fontSize: 9,
             fontWeight: FontWeight.w600,
@@ -615,8 +620,10 @@ class _WeekNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     final weekEnd = weekStart.add(const Duration(days: 6));
-    final label = _formatRange(weekStart, weekEnd);
+    final label = _formatRange(weekStart, weekEnd, localeName);
 
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 4),
@@ -641,7 +648,7 @@ class _WeekNav extends StatelessWidget {
                   if (isCurrent) ...<Widget>[
                     const SizedBox(height: 1),
                     Text(
-                      'This week',
+                      loc.weekThisWeek,
                       style: KText.caption.copyWith(
                         fontSize: 10,
                         color: colors.fgSecondary,
@@ -659,12 +666,9 @@ class _WeekNav extends StatelessWidget {
     );
   }
 
-  String _formatRange(DateTime start, DateTime end) {
-    if (start.month == end.month) {
-      return '${start.shortMonth} ${start.day} – ${end.day}';
-    }
-    return '${start.shortMonth} ${start.day} – '
-        '${end.shortMonth} ${end.day}';
+  String _formatRange(DateTime start, DateTime end, String localeName) {
+    final fmt = DateFormat.MMMd(localeName);
+    return '${fmt.format(start)} – ${fmt.format(end)}';
   }
 }
 
