@@ -732,8 +732,11 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
   bottom sheet with options [Off, 2, 3, 4, 5, 6, 7].
 - ✅ Week view: `_WeekSummaryCard` shows `_GoalRing` (44×44
   progress ring with percentage or check icon) when a goal is set.
-  Denominator changes from `/planned` to `/weeklyGoal`, label from
-  "sessions done" to "weekly goal".
+  The main text always shows `done/planned` with "sessions done ·
+  X% on track" below it. When a goal is set, a second smaller line
+  appears underneath: `done/goal weekly goal`. The ring and the
+  session count are intentionally separate — the ring tracks goal
+  progress, the big text tracks actual planned sessions.
 
 #### Pro stat widgets (done — visual review pending)
 All live in `lib/screens/stats/widgets/` and use the shared

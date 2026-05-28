@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -70,5 +71,5 @@ class KOAuthButton extends StatelessWidget {
     );
   }
 
-  static bool get showApple => Platform.isIOS;
+  static bool get showApple => !kIsWeb && Platform.isIOS;
 }
