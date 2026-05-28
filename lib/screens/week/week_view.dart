@@ -367,7 +367,7 @@ class _WeekSummaryCard extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: hasGoal ? '/$weeklyGoal' : '/$planned',
+                        text: '/$planned',
                         style: KText.h2.copyWith(
                           fontSize: 22,
                           fontWeight: FontWeight.w500,
@@ -380,14 +380,22 @@ class _WeekSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  hasGoal
-                      ? 'weekly goal · $onTrack% on track'
-                      : 'sessions done · $onTrack% on track',
+                  'sessions done · $onTrack% on track',
                   style: KText.caption.copyWith(
                     fontSize: 11,
                     color: colors.fgSecondary,
                   ),
                 ),
+                if (hasGoal) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '$done/$weeklyGoal weekly goal',
+                    style: KText.caption.copyWith(
+                      fontSize: 11,
+                      color: colors.fgTertiary,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

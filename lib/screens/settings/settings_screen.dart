@@ -311,6 +311,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: 'Theme color',
               icon: LucideIcons.palette,
               iconBg: Color(0xFFFF2D55),
+              proBadge: true,
             ),
             _ToggleRow(
               icon: LucideIcons.calendarSync,
@@ -334,6 +335,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: 'Customize',
               onTap: () => _showTypeColorPicker(context),
               isLast: true,
+              proBadge: true,
             ),
           ],
         ),
@@ -473,6 +475,32 @@ class _RowIcon extends StatelessWidget {
   }
 }
 
+class _ProBadge extends StatelessWidget {
+  const _ProBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      margin: const EdgeInsets.only(left: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+      decoration: BoxDecoration(
+        color: colors.accent.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(KRadius.full),
+      ),
+      child: Text(
+        'PRO',
+        style: KText.caption.copyWith(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          color: colors.accent,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
+
 class _ToggleRow extends StatelessWidget {
   const _ToggleRow({
     required this.label,
@@ -526,6 +554,7 @@ class _StaticRow extends StatelessWidget {
     this.isLast = false,
     this.icon,
     this.iconBg,
+    this.proBadge = false,
   });
 
   final String label;
@@ -534,6 +563,7 @@ class _StaticRow extends StatelessWidget {
   final bool isLast;
   final IconData? icon;
   final Color? iconBg;
+  final bool proBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -560,9 +590,14 @@ class _StaticRow extends StatelessWidget {
                 const SizedBox(width: 12),
               ],
               Expanded(
-                child: Text(
-                  label,
-                  style: KText.body.copyWith(color: colors.fgPrimary),
+                child: Row(
+                  children: [
+                    Text(
+                      label,
+                      style: KText.body.copyWith(color: colors.fgPrimary),
+                    ),
+                    if (proBadge) const _ProBadge(),
+                  ],
                 ),
               ),
               Text(
@@ -1245,7 +1280,7 @@ class _ProCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Unlock advanced stats and more',
+                      'Premium features coming soon',
                       style: KText.caption.copyWith(color: colors.fgTertiary),
                     ),
                   ],
@@ -1364,61 +1399,147 @@ class _AccentColorRow extends StatelessWidget {
     this.label = 'Accent color',
     this.icon,
     this.iconBg,
+    this.proBadge = false,
   });
 
   final String label;
   final IconData? icon;
   final Color? iconBg;
+  final bool proBadge;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final controller = context.watch<TypeColorController>();
+    final swatch = colors.paletteColor(controller.accentIndex);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showAccentColorSheet(context),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: colors.borderSubtle, width: 1),
+            ),
+          ),
+          padding:
+              const EdgeInsets.symmetric(horizontal: KSpace.s4, vertical: 13),
+          child: Row(
+            children: <Widget>[
+              if (icon != null) ...[
+                _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: Row(
+                  children: [
+                    Text(
+                      label,
+                      style: KText.body.copyWith(color: colors.fgPrimary),
+                    ),
+                    if (proBadge) const _ProBadge(),
+                  ],
+                ),
+              ),
+              Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: swatch.tint,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                LucideIcons.chevronRight,
+                size: 14,
+                color: colors.fgTertiary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAccentColorSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _AccentColorSheet(),
+    );
+  }
+}
+
+class _AccentColorSheet extends StatelessWidget {
+  const _AccentColorSheet();
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final controller = context.watch<TypeColorController>();
     final currentIdx = controller.accentIndex;
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
 
     return Container(
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: colors.borderSubtle, width: 1),
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: KSpace.s4, vertical: 13),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if (icon != null) ...[
-            _RowIcon(icon: icon!, bg: iconBg ?? colors.fgTertiary),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: Text(
-              label,
-              style: KText.body.copyWith(color: colors.fgPrimary),
+          const SizedBox(height: 10),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colors.border,
+              borderRadius: BorderRadius.circular(KRadius.full),
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(TypeColorController.paletteSize, (idx) {
-              final swatch = colors.paletteColor(idx);
-              final selected = currentIdx == idx;
-              return GestureDetector(
-                onTap: () => controller.setAccent(idx),
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  margin: const EdgeInsets.only(left: 6),
-                  decoration: BoxDecoration(
-                    color: swatch.tint,
-                    shape: BoxShape.circle,
-                    border: selected
-                        ? Border.all(color: colors.fgPrimary, width: 2)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              'Theme color',
+              style: KText.h3.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: colors.fgPrimary,
+              ),
+            ),
+          ),
+          Divider(height: 1, color: colors.borderSubtle),
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomSafe),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(TypeColorController.paletteSize, (idx) {
+                final swatch = colors.paletteColor(idx);
+                final selected = currentIdx == idx;
+                return GestureDetector(
+                  onTap: () => controller.setAccent(idx),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: swatch.tint,
+                      shape: BoxShape.circle,
+                      border: selected
+                          ? Border.all(color: colors.fgPrimary, width: 2.5)
+                          : null,
+                    ),
+                    child: selected
+                        ? Icon(LucideIcons.check,
+                            size: 16, color: colors.bgBase)
                         : null,
                   ),
-                  child: selected
-                      ? Icon(LucideIcons.check, size: 11, color: colors.bgBase)
-                      : null,
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ],
       ),
