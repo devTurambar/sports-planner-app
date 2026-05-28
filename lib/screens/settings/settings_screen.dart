@@ -1225,7 +1225,7 @@ class _TypeColorRow extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              type.label,
+              type.localized(AppLocalizations.of(context)!),
               style: KText.body.copyWith(color: colors.fgPrimary),
             ),
           ),

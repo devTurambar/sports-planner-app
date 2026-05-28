@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/activity.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_spacing.dart';
@@ -24,6 +25,7 @@ class KActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final status = activity.status;
     final isDone = status == DayStatus.done;
     final type = activity.type;
@@ -32,9 +34,9 @@ class KActivityCard extends StatelessWidget {
     final bg = tc?.bg ?? colors.bgCard;
 
     final statusLabel = switch (status) {
-      DayStatus.done => 'DONE',
-      DayStatus.today => 'TODAY',
-      DayStatus.planned => 'PLANNED',
+      DayStatus.done => loc.statusDone.toUpperCase(),
+      DayStatus.today => loc.statusToday.toUpperCase(),
+      DayStatus.planned => loc.statusPlanned.toUpperCase(),
       DayStatus.empty => '',
     };
 
@@ -72,7 +74,7 @@ class KActivityCard extends StatelessWidget {
                       children: <Widget>[
                         Flexible(
                           child: Text(
-                            activity.name ?? 'Session',
+                            activity.name ?? loc.activityNameFallback,
                             style: KText.body.copyWith(
                               fontWeight: FontWeight.w600,
                               color: colors.fgPrimary,

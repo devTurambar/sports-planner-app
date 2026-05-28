@@ -744,6 +744,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap the title at the top to jump back to the current month'**
   String get tipMonthTitleNavBody;
+
+  /// No description provided for @sheetAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add session'**
+  String get sheetAddTitle;
+
+  /// No description provided for @sheetEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit session'**
+  String get sheetEditTitle;
+
+  /// No description provided for @activityNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity name'**
+  String get activityNameLabel;
+
+  /// No description provided for @activityNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Morning run'**
+  String get activityNamePlaceholder;
+
+  /// No description provided for @notesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notesLabel;
+
+  /// No description provided for @notesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Any extra details…'**
+  String get notesPlaceholder;
+
+  /// No description provided for @fieldOptionalSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'  (optional)'**
+  String get fieldOptionalSuffix;
+
+  /// No description provided for @actionSaveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Save session'**
+  String get actionSaveSession;
+
+  /// No description provided for @actionDeleteSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session'**
+  String get actionDeleteSession;
+
+  /// No description provided for @addAnotherActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another activity'**
+  String get addAnotherActivity;
+
+  /// No description provided for @sessionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 session} other{{count} sessions}}'**
+  String sessionsCount(int count);
+
+  /// No description provided for @recurrenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get recurrenceLabel;
+
+  /// No description provided for @recurrenceOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get recurrenceOnce;
+
+  /// No description provided for @recurrenceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get recurrenceDaily;
+
+  /// No description provided for @recurrenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get recurrenceWeekly;
+
+  /// No description provided for @recurrenceWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays'**
+  String get recurrenceWeekdays;
+
+  /// No description provided for @recurrenceWeekends.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekends'**
+  String get recurrenceWeekends;
+
+  /// No description provided for @repeatForLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat for'**
+  String get repeatForLabel;
+
+  /// No description provided for @weeksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String weeksCount(int count);
+
+  /// No description provided for @durationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get durationLabel;
+
+  /// No description provided for @durationPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Set duration'**
+  String get durationPlaceholder;
+
+  /// No description provided for @durationHoursWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h'**
+  String durationHoursWheel(int count);
+
+  /// No description provided for @durationMinutesWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String durationMinutesWheel(int count);
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get timeLabel;
+
+  /// No description provided for @timePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Set time'**
+  String get timePlaceholder;
+
+  /// No description provided for @typeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get typeLabel;
+
+  /// No description provided for @typeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More…'**
+  String get typeMore;
+
+  /// No description provided for @subTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose activity type'**
+  String get subTypeTitle;
+
+  /// No description provided for @subTypeSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search…'**
+  String get subTypeSearchPlaceholder;
+
+  /// No description provided for @subTypeNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get subTypeNoResults;
+
+  /// No description provided for @typeRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get typeRun;
+
+  /// No description provided for @typeTrailRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Trail Run'**
+  String get typeTrailRun;
+
+  /// No description provided for @typeHike.
+  ///
+  /// In en, this message translates to:
+  /// **'Hike'**
+  String get typeHike;
+
+  /// No description provided for @typeWalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk'**
+  String get typeWalk;
+
+  /// No description provided for @typeCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get typeCycle;
+
+  /// No description provided for @typeMtb.
+  ///
+  /// In en, this message translates to:
+  /// **'MTB'**
+  String get typeMtb;
+
+  /// No description provided for @typeSwim.
+  ///
+  /// In en, this message translates to:
+  /// **'Swim'**
+  String get typeSwim;
+
+  /// No description provided for @typeGym.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get typeGym;
+
+  /// No description provided for @typeYoga.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get typeYoga;
+
+  /// No description provided for @typeHiit.
+  ///
+  /// In en, this message translates to:
+  /// **'HIIT'**
+  String get typeHiit;
+
+  /// No description provided for @typeRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Row'**
+  String get typeRow;
+
+  /// No description provided for @typeSki.
+  ///
+  /// In en, this message translates to:
+  /// **'Ski'**
+  String get typeSki;
+
+  /// No description provided for @typeSurf.
+  ///
+  /// In en, this message translates to:
+  /// **'Surf'**
+  String get typeSurf;
+
+  /// No description provided for @typeClimb.
+  ///
+  /// In en, this message translates to:
+  /// **'Climb'**
+  String get typeClimb;
+
+  /// No description provided for @typeTennis.
+  ///
+  /// In en, this message translates to:
+  /// **'Tennis'**
+  String get typeTennis;
+
+  /// No description provided for @typePadel.
+  ///
+  /// In en, this message translates to:
+  /// **'Padel'**
+  String get typePadel;
+
+  /// No description provided for @typeDance.
+  ///
+  /// In en, this message translates to:
+  /// **'Dance'**
+  String get typeDance;
+
+  /// No description provided for @typeCombat.
+  ///
+  /// In en, this message translates to:
+  /// **'Combat'**
+  String get typeCombat;
+
+  /// No description provided for @typeElliptical.
+  ///
+  /// In en, this message translates to:
+  /// **'Elliptical'**
+  String get typeElliptical;
+
+  /// No description provided for @typeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get typeOther;
+
+  /// No description provided for @statusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get statusDone;
+
+  /// No description provided for @statusToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get statusToday;
+
+  /// No description provided for @statusPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get statusPlanned;
+
+  /// No description provided for @statusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get statusOpen;
+
+  /// No description provided for @activityNameFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get activityNameFallback;
 }
 
 class _AppLocalizationsDelegate

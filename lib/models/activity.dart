@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../l10n/generated/app_localizations.dart';
+
 /// The planning status of a given day.
 ///
 /// A day is always in exactly one state. `today` is a convenience flag used
@@ -75,6 +77,53 @@ extension ActivityTypeLabel on ActivityType {
         return 'Elliptical';
       case ActivityType.other:
         return 'Other';
+    }
+  }
+
+  /// Locale-aware label for use in any UI surface that has a
+  /// `BuildContext`. Prefer this over [label] (which is English-only).
+  String localized(AppLocalizations loc) {
+    switch (this) {
+      case ActivityType.run:
+        return loc.typeRun;
+      case ActivityType.trailRun:
+        return loc.typeTrailRun;
+      case ActivityType.hike:
+        return loc.typeHike;
+      case ActivityType.walk:
+        return loc.typeWalk;
+      case ActivityType.cycle:
+        return loc.typeCycle;
+      case ActivityType.mtb:
+        return loc.typeMtb;
+      case ActivityType.swim:
+        return loc.typeSwim;
+      case ActivityType.gym:
+        return loc.typeGym;
+      case ActivityType.yoga:
+        return loc.typeYoga;
+      case ActivityType.hiit:
+        return loc.typeHiit;
+      case ActivityType.row:
+        return loc.typeRow;
+      case ActivityType.ski:
+        return loc.typeSki;
+      case ActivityType.surf:
+        return loc.typeSurf;
+      case ActivityType.climb:
+        return loc.typeClimb;
+      case ActivityType.tennis:
+        return loc.typeTennis;
+      case ActivityType.padel:
+        return loc.typePadel;
+      case ActivityType.dance:
+        return loc.typeDance;
+      case ActivityType.combat:
+        return loc.typeCombat;
+      case ActivityType.elliptical:
+        return loc.typeElliptical;
+      case ActivityType.other:
+        return loc.typeOther;
     }
   }
 

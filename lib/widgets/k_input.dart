@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_spacing.dart';
 import '../theme/kadence_text_styles.dart';
@@ -30,6 +31,7 @@ class KInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -43,7 +45,7 @@ class KInputField extends StatelessWidget {
               TextSpan(text: label),
               if (optional)
                 TextSpan(
-                  text: '  (optional)',
+                  text: loc.fieldOptionalSuffix,
                   style: KText.caption.copyWith(
                     color: colors.fgDisabled,
                   ),

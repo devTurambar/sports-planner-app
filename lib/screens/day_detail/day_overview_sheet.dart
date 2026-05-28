@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
-import '../../utils/date_utils.dart';
 import '../../widgets/k_activity_card.dart';
 import '../../widgets/k_type_chip.dart';
 import 'day_detail_sheet.dart';
@@ -35,6 +36,8 @@ class DayOverviewSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     final plan = context.watch<PlanController>();
     final activities = plan.activitiesFor(date);
     final bottomSafe = MediaQuery.paddingOf(context).bottom;
@@ -84,7 +87,7 @@ class DayOverviewSheet extends StatelessWidget {
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: date.fullWeekday,
+                              text: DateFormat.EEEE(localeName).format(date),
                               style: KText.h2.copyWith(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
@@ -105,7 +108,7 @@ class DayOverviewSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${date.shortMonth} ${date.day}',
+                        DateFormat.MMMd(localeName).format(date),
                         style: KText.caption.copyWith(
                           fontSize: 12,
                           color: colors.fgSecondary,
@@ -116,7 +119,7 @@ class DayOverviewSheet extends StatelessWidget {
                 ),
                 if (activities.isNotEmpty)
                   KTypeChip(
-                    label: '${activities.length} ${activities.length == 1 ? "session" : "sessions"}',
+                    label: loc.sessionsCount(activities.length),
                     tint: tint,
                     bg: tc?.bg ?? colors.bgSubtle,
                   ),
@@ -174,6 +177,7 @@ class DayOverviewSheet extends StatelessWidget {
 
   void _confirmDelete(BuildContext context, Activity activity) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -182,7 +186,7 @@ class DayOverviewSheet extends StatelessWidget {
           borderRadius: BorderRadius.circular(KRadius.md),
         ),
         title: Text(
-          'Delete session?',
+          loc.deleteSessionTitle,
           style: KText.h3.copyWith(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -190,14 +194,14 @@ class DayOverviewSheet extends StatelessWidget {
           ),
         ),
         content: Text(
-          'This can\'t be undone.',
+          loc.deleteSessionBody,
           style: KText.bodySm.copyWith(color: colors.fgSecondary),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Cancel',
+              loc.actionCancel,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w500,
                 color: colors.fgSecondary,
@@ -207,7 +211,7 @@ class DayOverviewSheet extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Delete',
+              loc.actionDelete,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFFB5443A),
@@ -232,6 +236,7 @@ class _AddSessionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -252,7 +257,7 @@ class _AddSessionButton extends StatelessWidget {
               Icon(LucideIcons.plus, size: 16, color: colors.fgSecondary),
               const SizedBox(width: 6),
               Text(
-                'Add another activity',
+                loc.addAnotherActivity,
                 style: KText.bodySm.copyWith(
                   fontWeight: FontWeight.w500,
                   color: colors.fgSecondary,

@@ -367,4 +367,189 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tipMonthTitleNavBody =>
       'Toca el título arriba para volver al mes actual';
+
+  @override
+  String get sheetAddTitle => 'Añadir sesión';
+
+  @override
+  String get sheetEditTitle => 'Editar sesión';
+
+  @override
+  String get activityNameLabel => 'Nombre de la actividad';
+
+  @override
+  String get activityNamePlaceholder => 'ej: Carrera matinal';
+
+  @override
+  String get notesLabel => 'Notas';
+
+  @override
+  String get notesPlaceholder => 'Detalles adicionales…';
+
+  @override
+  String get fieldOptionalSuffix => '  (opcional)';
+
+  @override
+  String get actionSaveSession => 'Guardar sesión';
+
+  @override
+  String get actionDeleteSession => 'Eliminar sesión';
+
+  @override
+  String get addAnotherActivity => 'Añadir otra actividad';
+
+  @override
+  String sessionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sesiones',
+      one: '1 sesión',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurrenceLabel => 'Se repite';
+
+  @override
+  String get recurrenceOnce => 'Una vez';
+
+  @override
+  String get recurrenceDaily => 'Diariamente';
+
+  @override
+  String get recurrenceWeekly => 'Semanalmente';
+
+  @override
+  String get recurrenceWeekdays => 'Días laborables';
+
+  @override
+  String get recurrenceWeekends => 'Fines de semana';
+
+  @override
+  String get repeatForLabel => 'Repetir durante';
+
+  @override
+  String weeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semanas',
+      one: '1 semana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get durationLabel => 'Duración';
+
+  @override
+  String get durationPlaceholder => 'Definir duración';
+
+  @override
+  String durationHoursWheel(int count) {
+    return '$count h';
+  }
+
+  @override
+  String durationMinutesWheel(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get timeLabel => 'Hora';
+
+  @override
+  String get timePlaceholder => 'Definir hora';
+
+  @override
+  String get typeLabel => 'Tipo';
+
+  @override
+  String get typeMore => 'Más…';
+
+  @override
+  String get subTypeTitle => 'Elige el tipo de actividad';
+
+  @override
+  String get subTypeSearchPlaceholder => 'Buscar…';
+
+  @override
+  String get subTypeNoResults => 'Sin resultados';
+
+  @override
+  String get typeRun => 'Carrera';
+
+  @override
+  String get typeTrailRun => 'Trail';
+
+  @override
+  String get typeHike => 'Senderismo';
+
+  @override
+  String get typeWalk => 'Caminar';
+
+  @override
+  String get typeCycle => 'Ciclismo';
+
+  @override
+  String get typeMtb => 'BTT';
+
+  @override
+  String get typeSwim => 'Natación';
+
+  @override
+  String get typeGym => 'Gimnasio';
+
+  @override
+  String get typeYoga => 'Yoga';
+
+  @override
+  String get typeHiit => 'HIIT';
+
+  @override
+  String get typeRow => 'Remo';
+
+  @override
+  String get typeSki => 'Esquí';
+
+  @override
+  String get typeSurf => 'Surf';
+
+  @override
+  String get typeClimb => 'Escalada';
+
+  @override
+  String get typeTennis => 'Tenis';
+
+  @override
+  String get typePadel => 'Pádel';
+
+  @override
+  String get typeDance => 'Baile';
+
+  @override
+  String get typeCombat => 'Combate';
+
+  @override
+  String get typeElliptical => 'Elíptica';
+
+  @override
+  String get typeOther => 'Otro';
+
+  @override
+  String get statusDone => 'Hecha';
+
+  @override
+  String get statusToday => 'Hoy';
+
+  @override
+  String get statusPlanned => 'Planeada';
+
+  @override
+  String get statusOpen => 'Abierta';
+
+  @override
+  String get activityNameFallback => 'Sesión';
 }

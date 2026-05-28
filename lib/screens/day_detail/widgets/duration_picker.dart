@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -25,13 +26,14 @@ class DurationPickerField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final hasValue = value != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Duration',
+          loc.durationLabel,
           style: KText.caption.copyWith(
             fontWeight: FontWeight.w500,
             color: colors.fgSecondary,
@@ -67,7 +69,7 @@ class DurationPickerField extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      hasValue ? formatDuration(value!) : 'Set duration',
+                      hasValue ? formatDuration(value!) : loc.durationPlaceholder,
                       style: KText.body.copyWith(
                         color: hasValue ? colors.fgPrimary : colors.fgTertiary,
                       ),
@@ -135,6 +137,7 @@ class _DurationPickerSheetState extends State<DurationPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final bottomSafe = MediaQuery.paddingOf(context).bottom;
 
     return Container(
@@ -163,7 +166,7 @@ class _DurationPickerSheetState extends State<DurationPickerSheet> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Duration',
+                    loc.durationLabel,
                     style: KText.h3.copyWith(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -204,7 +207,7 @@ class _DurationPickerSheetState extends State<DurationPickerSheet> {
                       for (var i = 0; i < _hours.length; i++)
                         Center(
                           child: Text(
-                            '${_hours[i]} h',
+                            loc.durationHoursWheel(_hours[i]),
                             style: KText.body.copyWith(
                               fontSize: 18,
                               fontWeight: i == _hourIndex
@@ -241,7 +244,7 @@ class _DurationPickerSheetState extends State<DurationPickerSheet> {
                       for (var i = 0; i < _minutes.length; i++)
                         Center(
                           child: Text(
-                            '${_minutes[i]} min',
+                            loc.durationMinutesWheel(_minutes[i]),
                             style: KText.body.copyWith(
                               fontSize: 18,
                               fontWeight: i == _minIndex
@@ -262,7 +265,7 @@ class _DurationPickerSheetState extends State<DurationPickerSheet> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
             child: KButton(
-              label: 'Done',
+              label: loc.actionDone,
               onPressed: () {
                 final total = _totalMinutes;
                 Navigator.of(context).pop(total > 0 ? total : null);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -9,12 +10,13 @@ import '../../../utils/date_utils.dart';
 enum RecurrenceRule { none, daily, weekly, weekdays, weekends }
 
 extension RecurrenceRuleX on RecurrenceRule {
-  String get label => switch (this) {
-        RecurrenceRule.none => 'Once',
-        RecurrenceRule.daily => 'Daily',
-        RecurrenceRule.weekly => 'Weekly',
-        RecurrenceRule.weekdays => 'Weekdays',
-        RecurrenceRule.weekends => 'Weekends',
+  /// Locale-aware label for the chip.
+  String localizedLabel(AppLocalizations loc) => switch (this) {
+        RecurrenceRule.none => loc.recurrenceOnce,
+        RecurrenceRule.daily => loc.recurrenceDaily,
+        RecurrenceRule.weekly => loc.recurrenceWeekly,
+        RecurrenceRule.weekdays => loc.recurrenceWeekdays,
+        RecurrenceRule.weekends => loc.recurrenceWeekends,
       };
 
   List<DateTime> expand(DateTime base, int weeks) {
@@ -61,11 +63,12 @@ class RecurrenceSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Repeats',
+          loc.recurrenceLabel,
           style: KText.caption.copyWith(
             fontWeight: FontWeight.w500,
             color: colors.fgSecondary,
@@ -119,7 +122,7 @@ class _RecurrenceChip extends StatelessWidget {
             ),
           ),
           child: Text(
-            rule.label,
+            rule.localizedLabel(AppLocalizations.of(context)!),
             style: KText.bodySm.copyWith(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -145,11 +148,12 @@ class WeeksStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Row(
       children: <Widget>[
         Expanded(
           child: Text(
-            'Repeat for',
+            loc.repeatForLabel,
             style: KText.body.copyWith(color: colors.fgPrimary),
           ),
         ),
@@ -158,9 +162,9 @@ class WeeksStepper extends StatelessWidget {
           onPressed: value > _min ? () => onChanged(value - 1) : null,
         ),
         SizedBox(
-          width: 64,
+          width: 80,
           child: Text(
-            value == 1 ? '1 week' : '$value weeks',
+            loc.weeksCount(value),
             textAlign: TextAlign.center,
             style: KText.body.copyWith(
               fontWeight: FontWeight.w600,

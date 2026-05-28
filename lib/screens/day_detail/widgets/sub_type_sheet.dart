@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -99,6 +100,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final bottomSafe = MediaQuery.paddingOf(context).bottom;
 
     return Container(
@@ -126,7 +128,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
             child: Text(
-              'Choose activity type',
+              loc.subTypeTitle,
               style: KText.h3.copyWith(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -140,7 +142,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
               controller: _search,
               style: KText.body.copyWith(color: colors.fgPrimary),
               decoration: InputDecoration(
-                hintText: 'Search…',
+                hintText: loc.subTypeSearchPlaceholder,
                 hintStyle: KText.body.copyWith(color: colors.fgTertiary),
                 prefixIcon: Icon(
                   LucideIcons.search,
@@ -167,7 +169,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
                 ? Padding(
                     padding: const EdgeInsets.all(32),
                     child: Text(
-                      'No results',
+                      loc.subTypeNoResults,
                       style: KText.body.copyWith(color: colors.fgTertiary),
                     ),
                   )

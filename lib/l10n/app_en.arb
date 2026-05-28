@@ -181,5 +181,76 @@
   "selectedDayEmpty": "Nothing planned",
   "selectedDayAdd": "Add",
 
-  "tipMonthTitleNavBody": "Tap the title at the top to jump back to the current month"
+  "tipMonthTitleNavBody": "Tap the title at the top to jump back to the current month",
+
+  "sheetAddTitle": "Add session",
+  "sheetEditTitle": "Edit session",
+  "activityNameLabel": "Activity name",
+  "activityNamePlaceholder": "e.g. Morning run",
+  "notesLabel": "Notes",
+  "notesPlaceholder": "Any extra details…",
+  "fieldOptionalSuffix": "  (optional)",
+  "actionSaveSession": "Save session",
+  "actionDeleteSession": "Delete session",
+  "addAnotherActivity": "Add another activity",
+  "sessionsCount": "{count, plural, =1{1 session} other{{count} sessions}}",
+  "@sessionsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "recurrenceLabel": "Repeats",
+  "recurrenceOnce": "Once",
+  "recurrenceDaily": "Daily",
+  "recurrenceWeekly": "Weekly",
+  "recurrenceWeekdays": "Weekdays",
+  "recurrenceWeekends": "Weekends",
+  "repeatForLabel": "Repeat for",
+  "weeksCount": "{count, plural, =1{1 week} other{{count} weeks}}",
+  "@weeksCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "durationLabel": "Duration",
+  "durationPlaceholder": "Set duration",
+  "durationHoursWheel": "{count} h",
+  "@durationHoursWheel": { "placeholders": { "count": { "type": "int" } } },
+  "durationMinutesWheel": "{count} min",
+  "@durationMinutesWheel": { "placeholders": { "count": { "type": "int" } } },
+
+  "timeLabel": "Time",
+  "timePlaceholder": "Set time",
+
+  "typeLabel": "Type",
+  "typeMore": "More…",
+
+  "subTypeTitle": "Choose activity type",
+  "subTypeSearchPlaceholder": "Search…",
+  "subTypeNoResults": "No results",
+
+  "typeRun": "Run",
+  "typeTrailRun": "Trail Run",
+  "typeHike": "Hike",
+  "typeWalk": "Walk",
+  "typeCycle": "Cycle",
+  "typeMtb": "MTB",
+  "typeSwim": "Swim",
+  "typeGym": "Gym",
+  "typeYoga": "Yoga",
+  "typeHiit": "HIIT",
+  "typeRow": "Row",
+  "typeSki": "Ski",
+  "typeSurf": "Surf",
+  "typeClimb": "Climb",
+  "typeTennis": "Tennis",
+  "typePadel": "Padel",
+  "typeDance": "Dance",
+  "typeCombat": "Combat",
+  "typeElliptical": "Elliptical",
+  "typeOther": "Other",
+
+  "statusDone": "Done",
+  "statusToday": "Today",
+  "statusPlanned": "Planned",
+  "statusOpen": "Open",
+  "activityNameFallback": "Session"
 }
