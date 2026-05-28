@@ -201,6 +201,72 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get languageFrench => 'Français';
+
+  @override
+  String get actionBack => 'Voltar';
+
+  @override
+  String get actionContinue => 'Continuar';
+
+  @override
+  String get onboardingWelcomeTagline => 'Planeia, regista e move-te.';
+
+  @override
+  String get onboardingWelcomeFeature1 =>
+      'Um registo semanal simples das tuas atividades';
+
+  @override
+  String get onboardingWelcomeFeature2 =>
+      'Marca as sessões à medida que as fazes';
+
+  @override
+  String get onboardingWelcomeFeature3 => 'Sem culpa nos dias de descanso';
+
+  @override
+  String get onboardingGetStarted => 'Começar';
+
+  @override
+  String get onboardingCalendarTitle => 'Sincronização de calendário';
+
+  @override
+  String get onboardingCalendarBody =>
+      'As sessões planeadas são sincronizadas automaticamente com o calendário do dispositivo para que tudo fique num só sítio.';
+
+  @override
+  String get onboardingCalendarFeature1 =>
+      'As atividades aparecem no teu calendário';
+
+  @override
+  String get onboardingCalendarFeature2 =>
+      'Edições e eliminações ficam sincronizadas';
+
+  @override
+  String get onboardingCalendarFeature3 =>
+      'Escolhe o teu calendário nas Definições';
+
+  @override
+  String get onboardingSignInTitle => 'Mantém os teus dados seguros';
+
+  @override
+  String get onboardingSignInBody =>
+      'Escolhe como queres fazer cópia de segurança das tuas sessões.\nPodes alterar esta opção a qualquer momento nas Definições.';
+
+  @override
+  String get onboardingManualTitle => 'Cópia de segurança manual';
+
+  @override
+  String get onboardingManualBody =>
+      'Exporta e importa os teus dados como ficheiro nas Definições, sempre que quiseres.';
+
+  @override
+  String get onboardingContinueWithoutAccount => 'Continuar sem conta';
+
+  @override
+  String get onboardingCloudTitle => 'Sincronização na nuvem';
+
+  @override
+  String get onboardingCloudBody =>
+      'Inicia sessão com a tua conta para sincronizar entre dispositivos automaticamente.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -401,4 +467,70 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get languageFrench => 'Français';
+
+  @override
+  String get actionBack => 'Voltar';
+
+  @override
+  String get actionContinue => 'Continuar';
+
+  @override
+  String get onboardingWelcomeTagline => 'Planeje, acompanhe e movimente-se.';
+
+  @override
+  String get onboardingWelcomeFeature1 =>
+      'Um registro semanal simples das suas atividades';
+
+  @override
+  String get onboardingWelcomeFeature2 =>
+      'Marque as sessões conforme você completa';
+
+  @override
+  String get onboardingWelcomeFeature3 => 'Sem culpa nos dias de descanso';
+
+  @override
+  String get onboardingGetStarted => 'Começar';
+
+  @override
+  String get onboardingCalendarTitle => 'Sincronização de calendário';
+
+  @override
+  String get onboardingCalendarBody =>
+      'As sessões planejadas são sincronizadas automaticamente com o calendário do seu dispositivo para que tudo fique em um só lugar.';
+
+  @override
+  String get onboardingCalendarFeature1 =>
+      'As atividades aparecem no seu calendário';
+
+  @override
+  String get onboardingCalendarFeature2 =>
+      'Edições e exclusões ficam sincronizadas';
+
+  @override
+  String get onboardingCalendarFeature3 =>
+      'Escolha seu calendário nas Configurações';
+
+  @override
+  String get onboardingSignInTitle => 'Mantenha seus dados seguros';
+
+  @override
+  String get onboardingSignInBody =>
+      'Escolha como você quer fazer backup das suas sessões.\nVocê pode alterar isso a qualquer momento nas Configurações.';
+
+  @override
+  String get onboardingManualTitle => 'Backup manual';
+
+  @override
+  String get onboardingManualBody =>
+      'Exporte e importe seus dados como arquivo nas Configurações sempre que quiser.';
+
+  @override
+  String get onboardingContinueWithoutAccount => 'Continuar sem conta';
+
+  @override
+  String get onboardingCloudTitle => 'Sincronização na nuvem';
+
+  @override
+  String get onboardingCloudBody =>
+      'Faça login com sua conta para sincronizar entre dispositivos automaticamente.';
 }

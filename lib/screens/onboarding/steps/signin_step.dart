@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../state/auth_controller.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
@@ -24,6 +25,7 @@ class _SignInStepState extends State<SignInStep> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final auth = context.watch<AuthController>();
 
     if (auth.isSignedIn && !_advanced) {
@@ -57,7 +59,7 @@ class _SignInStepState extends State<SignInStep> {
                     ),
                     const SizedBox(height: KSpace.s5),
                     Text(
-                      'Keep your data safe',
+                      loc.onboardingSignInTitle,
                       textAlign: TextAlign.center,
                       style: KText.h2.copyWith(
                         fontSize: 22,
@@ -68,8 +70,7 @@ class _SignInStepState extends State<SignInStep> {
                     ),
                     const SizedBox(height: KSpace.s1 + 2),
                     Text(
-                      'Choose how you\'d like to back up your sessions.\n'
-                      'You can change this anytime in Settings.',
+                      loc.onboardingSignInBody,
                       textAlign: TextAlign.center,
                       style: KText.bodySm.copyWith(
                         color: colors.fgSecondary,
@@ -79,17 +80,15 @@ class _SignInStepState extends State<SignInStep> {
                     const SizedBox(height: KSpace.s6),
                     _OptionCard(
                       icon: LucideIcons.hardDriveDownload,
-                      title: 'Manual backup',
-                      description:
-                          'Export and import your data as a file from Settings whenever you want.',
+                      title: loc.onboardingManualTitle,
+                      description: loc.onboardingManualBody,
                       action: _ManualAction(onTap: widget.onSkip),
                     ),
                     const SizedBox(height: KSpace.s3),
                     _OptionCard(
                       icon: LucideIcons.cloud,
-                      title: 'Cloud sync',
-                      description:
-                          'Sign in with your account to sync across devices automatically.',
+                      title: loc.onboardingCloudTitle,
+                      description: loc.onboardingCloudBody,
                       action: _CloudActions(auth: auth),
                     ),
                   ],
@@ -168,6 +167,7 @@ class _ManualAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -183,7 +183,7 @@ class _ManualAction extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            'Continue without account',
+            loc.onboardingContinueWithoutAccount,
             style: KText.button.copyWith(color: colors.fgPrimary),
           ),
         ),

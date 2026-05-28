@@ -201,4 +201,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageFrench => 'Français';
+
+  @override
+  String get actionBack => 'Back';
+
+  @override
+  String get actionContinue => 'Continue';
+
+  @override
+  String get onboardingWelcomeTagline => 'Plan, track & move.';
+
+  @override
+  String get onboardingWelcomeFeature1 => 'A simple weekly activity tracker';
+
+  @override
+  String get onboardingWelcomeFeature2 => 'Check off sessions as you go';
+
+  @override
+  String get onboardingWelcomeFeature3 => 'No guilt for rest days';
+
+  @override
+  String get onboardingGetStarted => 'Get started';
+
+  @override
+  String get onboardingCalendarTitle => 'Calendar sync';
+
+  @override
+  String get onboardingCalendarBody =>
+      'Your planned sessions automatically sync with your device calendar so everything stays in one place.';
+
+  @override
+  String get onboardingCalendarFeature1 => 'Activities appear on your calendar';
+
+  @override
+  String get onboardingCalendarFeature2 => 'Edits and deletions stay in sync';
+
+  @override
+  String get onboardingCalendarFeature3 => 'Choose your calendar in Settings';
+
+  @override
+  String get onboardingSignInTitle => 'Keep your data safe';
+
+  @override
+  String get onboardingSignInBody =>
+      'Choose how you\'d like to back up your sessions.\nYou can change this anytime in Settings.';
+
+  @override
+  String get onboardingManualTitle => 'Manual backup';
+
+  @override
+  String get onboardingManualBody =>
+      'Export and import your data as a file from Settings whenever you want.';
+
+  @override
+  String get onboardingContinueWithoutAccount => 'Continue without account';
+
+  @override
+  String get onboardingCloudTitle => 'Cloud sync';
+
+  @override
+  String get onboardingCloudBody =>
+      'Sign in with your account to sync across devices automatically.';
 }

@@ -71,5 +71,28 @@
   "languagePortuguese": "Português (Portugal)",
   "languagePortugueseBR": "Português (Brasil)",
   "languageSpanish": "Español",
-  "languageFrench": "Français"
+  "languageFrench": "Français",
+
+  "actionBack": "Voltar",
+  "actionContinue": "Continuar",
+
+  "onboardingWelcomeTagline": "Planeje, acompanhe e movimente-se.",
+  "onboardingWelcomeFeature1": "Um registro semanal simples das suas atividades",
+  "onboardingWelcomeFeature2": "Marque as sessões conforme você completa",
+  "onboardingWelcomeFeature3": "Sem culpa nos dias de descanso",
+  "onboardingGetStarted": "Começar",
+
+  "onboardingCalendarTitle": "Sincronização de calendário",
+  "onboardingCalendarBody": "As sessões planejadas são sincronizadas automaticamente com o calendário do seu dispositivo para que tudo fique em um só lugar.",
+  "onboardingCalendarFeature1": "As atividades aparecem no seu calendário",
+  "onboardingCalendarFeature2": "Edições e exclusões ficam sincronizadas",
+  "onboardingCalendarFeature3": "Escolha seu calendário nas Configurações",
+
+  "onboardingSignInTitle": "Mantenha seus dados seguros",
+  "onboardingSignInBody": "Escolha como você quer fazer backup das suas sessões.\nVocê pode alterar isso a qualquer momento nas Configurações.",
+  "onboardingManualTitle": "Backup manual",
+  "onboardingManualBody": "Exporte e importe seus dados como arquivo nas Configurações sempre que quiser.",
+  "onboardingContinueWithoutAccount": "Continuar sem conta",
+  "onboardingCloudTitle": "Sincronização na nuvem",
+  "onboardingCloudBody": "Faça login com sua conta para sincronizar entre dispositivos automaticamente."
 }

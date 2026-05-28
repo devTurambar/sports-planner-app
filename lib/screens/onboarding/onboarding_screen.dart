@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../state/onboarding_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
@@ -89,6 +90,7 @@ class _TopRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return SizedBox(
       height: 44,
       child: Padding(
@@ -107,7 +109,7 @@ class _TopRow extends StatelessWidget {
                   icon: Icon(LucideIcons.chevronLeft,
                       size: 16, color: colors.fgTertiary),
                   label: Text(
-                    'Back',
+                    loc.actionBack,
                     style: KText.bodySm.copyWith(color: colors.fgTertiary),
                   ),
                 )

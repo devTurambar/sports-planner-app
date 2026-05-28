@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -16,6 +17,7 @@ class WelcomeStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 0, 28, KSpace.s8),
       child: Column(
@@ -39,7 +41,7 @@ class WelcomeStep extends StatelessWidget {
                 ),
                 const SizedBox(height: KSpace.s2),
                 Text(
-                  'Plan, track & move.',
+                  loc.onboardingWelcomeTagline,
                   textAlign: TextAlign.center,
                   style: KText.body.copyWith(
                     fontSize: 16,
@@ -49,26 +51,26 @@ class WelcomeStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: KSpace.s6),
-                const _FeatureRow(
+                _FeatureRow(
                   icon: LucideIcons.circleDashed,
-                  text: 'A simple weekly activity tracker',
+                  text: loc.onboardingWelcomeFeature1,
                 ),
                 const SizedBox(height: KSpace.s2 + 2),
-                const _FeatureRow(
+                _FeatureRow(
                   icon: LucideIcons.check,
-                  text: 'Check off sessions as you go',
+                  text: loc.onboardingWelcomeFeature2,
                 ),
                 const SizedBox(height: KSpace.s2 + 2),
-                const _FeatureRow(
+                _FeatureRow(
                   icon: LucideIcons.minus,
-                  text: 'No guilt for rest days',
+                  text: loc.onboardingWelcomeFeature3,
                 ),
               ],
             ),
           ),
           const ProgressDots(total: 3, current: 0),
           const SizedBox(height: KSpace.s1 + 2),
-          KButton(label: 'Get started', onPressed: onNext),
+          KButton(label: loc.onboardingGetStarted, onPressed: onNext),
         ],
       ),
     );

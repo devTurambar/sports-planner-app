@@ -103,5 +103,28 @@
   "languagePortuguese": "Português (Portugal)",
   "languagePortugueseBR": "Português (Brasil)",
   "languageSpanish": "Español",
-  "languageFrench": "Français"
+  "languageFrench": "Français",
+
+  "actionBack": "Back",
+  "actionContinue": "Continue",
+
+  "onboardingWelcomeTagline": "Plan, track & move.",
+  "onboardingWelcomeFeature1": "A simple weekly activity tracker",
+  "onboardingWelcomeFeature2": "Check off sessions as you go",
+  "onboardingWelcomeFeature3": "No guilt for rest days",
+  "onboardingGetStarted": "Get started",
+
+  "onboardingCalendarTitle": "Calendar sync",
+  "onboardingCalendarBody": "Your planned sessions automatically sync with your device calendar so everything stays in one place.",
+  "onboardingCalendarFeature1": "Activities appear on your calendar",
+  "onboardingCalendarFeature2": "Edits and deletions stay in sync",
+  "onboardingCalendarFeature3": "Choose your calendar in Settings",
+
+  "onboardingSignInTitle": "Keep your data safe",
+  "onboardingSignInBody": "Choose how you'd like to back up your sessions.\nYou can change this anytime in Settings.",
+  "onboardingManualTitle": "Manual backup",
+  "onboardingManualBody": "Export and import your data as a file from Settings whenever you want.",
+  "onboardingContinueWithoutAccount": "Continue without account",
+  "onboardingCloudTitle": "Cloud sync",
+  "onboardingCloudBody": "Sign in with your account to sync across devices automatically."
 }

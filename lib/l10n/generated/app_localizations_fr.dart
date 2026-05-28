@@ -202,4 +202,71 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get languageFrench => 'Français';
+
+  @override
+  String get actionBack => 'Retour';
+
+  @override
+  String get actionContinue => 'Continuer';
+
+  @override
+  String get onboardingWelcomeTagline => 'Planifie, suis et bouge.';
+
+  @override
+  String get onboardingWelcomeFeature1 =>
+      'Un suivi hebdomadaire simple de tes activités';
+
+  @override
+  String get onboardingWelcomeFeature2 =>
+      'Coche tes séances au fur et à mesure';
+
+  @override
+  String get onboardingWelcomeFeature3 =>
+      'Aucune culpabilité pour les jours de repos';
+
+  @override
+  String get onboardingGetStarted => 'Commencer';
+
+  @override
+  String get onboardingCalendarTitle => 'Synchronisation du calendrier';
+
+  @override
+  String get onboardingCalendarBody =>
+      'Tes séances planifiées se synchronisent automatiquement avec le calendrier de ton appareil pour que tout reste au même endroit.';
+
+  @override
+  String get onboardingCalendarFeature1 =>
+      'Les activités apparaissent sur ton calendrier';
+
+  @override
+  String get onboardingCalendarFeature2 =>
+      'Les modifications et suppressions restent synchronisées';
+
+  @override
+  String get onboardingCalendarFeature3 =>
+      'Choisis ton calendrier dans les Paramètres';
+
+  @override
+  String get onboardingSignInTitle => 'Garde tes données en sécurité';
+
+  @override
+  String get onboardingSignInBody =>
+      'Choisis comment sauvegarder tes séances.\nTu peux changer cela à tout moment dans les Paramètres.';
+
+  @override
+  String get onboardingManualTitle => 'Sauvegarde manuelle';
+
+  @override
+  String get onboardingManualBody =>
+      'Exporte et importe tes données sous forme de fichier depuis les Paramètres quand tu veux.';
+
+  @override
+  String get onboardingContinueWithoutAccount => 'Continuer sans compte';
+
+  @override
+  String get onboardingCloudTitle => 'Synchronisation cloud';
+
+  @override
+  String get onboardingCloudBody =>
+      'Connecte-toi avec ton compte pour synchroniser automatiquement entre appareils.';
 }

@@ -456,6 +456,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Français'**
   String get languageFrench;
+
+  /// No description provided for @actionBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get actionBack;
+
+  /// No description provided for @actionContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get actionContinue;
+
+  /// No description provided for @onboardingWelcomeTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan, track & move.'**
+  String get onboardingWelcomeTagline;
+
+  /// No description provided for @onboardingWelcomeFeature1.
+  ///
+  /// In en, this message translates to:
+  /// **'A simple weekly activity tracker'**
+  String get onboardingWelcomeFeature1;
+
+  /// No description provided for @onboardingWelcomeFeature2.
+  ///
+  /// In en, this message translates to:
+  /// **'Check off sessions as you go'**
+  String get onboardingWelcomeFeature2;
+
+  /// No description provided for @onboardingWelcomeFeature3.
+  ///
+  /// In en, this message translates to:
+  /// **'No guilt for rest days'**
+  String get onboardingWelcomeFeature3;
+
+  /// No description provided for @onboardingGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingGetStarted;
+
+  /// No description provided for @onboardingCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar sync'**
+  String get onboardingCalendarTitle;
+
+  /// No description provided for @onboardingCalendarBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your planned sessions automatically sync with your device calendar so everything stays in one place.'**
+  String get onboardingCalendarBody;
+
+  /// No description provided for @onboardingCalendarFeature1.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities appear on your calendar'**
+  String get onboardingCalendarFeature1;
+
+  /// No description provided for @onboardingCalendarFeature2.
+  ///
+  /// In en, this message translates to:
+  /// **'Edits and deletions stay in sync'**
+  String get onboardingCalendarFeature2;
+
+  /// No description provided for @onboardingCalendarFeature3.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your calendar in Settings'**
+  String get onboardingCalendarFeature3;
+
+  /// No description provided for @onboardingSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your data safe'**
+  String get onboardingSignInTitle;
+
+  /// No description provided for @onboardingSignInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how you\'d like to back up your sessions.\nYou can change this anytime in Settings.'**
+  String get onboardingSignInBody;
+
+  /// No description provided for @onboardingManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual backup'**
+  String get onboardingManualTitle;
+
+  /// No description provided for @onboardingManualBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Export and import your data as a file from Settings whenever you want.'**
+  String get onboardingManualBody;
+
+  /// No description provided for @onboardingContinueWithoutAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without account'**
+  String get onboardingContinueWithoutAccount;
+
+  /// No description provided for @onboardingCloudTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync'**
+  String get onboardingCloudTitle;
+
+  /// No description provided for @onboardingCloudBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your account to sync across devices automatically.'**
+  String get onboardingCloudBody;
 }
 
 class _AppLocalizationsDelegate

@@ -71,5 +71,28 @@
   "languagePortuguese": "Português (Portugal)",
   "languagePortugueseBR": "Português (Brasil)",
   "languageSpanish": "Español",
-  "languageFrench": "Français"
+  "languageFrench": "Français",
+
+  "actionBack": "Retour",
+  "actionContinue": "Continuer",
+
+  "onboardingWelcomeTagline": "Planifie, suis et bouge.",
+  "onboardingWelcomeFeature1": "Un suivi hebdomadaire simple de tes activités",
+  "onboardingWelcomeFeature2": "Coche tes séances au fur et à mesure",
+  "onboardingWelcomeFeature3": "Aucune culpabilité pour les jours de repos",
+  "onboardingGetStarted": "Commencer",
+
+  "onboardingCalendarTitle": "Synchronisation du calendrier",
+  "onboardingCalendarBody": "Tes séances planifiées se synchronisent automatiquement avec le calendrier de ton appareil pour que tout reste au même endroit.",
+  "onboardingCalendarFeature1": "Les activités apparaissent sur ton calendrier",
+  "onboardingCalendarFeature2": "Les modifications et suppressions restent synchronisées",
+  "onboardingCalendarFeature3": "Choisis ton calendrier dans les Paramètres",
+
+  "onboardingSignInTitle": "Garde tes données en sécurité",
+  "onboardingSignInBody": "Choisis comment sauvegarder tes séances.\nTu peux changer cela à tout moment dans les Paramètres.",
+  "onboardingManualTitle": "Sauvegarde manuelle",
+  "onboardingManualBody": "Exporte et importe tes données sous forme de fichier depuis les Paramètres quand tu veux.",
+  "onboardingContinueWithoutAccount": "Continuer sans compte",
+  "onboardingCloudTitle": "Synchronisation cloud",
+  "onboardingCloudBody": "Connecte-toi avec ton compte pour synchroniser automatiquement entre appareils."
 }

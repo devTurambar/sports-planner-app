@@ -202,4 +202,69 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get languageFrench => 'Français';
+
+  @override
+  String get actionBack => 'Atrás';
+
+  @override
+  String get actionContinue => 'Continuar';
+
+  @override
+  String get onboardingWelcomeTagline => 'Planifica, registra y muévete.';
+
+  @override
+  String get onboardingWelcomeFeature1 =>
+      'Un registro semanal sencillo de tus actividades';
+
+  @override
+  String get onboardingWelcomeFeature2 =>
+      'Marca las sesiones a medida que las haces';
+
+  @override
+  String get onboardingWelcomeFeature3 => 'Sin culpa en los días de descanso';
+
+  @override
+  String get onboardingGetStarted => 'Empezar';
+
+  @override
+  String get onboardingCalendarTitle => 'Sincronización de calendario';
+
+  @override
+  String get onboardingCalendarBody =>
+      'Tus sesiones planificadas se sincronizan automáticamente con el calendario de tu dispositivo para que todo esté en un solo lugar.';
+
+  @override
+  String get onboardingCalendarFeature1 =>
+      'Las actividades aparecen en tu calendario';
+
+  @override
+  String get onboardingCalendarFeature2 =>
+      'Las ediciones y eliminaciones se mantienen sincronizadas';
+
+  @override
+  String get onboardingCalendarFeature3 => 'Elige tu calendario en Ajustes';
+
+  @override
+  String get onboardingSignInTitle => 'Mantén tus datos seguros';
+
+  @override
+  String get onboardingSignInBody =>
+      'Elige cómo quieres hacer copia de seguridad de tus sesiones.\nPuedes cambiarlo en cualquier momento en Ajustes.';
+
+  @override
+  String get onboardingManualTitle => 'Copia de seguridad manual';
+
+  @override
+  String get onboardingManualBody =>
+      'Exporta e importa tus datos como archivo desde Ajustes cuando quieras.';
+
+  @override
+  String get onboardingContinueWithoutAccount => 'Continuar sin cuenta';
+
+  @override
+  String get onboardingCloudTitle => 'Sincronización en la nube';
+
+  @override
+  String get onboardingCloudBody =>
+      'Inicia sesión con tu cuenta para sincronizar entre dispositivos automáticamente.';
 }

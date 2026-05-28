@@ -71,5 +71,28 @@
   "languagePortuguese": "Português (Portugal)",
   "languagePortugueseBR": "Português (Brasil)",
   "languageSpanish": "Español",
-  "languageFrench": "Français"
+  "languageFrench": "Français",
+
+  "actionBack": "Voltar",
+  "actionContinue": "Continuar",
+
+  "onboardingWelcomeTagline": "Planeia, regista e move-te.",
+  "onboardingWelcomeFeature1": "Um registo semanal simples das tuas atividades",
+  "onboardingWelcomeFeature2": "Marca as sessões à medida que as fazes",
+  "onboardingWelcomeFeature3": "Sem culpa nos dias de descanso",
+  "onboardingGetStarted": "Começar",
+
+  "onboardingCalendarTitle": "Sincronização de calendário",
+  "onboardingCalendarBody": "As sessões planeadas são sincronizadas automaticamente com o calendário do dispositivo para que tudo fique num só sítio.",
+  "onboardingCalendarFeature1": "As atividades aparecem no teu calendário",
+  "onboardingCalendarFeature2": "Edições e eliminações ficam sincronizadas",
+  "onboardingCalendarFeature3": "Escolhe o teu calendário nas Definições",
+
+  "onboardingSignInTitle": "Mantém os teus dados seguros",
+  "onboardingSignInBody": "Escolhe como queres fazer cópia de segurança das tuas sessões.\nPodes alterar esta opção a qualquer momento nas Definições.",
+  "onboardingManualTitle": "Cópia de segurança manual",
+  "onboardingManualBody": "Exporta e importa os teus dados como ficheiro nas Definições, sempre que quiseres.",
+  "onboardingContinueWithoutAccount": "Continuar sem conta",
+  "onboardingCloudTitle": "Sincronização na nuvem",
+  "onboardingCloudBody": "Inicia sessão com a tua conta para sincronizar entre dispositivos automaticamente."
 }
