@@ -344,4 +344,29 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get actionDelete => 'Supprimer';
+
+  @override
+  String get statsDone => 'Faites';
+
+  @override
+  String get statsPlanned => 'Prévues';
+
+  @override
+  String get statsOnTrack => 'Dans les temps';
+
+  @override
+  String get deleteSessionTitle => 'Supprimer la séance ?';
+
+  @override
+  String get deleteSessionBody => 'Cette action est irréversible.';
+
+  @override
+  String get selectedDayEmpty => 'Rien de prévu';
+
+  @override
+  String get selectedDayAdd => 'Ajouter';
+
+  @override
+  String get tipMonthTitleNavBody =>
+      'Tape le titre en haut pour revenir au mois actuel';
 }

@@ -120,5 +120,17 @@
 
   "deleteDayTitle": "¿Eliminar todas las sesiones?",
   "deleteDayBody": "Todas las sesiones de este día se eliminarán. Esta acción no se puede deshacer.",
-  "actionDelete": "Eliminar"
+  "actionDelete": "Eliminar",
+
+  "statsDone": "Hechas",
+  "statsPlanned": "Planeadas",
+  "statsOnTrack": "En plan",
+
+  "deleteSessionTitle": "¿Eliminar sesión?",
+  "deleteSessionBody": "Esta acción no se puede deshacer.",
+
+  "selectedDayEmpty": "Nada planeado",
+  "selectedDayAdd": "Añadir",
+
+  "tipMonthTitleNavBody": "Toca el título arriba para volver al mes actual"
 }

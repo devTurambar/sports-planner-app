@@ -696,6 +696,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get actionDelete;
+
+  /// No description provided for @statsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get statsDone;
+
+  /// No description provided for @statsPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get statsPlanned;
+
+  /// No description provided for @statsOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'On track'**
+  String get statsOnTrack;
+
+  /// No description provided for @deleteSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session?'**
+  String get deleteSessionTitle;
+
+  /// No description provided for @deleteSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get deleteSessionBody;
+
+  /// No description provided for @selectedDayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned'**
+  String get selectedDayEmpty;
+
+  /// No description provided for @selectedDayAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get selectedDayAdd;
+
+  /// No description provided for @tipMonthTitleNavBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the title at the top to jump back to the current month'**
+  String get tipMonthTitleNavBody;
 }
 
 class _AppLocalizationsDelegate

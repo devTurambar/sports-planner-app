@@ -342,4 +342,29 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get actionDelete => 'Eliminar';
+
+  @override
+  String get statsDone => 'Hechas';
+
+  @override
+  String get statsPlanned => 'Planeadas';
+
+  @override
+  String get statsOnTrack => 'En plan';
+
+  @override
+  String get deleteSessionTitle => '¿Eliminar sesión?';
+
+  @override
+  String get deleteSessionBody => 'Esta acción no se puede deshacer.';
+
+  @override
+  String get selectedDayEmpty => 'Nada planeado';
+
+  @override
+  String get selectedDayAdd => 'Añadir';
+
+  @override
+  String get tipMonthTitleNavBody =>
+      'Toca el título arriba para volver al mes actual';
 }

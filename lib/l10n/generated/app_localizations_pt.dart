@@ -342,6 +342,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get actionDelete => 'Eliminar';
+
+  @override
+  String get statsDone => 'Feitas';
+
+  @override
+  String get statsPlanned => 'Planeadas';
+
+  @override
+  String get statsOnTrack => 'No plano';
+
+  @override
+  String get deleteSessionTitle => 'Eliminar sessão?';
+
+  @override
+  String get deleteSessionBody => 'Esta ação não pode ser anulada.';
+
+  @override
+  String get selectedDayEmpty => 'Nada planeado';
+
+  @override
+  String get selectedDayAdd => 'Adicionar';
+
+  @override
+  String get tipMonthTitleNavBody =>
+      'Toca no título no topo para voltar ao mês atual';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -683,4 +708,29 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get actionDelete => 'Excluir';
+
+  @override
+  String get statsDone => 'Feitas';
+
+  @override
+  String get statsPlanned => 'Planejadas';
+
+  @override
+  String get statsOnTrack => 'No plano';
+
+  @override
+  String get deleteSessionTitle => 'Excluir sessão?';
+
+  @override
+  String get deleteSessionBody => 'Essa ação não pode ser desfeita.';
+
+  @override
+  String get selectedDayEmpty => 'Nada planejado';
+
+  @override
+  String get selectedDayAdd => 'Adicionar';
+
+  @override
+  String get tipMonthTitleNavBody =>
+      'Toque no título no topo para voltar ao mês atual';
 }

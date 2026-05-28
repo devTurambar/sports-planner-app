@@ -120,5 +120,17 @@
 
   "deleteDayTitle": "Eliminar todas as sessões?",
   "deleteDayBody": "Todas as sessões deste dia serão removidas. Esta ação não pode ser anulada.",
-  "actionDelete": "Eliminar"
+  "actionDelete": "Eliminar",
+
+  "statsDone": "Feitas",
+  "statsPlanned": "Planeadas",
+  "statsOnTrack": "No plano",
+
+  "deleteSessionTitle": "Eliminar sessão?",
+  "deleteSessionBody": "Esta ação não pode ser anulada.",
+
+  "selectedDayEmpty": "Nada planeado",
+  "selectedDayAdd": "Adicionar",
+
+  "tipMonthTitleNavBody": "Toca no título no topo para voltar ao mês atual"
 }

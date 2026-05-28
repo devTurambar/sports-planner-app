@@ -120,5 +120,17 @@
 
   "deleteDayTitle": "Supprimer toutes les séances ?",
   "deleteDayBody": "Toutes les séances de ce jour seront supprimées. Cette action est irréversible.",
-  "actionDelete": "Supprimer"
+  "actionDelete": "Supprimer",
+
+  "statsDone": "Faites",
+  "statsPlanned": "Prévues",
+  "statsOnTrack": "Dans les temps",
+
+  "deleteSessionTitle": "Supprimer la séance ?",
+  "deleteSessionBody": "Cette action est irréversible.",
+
+  "selectedDayEmpty": "Rien de prévu",
+  "selectedDayAdd": "Ajouter",
+
+  "tipMonthTitleNavBody": "Tape le titre en haut pour revenir au mois actuel"
 }

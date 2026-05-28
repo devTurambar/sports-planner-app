@@ -120,5 +120,17 @@
 
   "deleteDayTitle": "Excluir todas as sessões?",
   "deleteDayBody": "Todas as sessões deste dia serão removidas. Essa ação não pode ser desfeita.",
-  "actionDelete": "Excluir"
+  "actionDelete": "Excluir",
+
+  "statsDone": "Feitas",
+  "statsPlanned": "Planejadas",
+  "statsOnTrack": "No plano",
+
+  "deleteSessionTitle": "Excluir sessão?",
+  "deleteSessionBody": "Essa ação não pode ser desfeita.",
+
+  "selectedDayEmpty": "Nada planejado",
+  "selectedDayAdd": "Adicionar",
+
+  "tipMonthTitleNavBody": "Toque no título no topo para voltar ao mês atual"
 }

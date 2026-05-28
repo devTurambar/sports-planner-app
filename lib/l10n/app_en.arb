@@ -169,5 +169,17 @@
 
   "deleteDayTitle": "Delete all sessions?",
   "deleteDayBody": "Every session on this day will be removed. This can't be undone.",
-  "actionDelete": "Delete"
+  "actionDelete": "Delete",
+
+  "statsDone": "Done",
+  "statsPlanned": "Planned",
+  "statsOnTrack": "On track",
+
+  "deleteSessionTitle": "Delete session?",
+  "deleteSessionBody": "This can't be undone.",
+
+  "selectedDayEmpty": "Nothing planned",
+  "selectedDayAdd": "Add",
+
+  "tipMonthTitleNavBody": "Tap the title at the top to jump back to the current month"
 }
