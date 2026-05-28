@@ -1,0 +1,75 @@
+{
+  "@@locale": "fr",
+
+  "settingsSectionApp": "Application",
+  "settingsSectionData": "Données",
+  "settingsSectionAbout": "À propos",
+
+  "settingsDarkMode": "Mode sombre",
+  "settingsWeekStartsOn": "La semaine commence le",
+  "weekdaySunday": "Dimanche",
+  "weekdayMonday": "Lundi",
+
+  "settingsWeeklyGoal": "Objectif hebdomadaire",
+  "weeklyGoalSessions": "{count} séances",
+  "weeklyGoalOff": "Désactivé",
+  "weeklyGoalPrompt": "Combien de séances par semaine veux-tu réaliser ?",
+
+  "settingsThemeColor": "Couleur du thème",
+  "settingsCalendarSync": "Synchronisation du calendrier",
+  "settingsCalendars": "Calendriers",
+  "calendarsAll": "Tous les calendriers",
+  "calendarsCount": "{count} calendriers",
+  "calendarsFallback": "Calendrier",
+  "calendarsOff": "Désactivée",
+  "calendarsLoading": "…",
+  "calendarsChooseTitle": "Choisir les calendriers",
+
+  "settingsTypeColors": "Couleurs par type",
+  "settingsTypeColorsValue": "Personnaliser",
+  "typeColorsResetAll": "Tout réinitialiser",
+
+  "settingsExportData": "Exporter les données",
+  "settingsExportValue": "Partager",
+  "settingsImportData": "Importer des données",
+  "settingsImportValue": "Charger",
+  "exportFailed": "Échec de l’export",
+
+  "importReplaceTitle": "Remplacer toutes les données ?",
+  "importReplaceBody": "Cela remplacera toutes tes données actuelles par les données importées ({count} activités).",
+  "actionCancel": "Annuler",
+  "actionReplace": "Remplacer",
+  "actionDone": "Terminé",
+
+  "importedActivities": "{count} activités importées",
+
+  "calendarSyncPromptTitle": "Synchroniser avec le calendrier ?",
+  "calendarSyncPromptBody": "Ajouter les activités importées au calendrier de l’appareil ? Les événements correspondants existants seront ignorés.",
+  "actionNoThanks": "Non merci",
+  "actionSync": "Synchroniser",
+  "calendarSyncedAll": "{synced} événements synchronisés dans le calendrier",
+  "calendarSyncedWithSkipped": "{synced} événements synchronisés ({skipped} déjà dans le calendrier)",
+
+  "settingsRedoOnboarding": "Refaire l’introduction",
+  "settingsPrivacyPolicy": "Politique de confidentialité",
+  "settingsRateKadence": "Noter Kadence",
+  "settingsVersion": "Kadence · v{version}",
+
+  "accountSignInToSync": "Connecte-toi pour synchroniser",
+  "accountSignInSubtitle": "Sauvegarde et retrouve tes données partout",
+  "accountSignedInFallback": "Connecté",
+  "accountSyncingEnabled": "Synchronisation active",
+  "accountSignOut": "Se déconnecter",
+  "signInSheetSubtitle": "Sauvegarde tes données et retrouve-les sur n’importe quel appareil.",
+
+  "proCardSubtitle": "Fonctionnalités premium bientôt disponibles",
+  "proBadge": "PRO",
+
+  "settingsLanguage": "Langue",
+  "languageSystem": "Par défaut du système",
+  "languageEnglish": "English",
+  "languagePortuguese": "Português (Portugal)",
+  "languagePortugueseBR": "Português (Brasil)",
+  "languageSpanish": "Español",
+  "languageFrench": "Français"
+}

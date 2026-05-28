@@ -5,10 +5,12 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/auth_controller.dart';
 import '../../state/backup_service.dart';
 import '../../state/calendar_service.dart';
+import '../../state/locale_controller.dart';
 import '../../state/onboarding_controller.dart';
 import '../../state/plan_controller.dart';
 import '../../state/sync_service.dart';
@@ -88,25 +90,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  String get _calendarLabel {
-    if (!_calendarSync) return 'Off';
-    if (_loadingCalendars) return '…';
-    if (_selectedIds.isEmpty) return 'All calendars';
+  String _calendarLabel(AppLocalizations loc) {
+    if (!_calendarSync) return loc.calendarsOff;
+    if (_loadingCalendars) return loc.calendarsLoading;
+    if (_selectedIds.isEmpty) return loc.calendarsAll;
     if (_selectedIds.length == 1) {
       final match = _calendars.where((c) => c.id == _selectedIds.first);
-      if (match.isNotEmpty) return match.first.name ?? 'Calendar';
+      if (match.isNotEmpty) return match.first.name ?? loc.calendarsFallback;
     }
-    return '${_selectedIds.length} calendars';
+    return loc.calendarsCount(_selectedIds.length);
   }
 
   Future<void> _exportData() async {
     final plan = context.read<PlanController>();
+    final loc = AppLocalizations.of(context)!;
     try {
       await BackupService.exportData(plan.byDate);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Export failed')),
+        SnackBar(content: Text(loc.exportFailed)),
       );
     }
   }
@@ -116,30 +119,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (activities == null || !mounted) return;
 
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.bgElevated,
         title: Text(
-          'Replace all data?',
+          loc.importReplaceTitle,
           style: KText.h3.copyWith(color: colors.fgPrimary),
         ),
         content: Text(
-          'This will replace all your current data with the imported data (${activities.length} activities).',
+          loc.importReplaceBody(activities.length),
           style: KText.body.copyWith(color: colors.fgSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Cancel',
+              loc.actionCancel,
               style: KText.button.copyWith(color: colors.fgTertiary),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Replace',
+              loc.actionReplace,
               style: KText.button.copyWith(color: const Color(0xFFB5443A)),
             ),
           ),
@@ -169,7 +173,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Imported ${activities.length} activities')),
+      SnackBar(content: Text(loc.importedActivities(activities.length))),
     );
 
     if (CalendarService.syncEnabled) {
@@ -183,31 +187,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ) async {
     if (!mounted) return;
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final syncToCalendar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.bgElevated,
         title: Text(
-          'Sync to calendar?',
+          loc.calendarSyncPromptTitle,
           style: KText.h3.copyWith(color: colors.fgPrimary),
         ),
         content: Text(
-          'Add the imported activities to your device calendar? '
-          'Existing matching events will be skipped.',
+          loc.calendarSyncPromptBody,
           style: KText.body.copyWith(color: colors.fgSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'No thanks',
+              loc.actionNoThanks,
               style: KText.button.copyWith(color: colors.fgTertiary),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Sync',
+              loc.actionSync,
               style: KText.button.copyWith(color: colors.fgPrimary),
             ),
           ),
@@ -227,8 +231,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       SnackBar(
         content: Text(
           skipped > 0
-              ? 'Synced $synced events ($skipped already on calendar)'
-              : 'Synced $synced events to calendar',
+              ? loc.calendarSyncedWithSkipped(synced, skipped)
+              : loc.calendarSyncedAll(synced),
         ),
       ),
     );
@@ -269,6 +273,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final onboarding = context.watch<OnboardingController>();
     final auth = context.watch<AuthController>();
     final goalCtrl = context.watch<GoalController>();
+    final localeCtrl = context.watch<LocaleController>();
+    final loc = AppLocalizations.of(context)!;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -283,40 +289,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _ProCard(onTap: () => PaywallScreen.show(context)),
 
         // ── App ───────────────────────────────────────────
-        const _SectionHeader(label: 'App'),
+        _SectionHeader(label: loc.settingsSectionApp),
         _Group(
           rows: <Widget>[
             _ToggleRow(
               icon: LucideIcons.moon,
               iconBg: const Color(0xFF5856D6),
-              label: 'Dark mode',
+              label: loc.settingsDarkMode,
               value: theme.isDark,
               onChanged: (_) => theme.toggleDark(),
             ),
             _StaticRow(
               icon: LucideIcons.calendarDays,
               iconBg: const Color(0xFFFF9500),
-              label: 'Week starts on',
-              value: theme.weekStartsOnSunday ? 'Sunday' : 'Monday',
+              label: loc.settingsWeekStartsOn,
+              value: theme.weekStartsOnSunday
+                  ? loc.weekdaySunday
+                  : loc.weekdayMonday,
               onTap: () => theme.toggleWeekStart(),
+            ),
+            _StaticRow(
+              icon: LucideIcons.languages,
+              iconBg: const Color(0xFF0A84FF),
+              label: loc.settingsLanguage,
+              value: _languageLabel(loc, localeCtrl),
+              onTap: () => _showLanguagePicker(context),
             ),
             _StaticRow(
               icon: LucideIcons.target,
               iconBg: const Color(0xFFFF3B30),
-              label: 'Weekly goal',
-              value: goalCtrl.hasGoal ? '${goalCtrl.goal} sessions' : 'Off',
+              label: loc.settingsWeeklyGoal,
+              value: goalCtrl.hasGoal
+                  ? loc.weeklyGoalSessions(goalCtrl.goal!)
+                  : loc.weeklyGoalOff,
               onTap: () => _showGoalPicker(context),
             ),
-            const _AccentColorRow(
-              label: 'Theme color',
+            _AccentColorRow(
+              label: loc.settingsThemeColor,
               icon: LucideIcons.palette,
-              iconBg: Color(0xFFFF2D55),
+              iconBg: const Color(0xFFFF2D55),
               proBadge: true,
             ),
             _ToggleRow(
               icon: LucideIcons.calendarSync,
               iconBg: const Color(0xFF34C759),
-              label: 'Calendar sync',
+              label: loc.settingsCalendarSync,
               value: _calendarSync,
               onChanged: _toggleCalendarSync,
             ),
@@ -324,15 +341,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _StaticRow(
                 icon: LucideIcons.calendarCheck,
                 iconBg: const Color(0xFF30B0C7),
-                label: 'Calendars',
-                value: _calendarLabel,
+                label: loc.settingsCalendars,
+                value: _calendarLabel(loc),
                 onTap: _pickCalendars,
               ),
             _StaticRow(
               icon: LucideIcons.paintbrush,
               iconBg: const Color(0xFFAF52DE),
-              label: 'Type colors',
-              value: 'Customize',
+              label: loc.settingsTypeColors,
+              value: loc.settingsTypeColorsValue,
               onTap: () => _showTypeColorPicker(context),
               isLast: true,
               proBadge: true,
@@ -341,21 +358,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
 
         // ── Data ──────────────────────────────────────────
-        const _SectionHeader(label: 'Data'),
+        _SectionHeader(label: loc.settingsSectionData),
         _Group(
           rows: <Widget>[
             _StaticRow(
               icon: LucideIcons.upload,
               iconBg: const Color(0xFF007AFF),
-              label: 'Export data',
-              value: 'Share',
+              label: loc.settingsExportData,
+              value: loc.settingsExportValue,
               onTap: _exportData,
             ),
             _StaticRow(
               icon: LucideIcons.download,
               iconBg: const Color(0xFF5856D6),
-              label: 'Import data',
-              value: 'Load',
+              label: loc.settingsImportData,
+              value: loc.settingsImportValue,
               onTap: _importData,
               isLast: true,
             ),
@@ -363,13 +380,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
 
         // ── About ─────────────────────────────────────────
-        const _SectionHeader(label: 'About'),
+        _SectionHeader(label: loc.settingsSectionAbout),
         _Group(
           rows: <Widget>[
             _StaticRow(
               icon: LucideIcons.refreshCw,
               iconBg: const Color(0xFFFF9500),
-              label: 'Redo onboarding',
+              label: loc.settingsRedoOnboarding,
               value: '',
               onTap: () async {
                 await onboarding.reset();
@@ -378,14 +395,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _StaticRow(
               icon: LucideIcons.shieldCheck,
               iconBg: const Color(0xFF34C759),
-              label: 'Privacy Policy',
+              label: loc.settingsPrivacyPolicy,
               value: '',
               onTap: () {},
             ),
             _StaticRow(
               icon: LucideIcons.star,
               iconBg: const Color(0xFFFFCC00),
-              label: 'Rate Kadence',
+              label: loc.settingsRateKadence,
               value: '',
               onTap: () => InAppReview.instance.openStoreListing(),
               isLast: true,
@@ -394,7 +411,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: KSpace.s4),
         Text(
-          'Kadence · v1.0',
+          loc.settingsVersion('1.0'),
           textAlign: TextAlign.center,
           style: KText.caption.copyWith(
             fontSize: 11,
@@ -402,6 +419,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  String _languageLabel(AppLocalizations loc, LocaleController ctrl) {
+    final current = ctrl.locale;
+    if (current == null) return loc.languageSystem;
+    switch (current.languageCode) {
+      case 'en':
+        return loc.languageEnglish;
+      case 'pt':
+        return current.countryCode == 'BR'
+            ? loc.languagePortugueseBR
+            : loc.languagePortuguese;
+      case 'es':
+        return loc.languageSpanish;
+      case 'fr':
+        return loc.languageFrench;
+      default:
+        return loc.languageSystem;
+    }
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    final colors = context.colors;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: colors.scrim,
+      builder: (_) => const _LanguagePickerSheet(),
     );
   }
 }
@@ -481,6 +527,7 @@ class _ProBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(left: 6),
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
@@ -489,7 +536,7 @@ class _ProBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(KRadius.full),
       ),
       child: Text(
-        'PRO',
+        loc.proBadge,
         style: KText.caption.copyWith(
           fontSize: 9,
           fontWeight: FontWeight.w700,
@@ -680,7 +727,7 @@ class _CalendarPickerState extends State<_CalendarPicker> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Choose calendars',
+                    AppLocalizations.of(context)!.calendarsChooseTitle,
                     style: KText.h3.copyWith(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -691,7 +738,7 @@ class _CalendarPickerState extends State<_CalendarPicker> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(_selected),
                   child: Text(
-                    'Done',
+                    AppLocalizations.of(context)!.actionDone,
                     style: KText.bodySm.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.accent,
@@ -708,9 +755,10 @@ class _CalendarPickerState extends State<_CalendarPicker> {
               padding: EdgeInsets.only(bottom: KSpace.s4 + bottomSafe),
               itemCount: widget.calendars.length + 1,
               itemBuilder: (ctx, i) {
+                final loc = AppLocalizations.of(ctx)!;
                 if (i == 0) {
                   return _CalendarRow(
-                    label: 'All calendars',
+                    label: loc.calendarsAll,
                     icon: LucideIcons.layers,
                     isChecked: _isAll,
                     onTap: _toggleAll,
@@ -719,7 +767,7 @@ class _CalendarPickerState extends State<_CalendarPicker> {
                 final cal = widget.calendars[i - 1];
                 final id = cal.id ?? '';
                 return _CalendarRow(
-                  label: cal.name ?? 'Calendar',
+                  label: cal.name ?? loc.calendarsFallback,
                   subtitle: cal.accountName,
                   color: Color(cal.color ?? 0xFF4A7C59),
                   isChecked: _isAll || _selected.contains(id),
@@ -891,6 +939,7 @@ class _AccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
 
     if (auth.isSignedIn) {
       return Container(
@@ -918,14 +967,14 @@ class _AccountCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    auth.displayName ?? 'Signed in',
+                    auth.displayName ?? loc.accountSignedInFallback,
                     style: KText.body.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.fgPrimary,
                     ),
                   ),
                   Text(
-                    'Syncing enabled',
+                    loc.accountSyncingEnabled,
                     style: KText.caption.copyWith(color: colors.fgTertiary),
                   ),
                 ],
@@ -939,7 +988,7 @@ class _AccountCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(KSpace.s2),
                   child: Text(
-                    'Sign out',
+                    loc.accountSignOut,
                     style: KText.bodySm.copyWith(
                       color: colors.fgTertiary,
                       fontWeight: FontWeight.w500,
@@ -978,14 +1027,14 @@ class _AccountCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'Sign in to sync',
+                      loc.accountSignInToSync,
                       style: KText.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.fgPrimary,
                       ),
                     ),
                     Text(
-                      'Back up and access your data anywhere',
+                      loc.accountSignInSubtitle,
                       style: KText.caption.copyWith(color: colors.fgTertiary),
                     ),
                   ],
@@ -1017,6 +1066,7 @@ class _SignInSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final auth = context.read<AuthController>();
+    final loc = AppLocalizations.of(context)!;
     final bottomSafe = MediaQuery.paddingOf(context).bottom;
 
     return Container(
@@ -1041,7 +1091,7 @@ class _SignInSheet extends StatelessWidget {
             ),
             const SizedBox(height: KSpace.s4),
             Text(
-              'Sign in to sync',
+              loc.accountSignInToSync,
               style: KText.h3.copyWith(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -1050,7 +1100,7 @@ class _SignInSheet extends StatelessWidget {
             ),
             const SizedBox(height: KSpace.s2),
             Text(
-              'Back up your data and access it from any device.',
+              loc.signInSheetSubtitle,
               style: KText.bodySm.copyWith(color: colors.fgTertiary),
               textAlign: TextAlign.center,
             ),
@@ -1116,7 +1166,7 @@ class _TypeColorPickerSheet extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Type colors',
+                    AppLocalizations.of(context)!.settingsTypeColors,
                     style: KText.h3.copyWith(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -1128,7 +1178,7 @@ class _TypeColorPickerSheet extends StatelessWidget {
                   TextButton(
                     onPressed: controller.resetAll,
                     child: Text(
-                      'Reset all',
+                      AppLocalizations.of(context)!.typeColorsResetAll,
                       style: KText.bodySm.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.fgTertiary,
@@ -1280,7 +1330,7 @@ class _ProCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Premium features coming soon',
+                      AppLocalizations.of(context)!.proCardSubtitle,
                       style: KText.caption.copyWith(color: colors.fgTertiary),
                     ),
                   ],
@@ -1332,7 +1382,7 @@ class _GoalPickerSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: Text(
-              'Weekly goal',
+              AppLocalizations.of(context)!.settingsWeeklyGoal,
               style: KText.h3.copyWith(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -1343,7 +1393,7 @@ class _GoalPickerSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              'How many sessions per week do you want to complete?',
+              AppLocalizations.of(context)!.weeklyGoalPrompt,
               style: KText.bodySm.copyWith(color: colors.fgTertiary),
               textAlign: TextAlign.center,
             ),
@@ -1357,6 +1407,7 @@ class _GoalPickerSheet extends StatelessWidget {
               children: _options.map((n) {
                 final isOff = n == 0;
                 final selected = isOff ? current == null : current == n;
+                final loc = AppLocalizations.of(context)!;
                 return GestureDetector(
                   onTap: () => onSelected(isOff ? null : n),
                   child: AnimatedContainer(
@@ -1375,7 +1426,7 @@ class _GoalPickerSheet extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        isOff ? 'Off' : '$n',
+                        isOff ? loc.weeklyGoalOff : '$n',
                         style: KText.body.copyWith(
                           fontWeight: FontWeight.w700,
                           color: selected ? colors.accent : colors.fgPrimary,
@@ -1396,7 +1447,7 @@ class _GoalPickerSheet extends StatelessWidget {
 
 class _AccentColorRow extends StatelessWidget {
   const _AccentColorRow({
-    this.label = 'Accent color',
+    required this.label,
     this.icon,
     this.iconBg,
     this.proBadge = false,
@@ -1504,7 +1555,7 @@ class _AccentColorSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: Text(
-              'Theme color',
+              AppLocalizations.of(context)!.settingsThemeColor,
               style: KText.h3.copyWith(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -1545,4 +1596,118 @@ class _AccentColorSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LanguagePickerSheet extends StatelessWidget {
+  const _LanguagePickerSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    final controller = context.watch<LocaleController>();
+    final current = controller.locale;
+    final bottomSafe = MediaQuery.paddingOf(context).bottom;
+
+    final options = <_LanguageOption>[
+      _LanguageOption(locale: null, label: loc.languageSystem),
+      _LanguageOption(locale: const Locale('en'), label: loc.languageEnglish),
+      _LanguageOption(
+        locale: const Locale('pt'),
+        label: loc.languagePortuguese,
+      ),
+      _LanguageOption(
+        locale: const Locale('pt', 'BR'),
+        label: loc.languagePortugueseBR,
+      ),
+      _LanguageOption(locale: const Locale('es'), label: loc.languageSpanish),
+      _LanguageOption(locale: const Locale('fr'), label: loc.languageFrench),
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bgElevated,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KRadius.xl),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const SizedBox(height: 10),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colors.border,
+              borderRadius: BorderRadius.circular(KRadius.full),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              loc.settingsLanguage,
+              style: KText.h3.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: colors.fgPrimary,
+              ),
+            ),
+          ),
+          Divider(height: 1, color: colors.borderSubtle),
+          Padding(
+            padding: EdgeInsets.only(bottom: KSpace.s2 + bottomSafe),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: options.map((opt) {
+                final selected = opt.locale == null
+                    ? current == null
+                    : current?.languageCode == opt.locale!.languageCode &&
+                        current?.countryCode == opt.locale!.countryCode;
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      controller.setLocale(opt.locale);
+                      Navigator.of(context).pop();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              opt.label,
+                              style: KText.body.copyWith(
+                                color: colors.fgPrimary,
+                                fontWeight: selected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                          if (selected)
+                            Icon(LucideIcons.check,
+                                size: 18, color: colors.accent),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LanguageOption {
+  const _LanguageOption({required this.locale, required this.label});
+  final Locale? locale;
+  final String label;
 }

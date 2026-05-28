@@ -1,0 +1,107 @@
+{
+  "@@locale": "en",
+
+  "settingsSectionApp": "App",
+  "@settingsSectionApp": { "description": "Settings section header for app preferences" },
+
+  "settingsSectionData": "Data",
+  "@settingsSectionData": { "description": "Settings section header for backup/export" },
+
+  "settingsSectionAbout": "About",
+  "@settingsSectionAbout": { "description": "Settings section header for legal/info rows" },
+
+  "settingsDarkMode": "Dark mode",
+  "settingsWeekStartsOn": "Week starts on",
+  "weekdaySunday": "Sunday",
+  "weekdayMonday": "Monday",
+
+  "settingsWeeklyGoal": "Weekly goal",
+  "weeklyGoalSessions": "{count} sessions",
+  "@weeklyGoalSessions": {
+    "description": "Trailing value on the weekly-goal row, e.g. '5 sessions'",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "weeklyGoalOff": "Off",
+  "weeklyGoalPrompt": "How many sessions per week do you want to complete?",
+
+  "settingsThemeColor": "Theme color",
+  "settingsCalendarSync": "Calendar sync",
+  "settingsCalendars": "Calendars",
+  "calendarsAll": "All calendars",
+  "calendarsCount": "{count} calendars",
+  "@calendarsCount": {
+    "description": "Trailing label showing how many calendars are selected",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "calendarsFallback": "Calendar",
+  "calendarsOff": "Off",
+  "calendarsLoading": "…",
+  "calendarsChooseTitle": "Choose calendars",
+
+  "settingsTypeColors": "Type colors",
+  "settingsTypeColorsValue": "Customize",
+  "typeColorsResetAll": "Reset all",
+
+  "settingsExportData": "Export data",
+  "settingsExportValue": "Share",
+  "settingsImportData": "Import data",
+  "settingsImportValue": "Load",
+  "exportFailed": "Export failed",
+
+  "importReplaceTitle": "Replace all data?",
+  "importReplaceBody": "This will replace all your current data with the imported data ({count} activities).",
+  "@importReplaceBody": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "actionCancel": "Cancel",
+  "actionReplace": "Replace",
+  "actionDone": "Done",
+
+  "importedActivities": "Imported {count} activities",
+  "@importedActivities": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "calendarSyncPromptTitle": "Sync to calendar?",
+  "calendarSyncPromptBody": "Add the imported activities to your device calendar? Existing matching events will be skipped.",
+  "actionNoThanks": "No thanks",
+  "actionSync": "Sync",
+  "calendarSyncedAll": "Synced {synced} events to calendar",
+  "@calendarSyncedAll": {
+    "placeholders": { "synced": { "type": "int" } }
+  },
+  "calendarSyncedWithSkipped": "Synced {synced} events ({skipped} already on calendar)",
+  "@calendarSyncedWithSkipped": {
+    "placeholders": {
+      "synced": { "type": "int" },
+      "skipped": { "type": "int" }
+    }
+  },
+
+  "settingsRedoOnboarding": "Redo onboarding",
+  "settingsPrivacyPolicy": "Privacy Policy",
+  "settingsRateKadence": "Rate Kadence",
+  "settingsVersion": "Kadence · v{version}",
+  "@settingsVersion": {
+    "description": "App version row at the bottom of Settings",
+    "placeholders": { "version": { "type": "String" } }
+  },
+
+  "accountSignInToSync": "Sign in to sync",
+  "accountSignInSubtitle": "Back up and access your data anywhere",
+  "accountSignedInFallback": "Signed in",
+  "accountSyncingEnabled": "Syncing enabled",
+  "accountSignOut": "Sign out",
+  "signInSheetSubtitle": "Back up your data and access it from any device.",
+
+  "proCardSubtitle": "Premium features coming soon",
+  "proBadge": "PRO",
+
+  "settingsLanguage": "Language",
+  "languageSystem": "System default",
+  "languageEnglish": "English",
+  "languagePortuguese": "Português (Portugal)",
+  "languagePortugueseBR": "Português (Brasil)",
+  "languageSpanish": "Español",
+  "languageFrench": "Français"
+}

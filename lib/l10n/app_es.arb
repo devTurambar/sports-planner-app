@@ -1,0 +1,75 @@
+{
+  "@@locale": "es",
+
+  "settingsSectionApp": "Aplicación",
+  "settingsSectionData": "Datos",
+  "settingsSectionAbout": "Acerca de",
+
+  "settingsDarkMode": "Modo oscuro",
+  "settingsWeekStartsOn": "La semana empieza el",
+  "weekdaySunday": "Domingo",
+  "weekdayMonday": "Lunes",
+
+  "settingsWeeklyGoal": "Objetivo semanal",
+  "weeklyGoalSessions": "{count} sesiones",
+  "weeklyGoalOff": "Desactivado",
+  "weeklyGoalPrompt": "¿Cuántas sesiones por semana quieres completar?",
+
+  "settingsThemeColor": "Color del tema",
+  "settingsCalendarSync": "Sincronizar calendario",
+  "settingsCalendars": "Calendarios",
+  "calendarsAll": "Todos los calendarios",
+  "calendarsCount": "{count} calendarios",
+  "calendarsFallback": "Calendario",
+  "calendarsOff": "Desactivado",
+  "calendarsLoading": "…",
+  "calendarsChooseTitle": "Elegir calendarios",
+
+  "settingsTypeColors": "Colores por tipo",
+  "settingsTypeColorsValue": "Personalizar",
+  "typeColorsResetAll": "Restablecer todo",
+
+  "settingsExportData": "Exportar datos",
+  "settingsExportValue": "Compartir",
+  "settingsImportData": "Importar datos",
+  "settingsImportValue": "Cargar",
+  "exportFailed": "Error al exportar",
+
+  "importReplaceTitle": "¿Reemplazar todos los datos?",
+  "importReplaceBody": "Esto reemplazará todos tus datos actuales por los datos importados ({count} actividades).",
+  "actionCancel": "Cancelar",
+  "actionReplace": "Reemplazar",
+  "actionDone": "Hecho",
+
+  "importedActivities": "Se han importado {count} actividades",
+
+  "calendarSyncPromptTitle": "¿Sincronizar con el calendario?",
+  "calendarSyncPromptBody": "¿Añadir las actividades importadas al calendario del dispositivo? Los eventos coincidentes existentes se omitirán.",
+  "actionNoThanks": "No, gracias",
+  "actionSync": "Sincronizar",
+  "calendarSyncedAll": "Se sincronizaron {synced} eventos en el calendario",
+  "calendarSyncedWithSkipped": "Se sincronizaron {synced} eventos ({skipped} ya en el calendario)",
+
+  "settingsRedoOnboarding": "Rehacer introducción",
+  "settingsPrivacyPolicy": "Política de privacidad",
+  "settingsRateKadence": "Valorar Kadence",
+  "settingsVersion": "Kadence · v{version}",
+
+  "accountSignInToSync": "Inicia sesión para sincronizar",
+  "accountSignInSubtitle": "Haz copia de seguridad y accede a tus datos donde quieras",
+  "accountSignedInFallback": "Sesión iniciada",
+  "accountSyncingEnabled": "Sincronización activa",
+  "accountSignOut": "Cerrar sesión",
+  "signInSheetSubtitle": "Haz copia de seguridad de tus datos y accede a ellos desde cualquier dispositivo.",
+
+  "proCardSubtitle": "Funciones premium próximamente",
+  "proBadge": "PRO",
+
+  "settingsLanguage": "Idioma",
+  "languageSystem": "Predeterminado del sistema",
+  "languageEnglish": "English",
+  "languagePortuguese": "Português (Portugal)",
+  "languagePortugueseBR": "Português (Brasil)",
+  "languageSpanish": "Español",
+  "languageFrench": "Français"
+}

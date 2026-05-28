@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'l10n/generated/app_localizations.dart';
+import 'state/locale_controller.dart';
 import 'state/onboarding_controller.dart';
 import 'state/theme_controller.dart';
 import 'theme/kadence_theme.dart';
@@ -14,12 +16,16 @@ class KadenceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeController>();
+    final localeCtrl = context.watch<LocaleController>();
     return MaterialApp(
       title: 'Kadence',
       debugShowCheckedModeBanner: false,
       themeMode: theme.mode,
       theme: buildKadenceTheme(Brightness.light),
       darkTheme: buildKadenceTheme(Brightness.dark),
+      locale: localeCtrl.locale,
+      supportedLocales: LocaleController.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       builder: (context, child) => TodayScope(child: child ?? const SizedBox()),
       home: const _AppGate(),
     );

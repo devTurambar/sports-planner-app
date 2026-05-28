@@ -1,0 +1,75 @@
+{
+  "@@locale": "pt",
+
+  "settingsSectionApp": "Aplicação",
+  "settingsSectionData": "Dados",
+  "settingsSectionAbout": "Acerca",
+
+  "settingsDarkMode": "Modo escuro",
+  "settingsWeekStartsOn": "Semana começa em",
+  "weekdaySunday": "Domingo",
+  "weekdayMonday": "Segunda-feira",
+
+  "settingsWeeklyGoal": "Meta semanal",
+  "weeklyGoalSessions": "{count} sessões",
+  "weeklyGoalOff": "Desativada",
+  "weeklyGoalPrompt": "Quantas sessões por semana queres completar?",
+
+  "settingsThemeColor": "Cor do tema",
+  "settingsCalendarSync": "Sincronizar calendário",
+  "settingsCalendars": "Calendários",
+  "calendarsAll": "Todos os calendários",
+  "calendarsCount": "{count} calendários",
+  "calendarsFallback": "Calendário",
+  "calendarsOff": "Desativado",
+  "calendarsLoading": "…",
+  "calendarsChooseTitle": "Escolher calendários",
+
+  "settingsTypeColors": "Cores por tipo",
+  "settingsTypeColorsValue": "Personalizar",
+  "typeColorsResetAll": "Repor todas",
+
+  "settingsExportData": "Exportar dados",
+  "settingsExportValue": "Partilhar",
+  "settingsImportData": "Importar dados",
+  "settingsImportValue": "Carregar",
+  "exportFailed": "Falha ao exportar",
+
+  "importReplaceTitle": "Substituir todos os dados?",
+  "importReplaceBody": "Isto vai substituir todos os teus dados atuais pelos dados importados ({count} atividades).",
+  "actionCancel": "Cancelar",
+  "actionReplace": "Substituir",
+  "actionDone": "Concluído",
+
+  "importedActivities": "Foram importadas {count} atividades",
+
+  "calendarSyncPromptTitle": "Sincronizar com o calendário?",
+  "calendarSyncPromptBody": "Adicionar as atividades importadas ao calendário do dispositivo? Eventos já existentes serão ignorados.",
+  "actionNoThanks": "Não, obrigado",
+  "actionSync": "Sincronizar",
+  "calendarSyncedAll": "Sincronizados {synced} eventos no calendário",
+  "calendarSyncedWithSkipped": "Sincronizados {synced} eventos ({skipped} já no calendário)",
+
+  "settingsRedoOnboarding": "Refazer introdução",
+  "settingsPrivacyPolicy": "Política de privacidade",
+  "settingsRateKadence": "Avaliar o Kadence",
+  "settingsVersion": "Kadence · v{version}",
+
+  "accountSignInToSync": "Inicia sessão para sincronizar",
+  "accountSignInSubtitle": "Faz cópia de segurança e acede aos dados em qualquer lado",
+  "accountSignedInFallback": "Sessão iniciada",
+  "accountSyncingEnabled": "Sincronização ativa",
+  "accountSignOut": "Terminar sessão",
+  "signInSheetSubtitle": "Faz cópia de segurança e acede aos dados em qualquer dispositivo.",
+
+  "proCardSubtitle": "Funcionalidades premium em breve",
+  "proBadge": "PRO",
+
+  "settingsLanguage": "Idioma",
+  "languageSystem": "Padrão do sistema",
+  "languageEnglish": "English",
+  "languagePortuguese": "Português (Portugal)",
+  "languagePortugueseBR": "Português (Brasil)",
+  "languageSpanish": "Español",
+  "languageFrench": "Français"
+}

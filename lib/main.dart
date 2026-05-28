@@ -11,6 +11,7 @@ import 'state/calendar_service.dart';
 import 'state/onboarding_controller.dart';
 import 'state/plan_controller.dart';
 import 'state/theme_controller.dart';
+import 'state/locale_controller.dart';
 import 'state/review_service.dart';
 import 'state/goal_controller.dart';
 import 'state/tip_controller.dart';
@@ -48,6 +49,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<ThemeController>(
           create: (_) => ThemeController(prefs),
+        ),
+        ChangeNotifierProvider<LocaleController>(
+          create: (_) => LocaleController(prefs),
         ),
         ChangeNotifierProvider<OnboardingController>(
           create: (_) => OnboardingController(prefs),
