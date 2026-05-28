@@ -13,6 +13,7 @@ import '../../utils/date_utils.dart';
 import '../../widgets/k_tip_banner.dart';
 import 'stats_data.dart';
 import 'widgets/personal_records.dart';
+import 'widgets/period_breakdown.dart';
 import 'widgets/best_day_of_week.dart';
 import 'widgets/completion_rate.dart';
 import 'widgets/monthly_trends.dart';
@@ -140,6 +141,8 @@ class _StatsViewState extends State<StatsView> {
         _ProSectionHeader(colors: colors),
         const SizedBox(height: KSpace.s3),
         PersonalRecords(data: data),
+        const SizedBox(height: KSpace.s3),
+        PeriodBreakdown(data: data, startDay: startDay, today: today),
         const SizedBox(height: KSpace.s3),
         WeeklyActivityChart(data: data, startDay: startDay),
         const SizedBox(height: KSpace.s3),
