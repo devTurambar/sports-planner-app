@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -17,6 +18,7 @@ class EmptyStateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 320),
@@ -33,7 +35,7 @@ class EmptyStateView extends StatelessWidget {
               _CalendarMark(),
               const SizedBox(height: KSpace.s6 + 4),
               Text(
-                'Nothing planned yet',
+                loc.emptyStateTitle,
                 textAlign: TextAlign.center,
                 style: KText.h3.copyWith(
                   fontSize: 20,
@@ -44,7 +46,7 @@ class EmptyStateView extends StatelessWidget {
               ),
               const SizedBox(height: KSpace.s2),
               Text(
-                'Tap + to add your first session for the week.',
+                loc.emptyStateBody,
                 textAlign: TextAlign.center,
                 style: KText.bodySm.copyWith(
                   fontSize: 14,
@@ -54,7 +56,7 @@ class EmptyStateView extends StatelessWidget {
               ),
               const SizedBox(height: KSpace.s6 + 4),
               KButton(
-                label: 'Add activity',
+                label: loc.emptyStateAddCta,
                 onPressed: onAdd,
                 expanded: false,
                 leading: Icon(

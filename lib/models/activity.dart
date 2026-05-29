@@ -138,6 +138,98 @@ extension ActivityTypeLabel on ActivityType {
   }
 }
 
+/// Maps a stored English sub-type key (e.g. "Crossfit", "Alpine Ski")
+/// to its localized display label. Unknown values fall through
+/// unchanged so legacy data and custom strings still render.
+String localizedSubType(String key, AppLocalizations loc) {
+  switch (key) {
+    case 'Alpine Ski':
+      return loc.subtypeAlpineSki;
+    case 'Badminton':
+      return loc.subtypeBadminton;
+    case 'Canoeing':
+      return loc.subtypeCanoeing;
+    case 'Crossfit':
+      return loc.subtypeCrossfit;
+    case 'E-Bike Ride':
+      return loc.subtypeEbikeRide;
+    case 'Fencing':
+      return loc.subtypeFencing;
+    case 'Golf':
+      return loc.subtypeGolf;
+    case 'Handball':
+      return loc.subtypeHandball;
+    case 'Ice Skate':
+      return loc.subtypeIceSkate;
+    case 'Inline Skate':
+      return loc.subtypeInlineSkate;
+    case 'Kayaking':
+      return loc.subtypeKayaking;
+    case 'Kitesurf':
+      return loc.subtypeKitesurf;
+    case 'Martial Arts':
+      return loc.subtypeMartialArts;
+    case 'Pilates':
+      return loc.subtypePilates;
+    case 'Pickleball':
+      return loc.subtypePickleball;
+    case 'Racquetball':
+      return loc.subtypeRacquetball;
+    case 'Rock Climbing':
+      return loc.subtypeRockClimbing;
+    case 'Roller Ski':
+      return loc.subtypeRollerSki;
+    case 'Rowing':
+      return loc.subtypeRowing;
+    case 'Rugby':
+      return loc.subtypeRugby;
+    case 'Sailing':
+      return loc.subtypeSailing;
+    case 'Skateboarding':
+      return loc.subtypeSkateboarding;
+    case 'Snowboard':
+      return loc.subtypeSnowboard;
+    case 'Snowshoe':
+      return loc.subtypeSnowshoe;
+    case 'Soccer':
+      return loc.subtypeSoccer;
+    case 'Squash':
+      return loc.subtypeSquash;
+    case 'Stair Stepper':
+      return loc.subtypeStairStepper;
+    case 'Stand Up Paddling':
+      return loc.subtypeStandUpPaddling;
+    case 'Swimming':
+      return loc.subtypeSwimming;
+    case 'Table Tennis':
+      return loc.subtypeTableTennis;
+    case 'Trail Run':
+      return loc.subtypeTrailRun;
+    case 'Velomobile':
+      return loc.subtypeVelomobile;
+    case 'Virtual Ride':
+      return loc.subtypeVirtualRide;
+    case 'Virtual Row':
+      return loc.subtypeVirtualRow;
+    case 'Virtual Run':
+      return loc.subtypeVirtualRun;
+    case 'Volleyball':
+      return loc.subtypeVolleyball;
+    case 'Weightlifting':
+      return loc.subtypeWeightlifting;
+    case 'Wheelchair':
+      return loc.subtypeWheelchair;
+    case 'Windsurf':
+      return loc.subtypeWindsurf;
+    case 'Workout':
+      return loc.subtypeWorkout;
+    case 'Yoga':
+      return loc.subtypeYoga;
+    default:
+      return key;
+  }
+}
+
 /// A single session planned for a specific date.
 @immutable
 class Activity {
@@ -189,6 +281,16 @@ class Activity {
   String get typeLabel {
     if (type == ActivityType.other && subType != null) return subType!;
     return type?.label ?? 'Other';
+  }
+
+  /// Locale-aware version of [typeLabel]. Handles both core types
+  /// (run, hike, ...) and the Strava-style sub-types stored as English
+  /// strings (Crossfit, Soccer, ...).
+  String localizedTypeLabel(AppLocalizations loc) {
+    if (type == ActivityType.other && subType != null) {
+      return localizedSubType(subType!, loc);
+    }
+    return type?.localized(loc) ?? loc.typeOther;
   }
 
   Activity copyWith({

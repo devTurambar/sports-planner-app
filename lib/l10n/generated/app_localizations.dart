@@ -1074,6 +1074,984 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Session'**
   String get activityNameFallback;
+
+  /// No description provided for @oauthContinueGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get oauthContinueGoogle;
+
+  /// No description provided for @oauthContinueApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Apple'**
+  String get oauthContinueApple;
+
+  /// No description provided for @themeLightTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Light mode'**
+  String get themeLightTooltip;
+
+  /// No description provided for @themeDarkTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get themeDarkTooltip;
+
+  /// No description provided for @tipDismissHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap anywhere to continue'**
+  String get tipDismissHint;
+
+  /// No description provided for @loginTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan your week. Move your body.'**
+  String get loginTagline;
+
+  /// No description provided for @loginTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing you agree to our Terms of Service'**
+  String get loginTerms;
+
+  /// No description provided for @emptyStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned yet'**
+  String get emptyStateTitle;
+
+  /// No description provided for @emptyStateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add your first session for the week.'**
+  String get emptyStateBody;
+
+  /// No description provided for @emptyStateAddCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add activity'**
+  String get emptyStateAddCta;
+
+  /// No description provided for @paywallComingSoonBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get paywallComingSoonBadge;
+
+  /// No description provided for @paywallBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium features are\non the way'**
+  String get paywallBannerTitle;
+
+  /// No description provided for @paywallBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re building something special.\nStay tuned for Kadence Pro.'**
+  String get paywallBannerBody;
+
+  /// No description provided for @paywallFeaturesHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s what\'s coming:'**
+  String get paywallFeaturesHeader;
+
+  /// No description provided for @paywallStravaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Strava integration'**
+  String get paywallStravaTitle;
+
+  /// No description provided for @paywallStravaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Import your history and auto-mark sessions as done'**
+  String get paywallStravaBody;
+
+  /// No description provided for @paywallStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced stats'**
+  String get paywallStatsTitle;
+
+  /// No description provided for @paywallStatsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Full-year heatmap, insights, and shareable recaps'**
+  String get paywallStatsBody;
+
+  /// No description provided for @paywallDateFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Date filtering'**
+  String get paywallDateFilterTitle;
+
+  /// No description provided for @paywallDateFilterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter all stats by any custom date range'**
+  String get paywallDateFilterBody;
+
+  /// No description provided for @paywallCloudTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync'**
+  String get paywallCloudTitle;
+
+  /// No description provided for @paywallCloudBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up and access your data from any device'**
+  String get paywallCloudBody;
+
+  /// No description provided for @paywallCustomColorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom colors'**
+  String get paywallCustomColorsTitle;
+
+  /// No description provided for @paywallCustomColorsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalize activity type and theme colors'**
+  String get paywallCustomColorsBody;
+
+  /// No description provided for @paywallSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support an indie developer'**
+  String get paywallSupportTitle;
+
+  /// No description provided for @paywallSupportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your purchase helps keep Kadence alive'**
+  String get paywallSupportBody;
+
+  /// No description provided for @statsKpiSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get statsKpiSessions;
+
+  /// No description provided for @statsKpiStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get statsKpiStreak;
+
+  /// No description provided for @statsKpiAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get statsKpiAverage;
+
+  /// No description provided for @statsWeekSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'wk'**
+  String get statsWeekSuffix;
+
+  /// No description provided for @statsPerWeekSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'/wk'**
+  String get statsPerWeekSuffix;
+
+  /// No description provided for @statsProSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro Stats'**
+  String get statsProSection;
+
+  /// No description provided for @statsHeatmapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}-week activity'**
+  String statsHeatmapTitle(int count);
+
+  /// No description provided for @statsHeatmapFilteredTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtered to {type}'**
+  String statsHeatmapFilteredTo(String type);
+
+  /// No description provided for @statsHeatmapTinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Tinted by primary activity'**
+  String get statsHeatmapTinted;
+
+  /// No description provided for @statsByActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'By activity'**
+  String get statsByActivity;
+
+  /// No description provided for @statsAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get statsAllTime;
+
+  /// No description provided for @statsNoSessionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions yet'**
+  String get statsNoSessionsYet;
+
+  /// No description provided for @actionClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get actionClear;
+
+  /// No description provided for @statsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No stats yet'**
+  String get statsEmptyTitle;
+
+  /// No description provided for @statsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first session to start tracking your progress.'**
+  String get statsEmptyBody;
+
+  /// No description provided for @statsTipFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by activity'**
+  String get statsTipFilterTitle;
+
+  /// No description provided for @statsTipFilterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any activity type in \"By activity\" to highlight only that type on the heatmap'**
+  String get statsTipFilterBody;
+
+  /// No description provided for @statsPersonalRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal records'**
+  String get statsPersonalRecordsTitle;
+
+  /// No description provided for @statsBestStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Best streak'**
+  String get statsBestStreak;
+
+  /// No description provided for @statsBestWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Best week'**
+  String get statsBestWeek;
+
+  /// No description provided for @statsBestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Best day'**
+  String get statsBestDay;
+
+  /// No description provided for @statsWeeklyActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly activity'**
+  String get statsWeeklyActivityTitle;
+
+  /// No description provided for @statsAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg'**
+  String get statsAvg;
+
+  /// No description provided for @statsBestDayOfWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Best day of week'**
+  String get statsBestDayOfWeekTitle;
+
+  /// No description provided for @statsDoneSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Done sessions'**
+  String get statsDoneSessions;
+
+  /// No description provided for @statsCompletionRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion rate'**
+  String get statsCompletionRateTitle;
+
+  /// No description provided for @statsPlannedVsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned vs done'**
+  String get statsPlannedVsDone;
+
+  /// No description provided for @statsMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get statsMissed;
+
+  /// No description provided for @statsMonthlyTrendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly trends'**
+  String get statsMonthlyTrendsTitle;
+
+  /// No description provided for @statsActivityVarietyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity variety'**
+  String get statsActivityVarietyTitle;
+
+  /// No description provided for @statsLongestGapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest gap'**
+  String get statsLongestGapTitle;
+
+  /// No description provided for @statsBetweenSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Between sessions'**
+  String get statsBetweenSessions;
+
+  /// No description provided for @statsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get statsNoData;
+
+  /// No description provided for @statsMonthVsMonthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Month vs month'**
+  String get statsMonthVsMonthTitle;
+
+  /// No description provided for @statsMostConsistentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Most consistent'**
+  String get statsMostConsistentTitle;
+
+  /// No description provided for @statsCompletionByType.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion by type'**
+  String get statsCompletionByType;
+
+  /// No description provided for @statsWeeklyPatternsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly patterns'**
+  String get statsWeeklyPatternsTitle;
+
+  /// No description provided for @statsWhenYouDo.
+  ///
+  /// In en, this message translates to:
+  /// **'When you do each activity'**
+  String get statsWhenYouDo;
+
+  /// No description provided for @statsActiveDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Active days'**
+  String get statsActiveDays;
+
+  /// No description provided for @statsBestMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Best month'**
+  String get statsBestMonth;
+
+  /// No description provided for @statsTopActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Top activity'**
+  String get statsTopActivity;
+
+  /// No description provided for @statsPeriodBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Period breakdown'**
+  String get statsPeriodBreakdownTitle;
+
+  /// No description provided for @statsPeriodNoSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions in this period'**
+  String get statsPeriodNoSessions;
+
+  /// No description provided for @statsAvgPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg / wk'**
+  String get statsAvgPerWeek;
+
+  /// No description provided for @statsConsistency.
+  ///
+  /// In en, this message translates to:
+  /// **'Consistency'**
+  String get statsConsistency;
+
+  /// No description provided for @statsPeakWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak week'**
+  String get statsPeakWeek;
+
+  /// No description provided for @statsTrendingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending up vs earlier in period'**
+  String get statsTrendingUp;
+
+  /// No description provided for @statsTrendingDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending down vs earlier in period'**
+  String get statsTrendingDown;
+
+  /// No description provided for @statsSteadyPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady pace'**
+  String get statsSteadyPace;
+
+  /// No description provided for @statsNoDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get statsNoDataYet;
+
+  /// No description provided for @statsPeriodAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get statsPeriodAll;
+
+  /// No description provided for @statsInsightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights'**
+  String get statsInsightsTitle;
+
+  /// No description provided for @insightFavoriteDay.
+  ///
+  /// In en, this message translates to:
+  /// **'You train most on {day}s — {count} sessions total.'**
+  String insightFavoriteDay(String day, int count);
+
+  /// No description provided for @insightAboveAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'This month is {percent}% above your average. Keep it up!'**
+  String insightAboveAvg(int percent);
+
+  /// No description provided for @insightBelowAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'This month is quieter than usual. Still time to catch up!'**
+  String get insightBelowAvg;
+
+  /// No description provided for @insightVariety.
+  ///
+  /// In en, this message translates to:
+  /// **'Great variety! You did {count} different activities in the last 30 days.'**
+  String insightVariety(int count);
+
+  /// No description provided for @insightFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been focused on {type} lately. Try mixing it up!'**
+  String insightFocused(String type);
+
+  /// No description provided for @insightStreakStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks}-week streak! That\'s serious consistency.'**
+  String insightStreakStrong(int weeks);
+
+  /// No description provided for @insightStreakNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New streak started! Keep it going this week.'**
+  String get insightStreakNew;
+
+  /// No description provided for @insightBestMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Best month ever with {count} sessions so far!'**
+  String insightBestMonth(int count);
+
+  /// No description provided for @recapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your progress'**
+  String get recapTitle;
+
+  /// No description provided for @recapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a summary card and share it with friends.'**
+  String get recapSubtitle;
+
+  /// No description provided for @recapThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get recapThisMonth;
+
+  /// No description provided for @recapThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get recapThisYear;
+
+  /// No description provided for @recapPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get recapPreview;
+
+  /// No description provided for @recapShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get recapShare;
+
+  /// No description provided for @recapActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get recapActivity;
+
+  /// No description provided for @recapTopActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Top activity: {label}'**
+  String recapTopActivity(String label);
+
+  /// No description provided for @recapStreakBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} wk'**
+  String recapStreakBadge(int count);
+
+  /// No description provided for @recapYearInReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{year} Year in Review'**
+  String recapYearInReviewTitle(int year);
+
+  /// No description provided for @recapMonthGettingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting started!'**
+  String get recapMonthGettingStarted;
+
+  /// No description provided for @recapMonthUnstoppable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unstoppable month!'**
+  String get recapMonthUnstoppable;
+
+  /// No description provided for @recapMonthCrushing.
+  ///
+  /// In en, this message translates to:
+  /// **'Crushing it!'**
+  String get recapMonthCrushing;
+
+  /// No description provided for @recapMonthConsistency.
+  ///
+  /// In en, this message translates to:
+  /// **'Incredible consistency!'**
+  String get recapMonthConsistency;
+
+  /// No description provided for @recapMonthStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong month!'**
+  String get recapMonthStrong;
+
+  /// No description provided for @recapMonthMomentum.
+  ///
+  /// In en, this message translates to:
+  /// **'Building momentum!'**
+  String get recapMonthMomentum;
+
+  /// No description provided for @recapYearBegins.
+  ///
+  /// In en, this message translates to:
+  /// **'The journey begins!'**
+  String get recapYearBegins;
+
+  /// No description provided for @recapYearLegendary.
+  ///
+  /// In en, this message translates to:
+  /// **'Legendary year!'**
+  String get recapYearLegendary;
+
+  /// No description provided for @recapYearTripleDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'Triple digits!'**
+  String get recapYearTripleDigits;
+
+  /// No description provided for @recapYearStreakMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak machine!'**
+  String get recapYearStreakMachine;
+
+  /// No description provided for @recapYearHalfHundred.
+  ///
+  /// In en, this message translates to:
+  /// **'Half a hundred!'**
+  String get recapYearHalfHundred;
+
+  /// No description provided for @recapYearGoingStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Going strong!'**
+  String get recapYearGoingStrong;
+
+  /// No description provided for @recapYearHabit.
+  ///
+  /// In en, this message translates to:
+  /// **'Building the habit!'**
+  String get recapYearHabit;
+
+  /// No description provided for @statsLast12Months.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get statsLast12Months;
+
+  /// No description provided for @statsLast12Weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 weeks'**
+  String get statsLast12Weeks;
+
+  /// No description provided for @statsTypesAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} types all time'**
+  String statsTypesAllTime(int count);
+
+  /// No description provided for @statsDifferentTypesPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Different types per week (last 12 weeks)'**
+  String get statsDifferentTypesPerWeek;
+
+  /// No description provided for @statsNeedAtLeast2.
+  ///
+  /// In en, this message translates to:
+  /// **'Need at least 2 sessions'**
+  String get statsNeedAtLeast2;
+
+  /// No description provided for @statsDaysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String statsDaysCount(int count);
+
+  /// No description provided for @statsDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Today} =1{1 day ago} other{{count} days ago}}'**
+  String statsDaysAgo(int count);
+
+  /// No description provided for @statsSessionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{session} other{sessions}}'**
+  String statsSessionsCount(int count);
+
+  /// No description provided for @statsTypesCountShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 type} other{{count} types}}'**
+  String statsTypesCountShort(int count);
+
+  /// No description provided for @statsYearInReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{year} in review'**
+  String statsYearInReviewTitle(int year);
+
+  /// No description provided for @statsYearHeatmapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{year} heatmap'**
+  String statsYearHeatmapTitle(int year);
+
+  /// No description provided for @statsActiveDaysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active days'**
+  String statsActiveDaysCount(int count);
+
+  /// No description provided for @statsTriedTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'You tried {count, plural, =1{1 different activity} other{{count} different activities}} this year'**
+  String statsTriedTypes(int count);
+
+  /// No description provided for @subtypeAlpineSki.
+  ///
+  /// In en, this message translates to:
+  /// **'Alpine Ski'**
+  String get subtypeAlpineSki;
+
+  /// No description provided for @subtypeBadminton.
+  ///
+  /// In en, this message translates to:
+  /// **'Badminton'**
+  String get subtypeBadminton;
+
+  /// No description provided for @subtypeCanoeing.
+  ///
+  /// In en, this message translates to:
+  /// **'Canoeing'**
+  String get subtypeCanoeing;
+
+  /// No description provided for @subtypeCrossfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Crossfit'**
+  String get subtypeCrossfit;
+
+  /// No description provided for @subtypeEbikeRide.
+  ///
+  /// In en, this message translates to:
+  /// **'E-Bike Ride'**
+  String get subtypeEbikeRide;
+
+  /// No description provided for @subtypeFencing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fencing'**
+  String get subtypeFencing;
+
+  /// No description provided for @subtypeGolf.
+  ///
+  /// In en, this message translates to:
+  /// **'Golf'**
+  String get subtypeGolf;
+
+  /// No description provided for @subtypeHandball.
+  ///
+  /// In en, this message translates to:
+  /// **'Handball'**
+  String get subtypeHandball;
+
+  /// No description provided for @subtypeIceSkate.
+  ///
+  /// In en, this message translates to:
+  /// **'Ice Skate'**
+  String get subtypeIceSkate;
+
+  /// No description provided for @subtypeInlineSkate.
+  ///
+  /// In en, this message translates to:
+  /// **'Inline Skate'**
+  String get subtypeInlineSkate;
+
+  /// No description provided for @subtypeKayaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Kayaking'**
+  String get subtypeKayaking;
+
+  /// No description provided for @subtypeKitesurf.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitesurf'**
+  String get subtypeKitesurf;
+
+  /// No description provided for @subtypeMartialArts.
+  ///
+  /// In en, this message translates to:
+  /// **'Martial Arts'**
+  String get subtypeMartialArts;
+
+  /// No description provided for @subtypePilates.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilates'**
+  String get subtypePilates;
+
+  /// No description provided for @subtypePickleball.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickleball'**
+  String get subtypePickleball;
+
+  /// No description provided for @subtypeRacquetball.
+  ///
+  /// In en, this message translates to:
+  /// **'Racquetball'**
+  String get subtypeRacquetball;
+
+  /// No description provided for @subtypeRockClimbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Rock Climbing'**
+  String get subtypeRockClimbing;
+
+  /// No description provided for @subtypeRollerSki.
+  ///
+  /// In en, this message translates to:
+  /// **'Roller Ski'**
+  String get subtypeRollerSki;
+
+  /// No description provided for @subtypeRowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Rowing'**
+  String get subtypeRowing;
+
+  /// No description provided for @subtypeRugby.
+  ///
+  /// In en, this message translates to:
+  /// **'Rugby'**
+  String get subtypeRugby;
+
+  /// No description provided for @subtypeSailing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sailing'**
+  String get subtypeSailing;
+
+  /// No description provided for @subtypeSkateboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Skateboarding'**
+  String get subtypeSkateboarding;
+
+  /// No description provided for @subtypeSnowboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowboard'**
+  String get subtypeSnowboard;
+
+  /// No description provided for @subtypeSnowshoe.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowshoe'**
+  String get subtypeSnowshoe;
+
+  /// No description provided for @subtypeSoccer.
+  ///
+  /// In en, this message translates to:
+  /// **'Soccer'**
+  String get subtypeSoccer;
+
+  /// No description provided for @subtypeSquash.
+  ///
+  /// In en, this message translates to:
+  /// **'Squash'**
+  String get subtypeSquash;
+
+  /// No description provided for @subtypeStairStepper.
+  ///
+  /// In en, this message translates to:
+  /// **'Stair Stepper'**
+  String get subtypeStairStepper;
+
+  /// No description provided for @subtypeStandUpPaddling.
+  ///
+  /// In en, this message translates to:
+  /// **'Stand Up Paddling'**
+  String get subtypeStandUpPaddling;
+
+  /// No description provided for @subtypeSwimming.
+  ///
+  /// In en, this message translates to:
+  /// **'Swimming'**
+  String get subtypeSwimming;
+
+  /// No description provided for @subtypeTableTennis.
+  ///
+  /// In en, this message translates to:
+  /// **'Table Tennis'**
+  String get subtypeTableTennis;
+
+  /// No description provided for @subtypeTrailRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Trail Run'**
+  String get subtypeTrailRun;
+
+  /// No description provided for @subtypeVelomobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Velomobile'**
+  String get subtypeVelomobile;
+
+  /// No description provided for @subtypeVirtualRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual Ride'**
+  String get subtypeVirtualRide;
+
+  /// No description provided for @subtypeVirtualRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual Row'**
+  String get subtypeVirtualRow;
+
+  /// No description provided for @subtypeVirtualRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual Run'**
+  String get subtypeVirtualRun;
+
+  /// No description provided for @subtypeVolleyball.
+  ///
+  /// In en, this message translates to:
+  /// **'Volleyball'**
+  String get subtypeVolleyball;
+
+  /// No description provided for @subtypeWeightlifting.
+  ///
+  /// In en, this message translates to:
+  /// **'Weightlifting'**
+  String get subtypeWeightlifting;
+
+  /// No description provided for @subtypeWheelchair.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheelchair'**
+  String get subtypeWheelchair;
+
+  /// No description provided for @subtypeWindsurf.
+  ///
+  /// In en, this message translates to:
+  /// **'Windsurf'**
+  String get subtypeWindsurf;
+
+  /// No description provided for @subtypeWorkout.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout'**
+  String get subtypeWorkout;
+
+  /// No description provided for @subtypeYoga.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get subtypeYoga;
 }
 
 class _AppLocalizationsDelegate

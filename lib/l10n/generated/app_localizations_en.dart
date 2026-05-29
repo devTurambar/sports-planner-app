@@ -547,4 +547,574 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activityNameFallback => 'Session';
+
+  @override
+  String get oauthContinueGoogle => 'Continue with Google';
+
+  @override
+  String get oauthContinueApple => 'Continue with Apple';
+
+  @override
+  String get themeLightTooltip => 'Light mode';
+
+  @override
+  String get themeDarkTooltip => 'Dark mode';
+
+  @override
+  String get tipDismissHint => 'Tap anywhere to continue';
+
+  @override
+  String get loginTagline => 'Plan your week. Move your body.';
+
+  @override
+  String get loginTerms => 'By continuing you agree to our Terms of Service';
+
+  @override
+  String get emptyStateTitle => 'Nothing planned yet';
+
+  @override
+  String get emptyStateBody => 'Tap + to add your first session for the week.';
+
+  @override
+  String get emptyStateAddCta => 'Add activity';
+
+  @override
+  String get paywallComingSoonBadge => 'Coming soon';
+
+  @override
+  String get paywallBannerTitle => 'Premium features are\non the way';
+
+  @override
+  String get paywallBannerBody =>
+      'We\'re building something special.\nStay tuned for Kadence Pro.';
+
+  @override
+  String get paywallFeaturesHeader => 'Here\'s what\'s coming:';
+
+  @override
+  String get paywallStravaTitle => 'Strava integration';
+
+  @override
+  String get paywallStravaBody =>
+      'Import your history and auto-mark sessions as done';
+
+  @override
+  String get paywallStatsTitle => 'Advanced stats';
+
+  @override
+  String get paywallStatsBody =>
+      'Full-year heatmap, insights, and shareable recaps';
+
+  @override
+  String get paywallDateFilterTitle => 'Date filtering';
+
+  @override
+  String get paywallDateFilterBody =>
+      'Filter all stats by any custom date range';
+
+  @override
+  String get paywallCloudTitle => 'Cloud sync';
+
+  @override
+  String get paywallCloudBody => 'Back up and access your data from any device';
+
+  @override
+  String get paywallCustomColorsTitle => 'Custom colors';
+
+  @override
+  String get paywallCustomColorsBody =>
+      'Personalize activity type and theme colors';
+
+  @override
+  String get paywallSupportTitle => 'Support an indie developer';
+
+  @override
+  String get paywallSupportBody => 'Your purchase helps keep Kadence alive';
+
+  @override
+  String get statsKpiSessions => 'Sessions';
+
+  @override
+  String get statsKpiStreak => 'Streak';
+
+  @override
+  String get statsKpiAverage => 'Average';
+
+  @override
+  String get statsWeekSuffix => 'wk';
+
+  @override
+  String get statsPerWeekSuffix => '/wk';
+
+  @override
+  String get statsProSection => 'Pro Stats';
+
+  @override
+  String statsHeatmapTitle(int count) {
+    return '$count-week activity';
+  }
+
+  @override
+  String statsHeatmapFilteredTo(String type) {
+    return 'Filtered to $type';
+  }
+
+  @override
+  String get statsHeatmapTinted => 'Tinted by primary activity';
+
+  @override
+  String get statsByActivity => 'By activity';
+
+  @override
+  String get statsAllTime => 'All time';
+
+  @override
+  String get statsNoSessionsYet => 'No sessions yet';
+
+  @override
+  String get actionClear => 'Clear';
+
+  @override
+  String get statsEmptyTitle => 'No stats yet';
+
+  @override
+  String get statsEmptyBody =>
+      'Complete your first session to start tracking your progress.';
+
+  @override
+  String get statsTipFilterTitle => 'Filter by activity';
+
+  @override
+  String get statsTipFilterBody =>
+      'Tap any activity type in \"By activity\" to highlight only that type on the heatmap';
+
+  @override
+  String get statsPersonalRecordsTitle => 'Personal records';
+
+  @override
+  String get statsBestStreak => 'Best streak';
+
+  @override
+  String get statsBestWeek => 'Best week';
+
+  @override
+  String get statsBestDay => 'Best day';
+
+  @override
+  String get statsWeeklyActivityTitle => 'Weekly activity';
+
+  @override
+  String get statsAvg => 'Avg';
+
+  @override
+  String get statsBestDayOfWeekTitle => 'Best day of week';
+
+  @override
+  String get statsDoneSessions => 'Done sessions';
+
+  @override
+  String get statsCompletionRateTitle => 'Completion rate';
+
+  @override
+  String get statsPlannedVsDone => 'Planned vs done';
+
+  @override
+  String get statsMissed => 'Missed';
+
+  @override
+  String get statsMonthlyTrendsTitle => 'Monthly trends';
+
+  @override
+  String get statsActivityVarietyTitle => 'Activity variety';
+
+  @override
+  String get statsLongestGapTitle => 'Longest gap';
+
+  @override
+  String get statsBetweenSessions => 'Between sessions';
+
+  @override
+  String get statsNoData => 'No data';
+
+  @override
+  String get statsMonthVsMonthTitle => 'Month vs month';
+
+  @override
+  String get statsMostConsistentTitle => 'Most consistent';
+
+  @override
+  String get statsCompletionByType => 'Completion by type';
+
+  @override
+  String get statsWeeklyPatternsTitle => 'Weekly patterns';
+
+  @override
+  String get statsWhenYouDo => 'When you do each activity';
+
+  @override
+  String get statsActiveDays => 'Active days';
+
+  @override
+  String get statsBestMonth => 'Best month';
+
+  @override
+  String get statsTopActivity => 'Top activity';
+
+  @override
+  String get statsPeriodBreakdownTitle => 'Period breakdown';
+
+  @override
+  String get statsPeriodNoSessions => 'No sessions in this period';
+
+  @override
+  String get statsAvgPerWeek => 'Avg / wk';
+
+  @override
+  String get statsConsistency => 'Consistency';
+
+  @override
+  String get statsPeakWeek => 'Peak week';
+
+  @override
+  String get statsTrendingUp => 'Trending up vs earlier in period';
+
+  @override
+  String get statsTrendingDown => 'Trending down vs earlier in period';
+
+  @override
+  String get statsSteadyPace => 'Steady pace';
+
+  @override
+  String get statsNoDataYet => 'No data yet';
+
+  @override
+  String get statsPeriodAll => 'All';
+
+  @override
+  String get statsInsightsTitle => 'Insights';
+
+  @override
+  String insightFavoriteDay(String day, int count) {
+    return 'You train most on ${day}s — $count sessions total.';
+  }
+
+  @override
+  String insightAboveAvg(int percent) {
+    return 'This month is $percent% above your average. Keep it up!';
+  }
+
+  @override
+  String get insightBelowAvg =>
+      'This month is quieter than usual. Still time to catch up!';
+
+  @override
+  String insightVariety(int count) {
+    return 'Great variety! You did $count different activities in the last 30 days.';
+  }
+
+  @override
+  String insightFocused(String type) {
+    return 'You\'ve been focused on $type lately. Try mixing it up!';
+  }
+
+  @override
+  String insightStreakStrong(int weeks) {
+    return '$weeks-week streak! That\'s serious consistency.';
+  }
+
+  @override
+  String get insightStreakNew => 'New streak started! Keep it going this week.';
+
+  @override
+  String insightBestMonth(int count) {
+    return 'Best month ever with $count sessions so far!';
+  }
+
+  @override
+  String get recapTitle => 'Share your progress';
+
+  @override
+  String get recapSubtitle =>
+      'Generate a summary card and share it with friends.';
+
+  @override
+  String get recapThisMonth => 'This month';
+
+  @override
+  String get recapThisYear => 'This year';
+
+  @override
+  String get recapPreview => 'Preview';
+
+  @override
+  String get recapShare => 'Share';
+
+  @override
+  String get recapActivity => 'Activity';
+
+  @override
+  String recapTopActivity(String label) {
+    return 'Top activity: $label';
+  }
+
+  @override
+  String recapStreakBadge(int count) {
+    return '$count wk';
+  }
+
+  @override
+  String recapYearInReviewTitle(int year) {
+    return '$year Year in Review';
+  }
+
+  @override
+  String get recapMonthGettingStarted => 'Getting started!';
+
+  @override
+  String get recapMonthUnstoppable => 'Unstoppable month!';
+
+  @override
+  String get recapMonthCrushing => 'Crushing it!';
+
+  @override
+  String get recapMonthConsistency => 'Incredible consistency!';
+
+  @override
+  String get recapMonthStrong => 'Strong month!';
+
+  @override
+  String get recapMonthMomentum => 'Building momentum!';
+
+  @override
+  String get recapYearBegins => 'The journey begins!';
+
+  @override
+  String get recapYearLegendary => 'Legendary year!';
+
+  @override
+  String get recapYearTripleDigits => 'Triple digits!';
+
+  @override
+  String get recapYearStreakMachine => 'Streak machine!';
+
+  @override
+  String get recapYearHalfHundred => 'Half a hundred!';
+
+  @override
+  String get recapYearGoingStrong => 'Going strong!';
+
+  @override
+  String get recapYearHabit => 'Building the habit!';
+
+  @override
+  String get statsLast12Months => 'Last 12 months';
+
+  @override
+  String get statsLast12Weeks => 'Last 12 weeks';
+
+  @override
+  String statsTypesAllTime(int count) {
+    return '$count types all time';
+  }
+
+  @override
+  String get statsDifferentTypesPerWeek =>
+      'Different types per week (last 12 weeks)';
+
+  @override
+  String get statsNeedAtLeast2 => 'Need at least 2 sessions';
+
+  @override
+  String statsDaysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsSessionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'sessions',
+      one: 'session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsTypesCountShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count types',
+      one: '1 type',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsYearInReviewTitle(int year) {
+    return '$year in review';
+  }
+
+  @override
+  String statsYearHeatmapTitle(int year) {
+    return '$year heatmap';
+  }
+
+  @override
+  String statsActiveDaysCount(int count) {
+    return '$count active days';
+  }
+
+  @override
+  String statsTriedTypes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count different activities',
+      one: '1 different activity',
+    );
+    return 'You tried $_temp0 this year';
+  }
+
+  @override
+  String get subtypeAlpineSki => 'Alpine Ski';
+
+  @override
+  String get subtypeBadminton => 'Badminton';
+
+  @override
+  String get subtypeCanoeing => 'Canoeing';
+
+  @override
+  String get subtypeCrossfit => 'Crossfit';
+
+  @override
+  String get subtypeEbikeRide => 'E-Bike Ride';
+
+  @override
+  String get subtypeFencing => 'Fencing';
+
+  @override
+  String get subtypeGolf => 'Golf';
+
+  @override
+  String get subtypeHandball => 'Handball';
+
+  @override
+  String get subtypeIceSkate => 'Ice Skate';
+
+  @override
+  String get subtypeInlineSkate => 'Inline Skate';
+
+  @override
+  String get subtypeKayaking => 'Kayaking';
+
+  @override
+  String get subtypeKitesurf => 'Kitesurf';
+
+  @override
+  String get subtypeMartialArts => 'Martial Arts';
+
+  @override
+  String get subtypePilates => 'Pilates';
+
+  @override
+  String get subtypePickleball => 'Pickleball';
+
+  @override
+  String get subtypeRacquetball => 'Racquetball';
+
+  @override
+  String get subtypeRockClimbing => 'Rock Climbing';
+
+  @override
+  String get subtypeRollerSki => 'Roller Ski';
+
+  @override
+  String get subtypeRowing => 'Rowing';
+
+  @override
+  String get subtypeRugby => 'Rugby';
+
+  @override
+  String get subtypeSailing => 'Sailing';
+
+  @override
+  String get subtypeSkateboarding => 'Skateboarding';
+
+  @override
+  String get subtypeSnowboard => 'Snowboard';
+
+  @override
+  String get subtypeSnowshoe => 'Snowshoe';
+
+  @override
+  String get subtypeSoccer => 'Soccer';
+
+  @override
+  String get subtypeSquash => 'Squash';
+
+  @override
+  String get subtypeStairStepper => 'Stair Stepper';
+
+  @override
+  String get subtypeStandUpPaddling => 'Stand Up Paddling';
+
+  @override
+  String get subtypeSwimming => 'Swimming';
+
+  @override
+  String get subtypeTableTennis => 'Table Tennis';
+
+  @override
+  String get subtypeTrailRun => 'Trail Run';
+
+  @override
+  String get subtypeVelomobile => 'Velomobile';
+
+  @override
+  String get subtypeVirtualRide => 'Virtual Ride';
+
+  @override
+  String get subtypeVirtualRow => 'Virtual Row';
+
+  @override
+  String get subtypeVirtualRun => 'Virtual Run';
+
+  @override
+  String get subtypeVolleyball => 'Volleyball';
+
+  @override
+  String get subtypeWeightlifting => 'Weightlifting';
+
+  @override
+  String get subtypeWheelchair => 'Wheelchair';
+
+  @override
+  String get subtypeWindsurf => 'Windsurf';
+
+  @override
+  String get subtypeWorkout => 'Workout';
+
+  @override
+  String get subtypeYoga => 'Yoga';
 }

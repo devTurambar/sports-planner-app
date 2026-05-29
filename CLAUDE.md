@@ -22,6 +22,7 @@ sheet, Empty State, Stats, Settings.
 - `lucide_icons_flutter` for outline icons
 - `flutter_svg` for brand logo assets (Google, Apple)
 - `share_plus` + `file_picker` for export/import backup
+- `flutter_localizations` + `intl` for localization (ARB files, generated `AppLocalizations`)
 - No external charting library — stats heatmap is built with custom widgets
 
 ## Architecture at a glance
@@ -30,9 +31,10 @@ sheet, Empty State, Stats, Settings.
 lib/
   main.dart               # Initializes prefs + DB, awaits PlanController, runs KadenceApp
   app.dart                # MaterialApp + TodayScope + onboarding gate
+  l10n/                   # ARB files (app_en, app_pt, app_pt_BR, app_es, app_fr) + generated/
   theme/                  # Design tokens (colors, spacing, text, theme)
   models/                 # Activity + DayStatus + ActivityType
-  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color, goal, tip) + ActivityDb + BackupService
+  state/                  # ChangeNotifier controllers (theme, locale, onboarding, plan, type_color, goal, tip) + ActivityDb + BackupService
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
@@ -257,6 +259,69 @@ lib/
   that itself is `InkWell`-tappable, use `Material + InkWell` on both,
   not a `GestureDetector` for the inner element. Mixed
   GestureDetector/InkWell can let the outer tap win.
+- **Localization**: every visible string is in an ARB file under
+  `lib/l10n/`. Five locales ship: English (template, `app_en.arb`),
+  European Portuguese (`app_pt.arb`), Brazilian Portuguese
+  (`app_pt_BR.arb`), Spanish (`app_es.arb`), French (`app_fr.arb`).
+  - **Read strings via `AppLocalizations.of(context)!`**. The
+    generated class lives in `lib/l10n/generated/app_localizations*.dart`
+    (committed to the repo). After editing any ARB, run
+    `flutter gen-l10n` or trigger a build to regenerate.
+  - **Never concatenate translated fragments.** A full sentence is one
+    ARB key with placeholders (`{name}`, `{count}`). Concatenation
+    locks in English word order and breaks other languages. Use ICU
+    plurals for count-dependent forms — see `sessionsCount`,
+    `weeksCount`, `statsDaysAgo`, `statsTriedTypes`.
+  - **Dates and weekdays use `intl.DateFormat`** with
+    `Localizations.localeOf(context).toLanguageTag()`. Common patterns:
+    - `DateFormat.yMMMM(localeName).format(date)` → "May 2026" /
+      "maio de 2026"
+    - `DateFormat.MMMd(localeName).format(date)` → "May 4" / "4 mai"
+    - `DateFormat.E(localeName).format(date).toUpperCase()` → 3-letter
+      weekday stamp
+    - `DateFormat('EEEEE', localeName)` → narrow 1-letter weekday
+      (grid headers, week-dot cells)
+    The constants in `KDate` (`shortMonths`, `fullWeekdays`,
+    `orderedMinWeekdays`) are legacy English-only and should not appear
+    in UI code. `initializeDateFormatting()` is called once in
+    `main.dart` so intl data is available at runtime.
+  - **`LocaleController`** (`lib/state/locale_controller.dart`)
+    mirrors `ThemeController`. Persists chosen locale to
+    `kadence.locale` in SharedPreferences. A `null` locale = follow
+    system; setting `Locale('pt', 'BR')` etc. overrides it. Settings
+    has a Language row with: System default / English / Português
+    (Portugal) / Português (Brasil) / Español / Français.
+  - **Resolution**: device locale by default. Flutter resolves
+    exact-match first (pt-BR → `app_pt_BR.arb`), then language-only
+    (pt-PT → `app_pt.arb`), then the first supported locale (English)
+    as fallback. pt-BR is a *partial* override of `app_pt.arb` —
+    missing keys cascade up to European Portuguese, then to English.
+  - **Activity type labels**: `ActivityType.label` is English-only
+    (kept for serialization debugging). Use `ActivityType.localized(loc)`
+    in UI. All 21 core types have keys `typeRun`, `typeHike`, …,
+    `typeOther`.
+  - **Sub-types (the 41 Strava-style sports)**: `Activity.subType`
+    stores the canonical English string (`"Crossfit"`, `"Alpine Ski"`,
+    etc.) regardless of the user's language. Display via the top-level
+    `localizedSubType(key, loc)` from `lib/models/activity.dart`, or
+    `activity.localizedTypeLabel(loc)` which combines core + sub-type
+    in one call. Unknown keys fall through unchanged so custom or
+    legacy data still renders. The sub-type picker sheet matches
+    search queries against both the English key and the localized
+    label, so a Brazilian user typing "futebol" finds Soccer.
+  - **Adding a new key**: write it in `app_en.arb` first (template,
+    with `description` + typed placeholder metadata for translators),
+    then add the same key to every other locale file. A missing key
+    falls back to English at runtime — the build still passes, but
+    that one string will be mid-sentence English in other languages.
+  - **Adding a new locale**: create `app_xx.arb`, add `Locale('xx')` to
+    `LocaleController.supportedLocales`, add the language option to
+    `_LanguagePickerSheet` in `settings_screen.dart`, and add a
+    matching `languageXxx` key to every existing ARB file (translators
+    write their language's name in their own script).
+  - **Important `pubspec.yaml` bits**: `flutter_localizations` from
+    SDK, `intl: any`, and `flutter: generate: true` (required so the
+    build picks up `l10n.yaml`).
 - **Icons**: Lucide names are camelCase in `lucide_icons_flutter`
   (`LucideIcons.chevronLeft`). If the package version differs, the
   compile error will be obvious — adjust casing.
@@ -330,6 +395,7 @@ flutter create . --platforms=ios,android  # generate platform folders (first run
 flutter run                         # run on a connected device / simulator
 flutter test                        # run unit + widget tests
 flutter analyze                     # lint
+flutter gen-l10n                    # regenerate AppLocalizations from ARB files
 ```
 
 Lint config lives in `analysis_options.yaml`. We deliberately kept it
@@ -382,7 +448,6 @@ without discussion.
 ## Not done yet
 
 - No app icons / launcher assets.
-- No localization — copy is hardcoded English.
 - No integration tests; only one smoke test in `test/widget_test.dart`.
 
 ## Roadmap

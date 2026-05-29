@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_spacing.dart';
 import '../theme/kadence_text_styles.dart';
@@ -143,7 +144,8 @@ class _KTutorialOverlayState extends State<KTutorialOverlay>
     final fingerStartY = screenH * 0.62;
     final fingerStartX = screenW / 2;
 
-    final titleText = widget.animationHint ?? 'This week';
+    final titleText =
+        widget.animationHint ?? AppLocalizations.of(context)!.weekThisWeek;
 
     return Stack(
       children: [
@@ -368,7 +370,7 @@ class _KTutorialOverlayState extends State<KTutorialOverlay>
     return Padding(
       padding: const EdgeInsets.only(bottom: KSpace.s8),
       child: Text(
-        'Tap anywhere to continue',
+        AppLocalizations.of(context)!.tipDismissHint,
         style: KText.caption.copyWith(
           color: colors.fgTertiary,
           fontSize: 11,

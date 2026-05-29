@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -16,11 +17,12 @@ class PersonalRecords extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final records = _compute();
 
     return ProStatCard(
-      title: 'Personal records',
-      subtitle: 'All time',
+      title: loc.statsPersonalRecordsTitle,
+      subtitle: loc.statsAllTime,
       child: Row(
         children: [
           Expanded(
@@ -28,8 +30,8 @@ class PersonalRecords extends StatelessWidget {
               icon: LucideIcons.flame,
               iconColor: colors.typeRun.tint,
               value: '${records.longestStreak}',
-              suffix: 'wk',
-              label: 'Best streak',
+              suffix: loc.statsWeekSuffix,
+              label: loc.statsBestStreak,
             ),
           ),
           const SizedBox(width: KSpace.s2),
@@ -38,7 +40,7 @@ class PersonalRecords extends StatelessWidget {
               icon: LucideIcons.trophy,
               iconColor: colors.typeOther.tint,
               value: '${records.busiestWeek}',
-              label: 'Best week',
+              label: loc.statsBestWeek,
             ),
           ),
           const SizedBox(width: KSpace.s2),
@@ -47,7 +49,7 @@ class PersonalRecords extends StatelessWidget {
               icon: LucideIcons.zap,
               iconColor: colors.typeYoga.tint,
               value: '${records.busiestDay}',
-              label: 'Best day',
+              label: loc.statsBestDay,
             ),
           ),
         ],

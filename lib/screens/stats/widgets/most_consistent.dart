@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
@@ -15,17 +16,18 @@ class MostConsistent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final rankings = _compute();
+    final loc = AppLocalizations.of(context)!;
+    final rankings = _compute(loc);
 
     if (rankings.isEmpty) {
       return ProStatCard(
-        title: 'Most consistent',
-        subtitle: 'Completion by type',
+        title: loc.statsMostConsistentTitle,
+        subtitle: loc.statsCompletionByType,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: KSpace.s3),
             child: Text(
-              'No data yet',
+              loc.statsNoDataYet,
               style: KText.bodySm.copyWith(color: colors.fgTertiary),
             ),
           ),
@@ -34,8 +36,8 @@ class MostConsistent extends StatelessWidget {
     }
 
     return ProStatCard(
-      title: 'Most consistent',
-      subtitle: 'Completion by type',
+      title: loc.statsMostConsistentTitle,
+      subtitle: loc.statsCompletionByType,
       child: Column(
         children: [
           for (var i = 0; i < rankings.length; i++) ...[
@@ -50,7 +52,7 @@ class MostConsistent extends StatelessWidget {
     );
   }
 
-  List<_ConsistencyEntry> _compute() {
+  List<_ConsistencyEntry> _compute(AppLocalizations loc) {
     final all = data.allActivities
         .where((a) => a.status != DayStatus.empty && a.type != null);
 
@@ -61,7 +63,9 @@ class MostConsistent extends StatelessWidget {
     for (final a in all) {
       final key = (a.type!, a.type == ActivityType.other ? a.subType : null);
       planned[key] = (planned[key] ?? 0) + 1;
-      labels[key] = a.typeLabel;
+      labels[key] = a.type == ActivityType.other && a.subType != null
+          ? localizedSubType(a.subType!, loc)
+          : a.type!.localized(loc);
       if (a.status == DayStatus.done) {
         done[key] = (done[key] ?? 0) + 1;
       }

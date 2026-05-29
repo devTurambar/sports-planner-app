@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../state/auth_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
@@ -14,6 +15,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final auth = context.read<AuthController>();
     return Scaffold(
       backgroundColor: colors.bgBase,
@@ -35,7 +37,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: KSpace.s2),
               Text(
-                'Plan your week. Move your body.',
+                loc.loginTagline,
                 style: KText.body.copyWith(color: colors.fgTertiary),
               ),
               const Spacer(flex: 2),
@@ -52,7 +54,7 @@ class LoginScreen extends StatelessWidget {
               ],
               const Spacer(flex: 1),
               Text(
-                'By continuing you agree to our Terms of Service',
+                loc.loginTerms,
                 style: KText.caption.copyWith(color: colors.fgDisabled),
                 textAlign: TextAlign.center,
               ),

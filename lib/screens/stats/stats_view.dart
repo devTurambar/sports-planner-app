@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../state/theme_controller.dart';
@@ -48,12 +50,12 @@ class _StatsViewState extends State<StatsView> {
     if (!tips.shouldShow(TipKey.statsFilter)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final loc = AppLocalizations.of(context)!;
       KTutorialOverlay.show(
         context: context,
         gesture: TutorialGesture.tap,
-        title: 'Filter by activity',
-        subtitle:
-            'Tap any activity type in "By activity" to highlight only that type on the heatmap',
+        title: loc.statsTipFilterTitle,
+        subtitle: loc.statsTipFilterBody,
         onDismiss: () => tips.markSeen(TipKey.statsFilter),
       );
     });
@@ -83,6 +85,7 @@ class _StatsViewState extends State<StatsView> {
         ? filteredBreakdown.fold<int>(0, (s, b) => s + b.count)
         : data.totalSessions;
 
+    final loc = AppLocalizations.of(context)!;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         KSpace.s4,
@@ -96,22 +99,25 @@ class _StatsViewState extends State<StatsView> {
         Row(
           children: <Widget>[
             Expanded(
-              child: _Kpi(value: data.totalSessions.toString(), label: 'Sessions'),
+              child: _Kpi(
+                value: data.totalSessions.toString(),
+                label: loc.statsKpiSessions,
+              ),
             ),
             const SizedBox(width: KSpace.s2),
             Expanded(
               child: _Kpi(
                 value: data.currentStreak.toString(),
-                label: 'Streak',
-                suffix: 'wk',
+                label: loc.statsKpiStreak,
+                suffix: loc.statsWeekSuffix,
               ),
             ),
             const SizedBox(width: KSpace.s2),
             Expanded(
               child: _Kpi(
                 value: data.avgPerWeek.toStringAsFixed(1),
-                label: 'Average',
-                suffix: '/wk',
+                label: loc.statsKpiAverage,
+                suffix: loc.statsPerWeekSuffix,
               ),
             ),
           ],
@@ -186,7 +192,7 @@ class _ProSectionHeader extends StatelessWidget {
         Icon(LucideIcons.crown, size: 14, color: colors.accent),
         const SizedBox(width: 6),
         Text(
-          'Pro Stats',
+          AppLocalizations.of(context)!.statsProSection,
           style: KText.body.copyWith(
             fontWeight: FontWeight.w600,
             color: colors.accent,
@@ -217,13 +223,16 @@ class _HeatmapCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     final filtered = typeFilter != null;
     final filterLabel = filtered
-        ? 'Filtered to ${typeFilter!.label}'
-        : 'Tinted by primary activity';
+        ? loc.statsHeatmapFilteredTo(typeFilter!.localized(loc))
+        : loc.statsHeatmapTinted;
 
     final firstWeek = data.weekStarts.first;
     final lastWeek = data.weekStarts.last.add(const Duration(days: 6));
+    final shortMonthFmt = DateFormat.MMM(localeName);
 
     return Container(
       padding: const EdgeInsets.all(KSpace.s4),
@@ -242,7 +251,7 @@ class _HeatmapCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$kStatsWeekCount-week activity',
+                      loc.statsHeatmapTitle(kStatsWeekCount),
                       style: KText.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.fgPrimary,
@@ -263,7 +272,7 @@ class _HeatmapCard extends StatelessWidget {
                 _ClearPill(onTap: () {})
               else
                 Text(
-                  '${firstWeek.shortMonth} ${firstWeek.year % 100} → ${lastWeek.shortMonth} ${lastWeek.day}',
+                  '${shortMonthFmt.format(firstWeek)} ${firstWeek.year % 100} → ${shortMonthFmt.format(lastWeek)} ${lastWeek.day}',
                   style: KText.caption.copyWith(
                     fontSize: 11,
                     color: colors.fgSecondary,
@@ -358,11 +367,13 @@ class _MonthLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final fmt = DateFormat.MMM(localeName);
     final labels = <String>[];
     for (var i = 0; i < weekStarts.length; i++) {
       if (i == 0 ||
           weekStarts[i].month != weekStarts[i - 1].month) {
-        labels.add(weekStarts[i].shortMonth);
+        labels.add(fmt.format(weekStarts[i]));
       }
     }
 
@@ -486,7 +497,7 @@ class _TypeBreakdown extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'By activity',
+                  AppLocalizations.of(context)!.statsByActivity,
                   style: KText.body.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colors.fgPrimary,
@@ -497,7 +508,7 @@ class _TypeBreakdown extends StatelessWidget {
                 _ClearPill(onTap: onClear!)
               else
                 Text(
-                  'All time',
+                  AppLocalizations.of(context)!.statsAllTime,
                   style: KText.caption.copyWith(
                     fontSize: 10,
                     color: colors.fgTertiary,
@@ -511,7 +522,7 @@ class _TypeBreakdown extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: KSpace.s4),
               child: Center(
                 child: Text(
-                  'No sessions yet',
+                  AppLocalizations.of(context)!.statsNoSessionsYet,
                   style: KText.bodySm.copyWith(color: colors.fgTertiary),
                 ),
               ),
@@ -582,7 +593,7 @@ class _TypeRow extends StatelessWidget {
               SizedBox(
                 width: 48,
                 child: Text(
-                  bucket.label,
+                  bucket.localizedLabel(AppLocalizations.of(context)!),
                   style: KText.bodySm.copyWith(
                     fontWeight: FontWeight.w500,
                     color: colors.fgPrimary,
@@ -642,7 +653,7 @@ class _ClearPill extends StatelessWidget {
             Icon(LucideIcons.x, size: 10, color: colors.fgSecondary),
             const SizedBox(width: 4),
             Text(
-              'Clear',
+              AppLocalizations.of(context)!.actionClear,
               style: KText.caption.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
@@ -692,7 +703,7 @@ class _StatsEmpty extends StatelessWidget {
               ),
               const SizedBox(height: KSpace.s6 + 4),
               Text(
-                'No stats yet',
+                AppLocalizations.of(context)!.statsEmptyTitle,
                 textAlign: TextAlign.center,
                 style: KText.h3.copyWith(
                   fontSize: 20,
@@ -703,7 +714,7 @@ class _StatsEmpty extends StatelessWidget {
               ),
               const SizedBox(height: KSpace.s2),
               Text(
-                'Complete your first session to start tracking your progress.',
+                AppLocalizations.of(context)!.statsEmptyBody,
                 textAlign: TextAlign.center,
                 style: KText.bodySm.copyWith(
                   fontSize: 14,

@@ -1,3 +1,4 @@
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../utils/date_utils.dart';
@@ -57,6 +58,16 @@ class TypeBucket {
   String get label {
     if (type == ActivityType.other && subType != null) return subType!;
     return type?.label ?? 'Other';
+  }
+
+  /// Locale-aware version of [label]. Sub-type Strava-style names are
+  /// localized via [localizedSubType] so e.g. "Crossfit" stays
+  /// "Crossfit" while "Soccer" becomes "Futebol".
+  String localizedLabel(AppLocalizations loc) {
+    if (type == ActivityType.other && subType != null) {
+      return localizedSubType(subType!, loc);
+    }
+    return type?.localized(loc) ?? loc.typeOther;
   }
 }
 

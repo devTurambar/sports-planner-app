@@ -86,8 +86,9 @@ class _TypeChip extends StatelessWidget {
     final border = selected ? tc.tint : Colors.transparent;
     final fg = selected ? tc.tint : colors.fgSecondary;
 
-    final label = subTypeLabel ??
-        (type == ActivityType.other ? loc.typeMore : type.localized(loc));
+    final label = subTypeLabel != null
+        ? localizedSubType(subTypeLabel!, loc)
+        : (type == ActivityType.other ? loc.typeMore : type.localized(loc));
 
     return Material(
       color: bg,

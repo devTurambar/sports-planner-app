@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -16,17 +18,20 @@ class LongestGap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final dateFmt = DateFormat.MMMd(localeName);
     final gap = _compute();
 
     return ProStatCard(
-      title: 'Longest gap',
-      subtitle: 'Between sessions',
+      title: loc.statsLongestGapTitle,
+      subtitle: loc.statsBetweenSessions,
       child: gap == null
           ? Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: KSpace.s3),
                 child: Text(
-                  'Need at least 2 sessions',
+                  loc.statsNeedAtLeast2,
                   style: KText.bodySm.copyWith(color: colors.fgTertiary),
                 ),
               ),
@@ -51,25 +56,15 @@ class LongestGap extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text.rich(
-                        TextSpan(children: [
-                          TextSpan(
-                            text: '${gap.days}',
-                            style: KText.h3.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: colors.fgPrimary,
-                            ),
-                          ),
-                          TextSpan(
-                            text: gap.days == 1 ? ' day' : ' days',
-                            style: KText.bodySm.copyWith(
-                              color: colors.fgTertiary,
-                            ),
-                          ),
-                        ]),
+                      Text(
+                        loc.statsDaysCount(gap.days),
+                        style: KText.h3.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: colors.fgPrimary,
+                        ),
                       ),
                       Text(
-                        '${gap.startDate.shortMonth} ${gap.startDate.day} → ${gap.endDate.shortMonth} ${gap.endDate.day}',
+                        '${dateFmt.format(gap.startDate)} → ${dateFmt.format(gap.endDate)}',
                         style: KText.caption.copyWith(
                           fontSize: 11,
                           color: colors.fgTertiary,
@@ -88,7 +83,7 @@ class LongestGap extends StatelessWidget {
                     borderRadius: BorderRadius.circular(KRadius.full),
                   ),
                   child: Text(
-                    _currentGapLabel(),
+                    _currentGapLabel(loc),
                     style: KText.caption.copyWith(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
@@ -101,16 +96,14 @@ class LongestGap extends StatelessWidget {
     );
   }
 
-  String _currentGapLabel() {
-    if (data.allDone.isEmpty) return 'No data';
+  String _currentGapLabel(AppLocalizations loc) {
+    if (data.allDone.isEmpty) return loc.statsNoData;
     final sorted = data.allDone.toList()
       ..sort((a, b) => a.date.compareTo(b.date));
     final last = sorted.last.date;
     final now = KDate.startOfDay(DateTime.now());
     final daysSince = now.difference(last).inDays;
-    if (daysSince == 0) return 'Today';
-    if (daysSince == 1) return '1 day ago';
-    return '$daysSince days ago';
+    return loc.statsDaysAgo(daysSince);
   }
 
   _GapResult? _compute() {

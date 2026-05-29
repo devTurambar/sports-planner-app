@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -13,11 +15,13 @@ enum _Period {
   month3('3M', 13),
   month6('6M', 26),
   year1('1Y', 52),
-  allTime('All', null);
+  allTime(null, null);
 
-  const _Period(this.label, this.weeks);
-  final String label;
+  const _Period(this._fixedLabel, this.weeks);
+  final String? _fixedLabel;
   final int? weeks;
+
+  String label(AppLocalizations loc) => _fixedLabel ?? loc.statsPeriodAll;
 }
 
 class PeriodBreakdown extends StatefulWidget {
@@ -42,10 +46,12 @@ class _PeriodBreakdownState extends State<PeriodBreakdown> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final d = _compute();
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final d = _compute(localeName);
 
     return ProStatCard(
-      title: 'Period breakdown',
+      title: loc.statsPeriodBreakdownTitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -59,7 +65,7 @@ class _PeriodBreakdownState extends State<PeriodBreakdown> {
               padding: const EdgeInsets.symmetric(vertical: KSpace.s4),
               child: Center(
                 child: Text(
-                  'No sessions in this period',
+                  loc.statsPeriodNoSessions,
                   style: KText.bodySm.copyWith(color: colors.fgTertiary),
                 ),
               ),
@@ -79,7 +85,7 @@ class _PeriodBreakdownState extends State<PeriodBreakdown> {
     );
   }
 
-  _PeriodData _compute() {
+  _PeriodData _compute(String localeName) {
     final thisWeekStart = KDate.startOfWeek(widget.today, widget.startDay);
 
     final int weekCount;
@@ -111,8 +117,14 @@ class _PeriodBreakdownState extends State<PeriodBreakdown> {
       final key = (e.weekStart.year, e.weekStart.month);
       monthMap[key] = (monthMap[key] ?? 0) + e.count;
     }
+    final monthFmt = DateFormat.MMM(localeName);
     final monthEntries = monthMap.entries
-        .map((e) => _MonthEntry(year: e.key.$1, month: e.key.$2, count: e.value))
+        .map((e) => _MonthEntry(
+              year: e.key.$1,
+              month: e.key.$2,
+              count: e.value,
+              label: monthFmt.format(DateTime(e.key.$1, e.key.$2)),
+            ))
         .toList()
       ..sort((a, b) =>
           a.year != b.year ? a.year.compareTo(b.year) : a.month.compareTo(b.month));
@@ -175,7 +187,7 @@ class _PeriodSelector extends StatelessWidget {
                 borderRadius: BorderRadius.circular(KRadius.full),
               ),
               child: Text(
-                p.label,
+                p.label(AppLocalizations.of(context)!),
                 style: KText.caption.copyWith(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -199,17 +211,18 @@ class _MiniKpiRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Row(
       children: [
-        _MiniKpi(label: 'Sessions', value: data.total.toString()),
+        _MiniKpi(label: loc.statsKpiSessions, value: data.total.toString()),
         const SizedBox(width: 6),
-        _MiniKpi(label: 'Avg / wk', value: data.avg.toStringAsFixed(1)),
+        _MiniKpi(label: loc.statsAvgPerWeek, value: data.avg.toStringAsFixed(1)),
         const SizedBox(width: 6),
         _MiniKpi(
-            label: 'Consistency',
+            label: loc.statsConsistency,
             value: '${(data.consistency * 100).round()}%'),
         const SizedBox(width: 6),
-        _MiniKpi(label: 'Peak week', value: data.peak.toString()),
+        _MiniKpi(label: loc.statsPeakWeek, value: data.peak.toString()),
       ],
     );
   }
@@ -431,21 +444,22 @@ class _TrendBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final IconData icon;
     final String label;
     final Color color;
 
     if (trend > 0.15) {
       icon = LucideIcons.trendingUp;
-      label = 'Trending up vs earlier in period';
+      label = loc.statsTrendingUp;
       color = const Color(0xFF4CAF50);
     } else if (trend < -0.15) {
       icon = LucideIcons.trendingDown;
-      label = 'Trending down vs earlier in period';
+      label = loc.statsTrendingDown;
       color = const Color(0xFFE57373);
     } else {
       icon = LucideIcons.minus;
-      label = 'Steady pace';
+      label = loc.statsSteadyPace;
       color = colors.fgTertiary;
     }
 
@@ -510,11 +524,11 @@ class _MonthEntry {
     required this.year,
     required this.month,
     required this.count,
+    required this.label,
   });
 
   final int year;
   final int month;
   final int count;
-
-  String get label => KDate.shortMonths[month - 1];
+  final String label;
 }

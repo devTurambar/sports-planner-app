@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../state/theme_controller.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_text_styles.dart';
@@ -144,10 +145,11 @@ class KDarkModeToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<ThemeController>();
+    final loc = AppLocalizations.of(context)!;
     final isDark = controller.isDark;
     return KCircleIconButton(
       icon: isDark ? LucideIcons.sun : LucideIcons.moon,
-      tooltip: isDark ? 'Light mode' : 'Dark mode',
+      tooltip: isDark ? loc.themeLightTooltip : loc.themeDarkTooltip,
       onPressed: controller.toggleDark,
     );
   }

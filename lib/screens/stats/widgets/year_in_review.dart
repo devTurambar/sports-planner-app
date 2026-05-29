@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -16,10 +19,12 @@ class YearInReview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final review = _compute();
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final review = _compute(loc, localeName);
 
     return ProStatCard(
-      title: '${review.year} in review',
+      title: loc.statsYearInReviewTitle(review.year),
       child: Column(
         children: [
           Row(
@@ -29,7 +34,7 @@ class YearInReview extends StatelessWidget {
                   icon: LucideIcons.activity,
                   iconColor: colors.accent,
                   value: '${review.totalSessions}',
-                  label: 'Sessions',
+                  label: loc.statsKpiSessions,
                 ),
               ),
               const SizedBox(width: KSpace.s2),
@@ -38,7 +43,7 @@ class YearInReview extends StatelessWidget {
                   icon: LucideIcons.calendarCheck,
                   iconColor: colors.typeWalk.tint,
                   value: '${review.activeDays}',
-                  label: 'Active days',
+                  label: loc.statsActiveDays,
                 ),
               ),
             ],
@@ -51,7 +56,7 @@ class YearInReview extends StatelessWidget {
                   icon: LucideIcons.trophy,
                   iconColor: colors.typeOther.tint,
                   value: review.topMonth,
-                  label: 'Best month',
+                  label: loc.statsBestMonth,
                 ),
               ),
               const SizedBox(width: KSpace.s2),
@@ -60,7 +65,7 @@ class YearInReview extends StatelessWidget {
                   icon: LucideIcons.heart,
                   iconColor: colors.typeGym.tint,
                   value: review.topType,
-                  label: 'Top activity',
+                  label: loc.statsTopActivity,
                 ),
               ),
             ],
@@ -78,7 +83,7 @@ class YearInReview extends StatelessWidget {
                 borderRadius: BorderRadius.circular(KRadius.md),
               ),
               child: Text(
-                'You tried ${review.typesUsed} different ${review.typesUsed == 1 ? 'activity' : 'activities'} this year',
+                loc.statsTriedTypes(review.typesUsed),
                 style: KText.bodySm.copyWith(
                   color: colors.fgSecondary,
                 ),
@@ -91,7 +96,7 @@ class YearInReview extends StatelessWidget {
     );
   }
 
-  _YearReview _compute() {
+  _YearReview _compute(AppLocalizations loc, String localeName) {
     final year = DateTime.now().year;
     final yearDone = data.allDone
         .where((a) => a.date.year == year)
@@ -116,11 +121,13 @@ class YearInReview extends StatelessWidget {
       }
     }
 
-    // Top activity type (keyed by label to split sub-types)
+    // Top activity type (keyed by localized label to split sub-types)
     final typeLabelCounts = <String, int>{};
     for (final a in yearDone) {
       if (a.type != null) {
-        final lbl = a.typeLabel;
+        final lbl = a.type == ActivityType.other && a.subType != null
+            ? localizedSubType(a.subType!, loc)
+            : a.type!.localized(loc);
         typeLabelCounts[lbl] = (typeLabelCounts[lbl] ?? 0) + 1;
       }
     }
@@ -134,13 +141,14 @@ class YearInReview extends StatelessWidget {
     }
 
     final typesUsed = typeLabelCounts.keys.length;
+    final monthFmt = DateFormat.MMM(localeName);
 
     return _YearReview(
       year: year,
       totalSessions: yearDone.length,
       activeDays: activeDays,
       topMonth: topMonthIdx > 0
-          ? KDate.shortMonths[topMonthIdx - 1]
+          ? monthFmt.format(DateTime(year, topMonthIdx))
           : '—',
       topType: topTypeLabel ?? '—',
       typesUsed: typesUsed,

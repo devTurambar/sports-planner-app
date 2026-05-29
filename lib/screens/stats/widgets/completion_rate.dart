@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
@@ -17,6 +18,7 @@ class CompletionRate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final total = data.allActivities
         .where((a) => a.status != DayStatus.empty)
         .length;
@@ -25,8 +27,8 @@ class CompletionRate extends StatelessWidget {
     final pct = (rate * 100).round();
 
     return ProStatCard(
-      title: 'Completion rate',
-      subtitle: 'Planned vs done',
+      title: loc.statsCompletionRateTitle,
+      subtitle: loc.statsPlannedVsDone,
       child: Row(
         children: [
           SizedBox(
@@ -55,19 +57,19 @@ class CompletionRate extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Stat(
-                  label: 'Planned',
+                  label: loc.statsPlanned,
                   value: '$total',
                   color: colors.fgSecondary,
                 ),
                 const SizedBox(height: KSpace.s2),
                 _Stat(
-                  label: 'Done',
+                  label: loc.statsDone,
                   value: '$done',
                   color: colors.accent,
                 ),
                 const SizedBox(height: KSpace.s2),
                 _Stat(
-                  label: 'Missed',
+                  label: loc.statsMissed,
                   value: '${total - done}',
                   color: colors.fgTertiary,
                 ),
