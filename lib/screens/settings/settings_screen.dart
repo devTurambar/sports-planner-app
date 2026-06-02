@@ -13,6 +13,7 @@ import '../../state/calendar_service.dart';
 import '../../state/locale_controller.dart';
 import '../../state/onboarding_controller.dart';
 import '../../state/plan_controller.dart';
+import '../../state/pro_controller.dart';
 import '../../state/sync_service.dart';
 import '../../state/theme_controller.dart';
 import '../../state/type_color_controller.dart';
@@ -274,6 +275,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final auth = context.watch<AuthController>();
     final goalCtrl = context.watch<GoalController>();
     final localeCtrl = context.watch<LocaleController>();
+    final pro = context.watch<ProController>();
     final loc = AppLocalizations.of(context)!;
 
     return ListView(
@@ -284,7 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         KSpace.s16,
       ),
       children: <Widget>[
-        _AccountCard(auth: auth),
+        _AccountCard(auth: auth, isPro: pro.isPro),
         const SizedBox(height: KSpace.s3),
         _ProCard(onTap: () => PaywallScreen.show(context)),
 
@@ -328,7 +330,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: loc.settingsThemeColor,
               icon: LucideIcons.palette,
               iconBg: const Color(0xFFFF2D55),
-              proBadge: true,
+              proBadge: !pro.isPro,
+              isPro: pro.isPro,
             ),
             _ToggleRow(
               icon: LucideIcons.calendarSync,
@@ -350,9 +353,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               iconBg: const Color(0xFFAF52DE),
               label: loc.settingsTypeColors,
               value: loc.settingsTypeColorsValue,
-              onTap: () => _showTypeColorPicker(context),
+              onTap: pro.isPro
+                  ? () => _showTypeColorPicker(context)
+                  : () => PaywallScreen.show(context),
               isLast: true,
-              proBadge: true,
+              proBadge: !pro.isPro,
             ),
           ],
         ),
@@ -932,9 +937,10 @@ class _Toggle extends StatelessWidget {
 }
 
 class _AccountCard extends StatelessWidget {
-  const _AccountCard({required this.auth});
+  const _AccountCard({required this.auth, required this.isPro});
 
   final AuthController auth;
+  final bool isPro;
 
   @override
   Widget build(BuildContext context) {
@@ -1005,7 +1011,9 @@ class _AccountCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _showSignInSheet(context),
+        onTap: isPro
+            ? () => _showSignInSheet(context)
+            : () => PaywallScreen.show(context),
         borderRadius: BorderRadius.circular(KRadius.lg),
         child: Container(
           padding: const EdgeInsets.all(KSpace.s4),
@@ -1026,12 +1034,21 @@ class _AccountCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      loc.accountSignInToSync,
-                      style: KText.body.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colors.fgPrimary,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            loc.accountSignInToSync,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: KText.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colors.fgPrimary,
+                            ),
+                          ),
+                        ),
+                        if (!isPro) const _ProBadge(),
+                      ],
                     ),
                     Text(
                       loc.accountSignInSubtitle,
@@ -1451,12 +1468,14 @@ class _AccentColorRow extends StatelessWidget {
     this.icon,
     this.iconBg,
     this.proBadge = false,
+    this.isPro = true,
   });
 
   final String label;
   final IconData? icon;
   final Color? iconBg;
   final bool proBadge;
+  final bool isPro;
 
   @override
   Widget build(BuildContext context) {
@@ -1467,7 +1486,9 @@ class _AccentColorRow extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _showAccentColorSheet(context),
+        onTap: isPro
+            ? () => _showAccentColorSheet(context)
+            : () => PaywallScreen.show(context),
         child: Container(
           decoration: BoxDecoration(
             border: Border(

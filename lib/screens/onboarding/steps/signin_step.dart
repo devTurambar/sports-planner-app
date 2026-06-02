@@ -3,7 +3,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../screens/paywall/paywall_screen.dart';
 import '../../../state/auth_controller.dart';
+import '../../../state/pro_controller.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -199,6 +201,12 @@ class _CloudActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPro = context.watch<ProController>().isPro;
+
+    if (!isPro) {
+      return _ProUpgradeButton();
+    }
+
     return Column(
       children: <Widget>[
         KOAuthButton(
@@ -213,6 +221,45 @@ class _CloudActions extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _ProUpgradeButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => PaywallScreen.show(context),
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: colors.accent.withValues(alpha: 0.12),
+            border: Border.all(color: colors.accent.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(KRadius.lg),
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.crown, size: 16, color: colors.accent),
+              const SizedBox(width: 8),
+              Text(
+                loc.proBadge,
+                style: KText.button.copyWith(
+                  color: colors.accent,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

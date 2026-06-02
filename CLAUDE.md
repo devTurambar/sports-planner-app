@@ -34,7 +34,7 @@ lib/
   l10n/                   # ARB files (app_en, app_pt, app_pt_BR, app_es, app_fr) + generated/
   theme/                  # Design tokens (colors, spacing, text, theme)
   models/                 # Activity + DayStatus + ActivityType
-  state/                  # ChangeNotifier controllers (theme, locale, onboarding, plan, type_color, goal, tip) + ActivityDb + BackupService
+  state/                  # ChangeNotifier controllers (theme, locale, onboarding, plan, type_color, goal, tip, pro) + ActivityDb + BackupService
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
@@ -731,11 +731,11 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
 
 #### Free features
 - Core views (week, month, day detail)
-- Basic stats: 3 KPIs, 26-week heatmap, type breakdown
+- Basic stats: 3 KPI tiles, 26-week heatmap, "By activity" type
+  breakdown (the first 3 blocks in the stats screen)
 - Export/import backup
 - Calendar sync
 - Weekly goals & progress rings (core motivational loop)
-- Most stat widgets (see free/premium split below)
 
 #### Premium features (5 pillars)
 1. **Date filtering on stats** — filter all graphs and data by
@@ -757,24 +757,17 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
    - **Write to Strava**: optionally send manual activities to
      Strava when marked done.
 
-#### Free vs premium stat widget split
-**Free stat widgets** (generous free tier to drive adoption):
-- Personal records (best streak, best week, best day)
-- Weekly activity chart (12-week bars)
-- Best day of week (7 bars)
-- Completion rate (arc ring)
-- Monthly trends (12-month bars)
-- Activity variety (types per week)
-- Longest gap (break between sessions)
-- Month vs month (current vs previous)
-- Most consistent (top 5 types by completion)
-- Year in review (annual summary)
+#### Free vs premium stat split
+**Free** (always visible, the first 3 blocks in `stats_view.dart`):
+- 3 KPI tiles (total sessions, week streak, avg/week)
+- 26-week activity heatmap
+- "By activity" type breakdown with filter
 
-**Premium stat widgets** (shine with historical/Strava data):
-- Full-year heatmap — dramatically better with Strava import
-- Insights / nudges — smarter with more history
-- Shareable recap cards — social/vanity, impressive with real data
-- Weekly patterns — power-user depth (type × weekday heatmap)
+**Premium** (everything below the "Pro Stats" divider — gated):
+- All 14 pro stat widgets (personal records, weekly activity chart,
+  best day of week, completion rate, monthly trends, activity variety,
+  longest gap, month vs month, most consistent, weekly patterns,
+  year in review, full-year heatmap, insights, shareable recap)
 
 #### Paywall screen (done)
 - ✅ `PaywallScreen` (`lib/screens/paywall/paywall_screen.dart`):
@@ -832,21 +825,84 @@ Built widgets (11 chart-based + 3 experiential):
   Accent color resolved from `TypeColorController` so the card
   matches the user's chosen theme color.
 
-All stat widgets currently appear below a "Pro Stats" divider in
-`stats_view.dart`. They are **not gated yet** — visible to all
-users. The free/premium split above is the plan; gating will be
-implemented when purchase infrastructure is wired up.
+#### Pro gating (done)
+- ✅ `ProController` (`lib/state/pro_controller.dart`): simple
+  ChangeNotifier backed by SharedPreferences (`kadence.is_pro`).
+  Exposes `isPro` getter and `setPro(bool)`. Registered as
+  `ChangeNotifierProvider` in `main.dart`. Receives `AuthController`
+  in its constructor — on downgrade (`setPro(false)`) it forces
+  sign-out so cloud sync stops immediately. Currently backed by a
+  local flag — swap to RevenueCat / `in_app_purchase` entitlements
+  later without changing call sites.
+- ✅ `KProLock` (`lib/widgets/k_pro_lock.dart`): wrapper widget
+  that overlays a `BackdropFilter` blur + centered lock badge
+  ("PRO") on its child when the user is not Pro. Tapping the
+  overlay navigates to `PaywallScreen`. When Pro, renders the
+  child directly with zero overhead.
+- ✅ **Stats gating**: the stats screen has 3 free blocks at the
+  top (KPI tiles, 26-week heatmap, type breakdown). Everything
+  below the "Pro Stats" divider is wrapped in a single `KProLock`
+  — one blur overlay covering all 14 pro stat widgets. Free users
+  see the blurred preview with a lock badge; tapping opens the
+  paywall.
+- ✅ **Settings gating**: "Theme color" and "Type colors" rows
+  show a "PRO" badge and redirect to `PaywallScreen` on tap when
+  the user is not Pro. When Pro, they work normally and the badge
+  hides.
+- ✅ **Cloud sync gating (option 3 — UI gates)**: sign-in is
+  blocked at the two UI entry points when not Pro:
+  - **Settings `_AccountCard`** (signed-out state): shows a "PRO"
+    badge next to "Sign in to sync" and tapping opens the paywall
+    instead of the sign-in sheet. When Pro, works normally (no
+    badge, opens sign-in sheet).
+  - **Onboarding `_CloudActions`** (step 3, "Cloud sync" card):
+    replaces the Google/Apple OAuth buttons with a single
+    accent-colored "PRO" button (crown icon) that opens the
+    paywall. When Pro, shows the normal OAuth buttons.
+  - The sync layer (`SyncService`, `PlanController` cloud pushes,
+    `AuthController` auth state listener) is **untouched** — if
+    the user can't sign in, sync never triggers. Zero risk of
+    breaking existing flows.
+  - **Expired subscription handling**: two guards ensure a non-Pro
+    user never syncs:
+    1. **On downgrade**: `ProController.setPro(false)` forces
+       `AuthController.signOut()`, so sync stops mid-session.
+    2. **On startup**: the `ProController` constructor checks
+       `!isPro && authController.isSignedIn` and forces sign-out
+       immediately. This catches the case where the sub expired
+       between app sessions (e.g. the user was Pro, closed the
+       app, sub lapsed, reopened).
+    On re-subscription, they sign in again and `syncOnSignIn`
+    merges everything.
+  - **Why option 3 over option 2** (allow sign-in, gate sync at
+    the service layer): option 2 was considered but rejected for
+    several reasons:
+    1. All account-tied features (cloud sync + Strava) are
+       Pro-only, so sign-in has no free use case — letting users
+       sign in but blocking sync would feel broken ("I signed in
+       but nothing happened").
+    2. Option 2 requires 4-5 scattered `isPro` guards across
+       `PlanController` (save, toggleDone, delete cloud pushes),
+       `SyncService.syncOnSignIn`, `AuthController` auth state
+       listener, and `BackupService` import — more surface area
+       for bugs and easy to miss a call site.
+    3. Option 2 also needs a "trigger full sync on upgrade"
+       flow (user upgrades mid-session → push all local data),
+       which is more complexity for no benefit right now.
+    4. Option 3 gates at exactly 2 UI entry points, the sync
+       layer stays untouched (zero risk of breaking existing
+       flows), and force-sign-out-on-expiry handles the lapsed
+       subscription edge case cleanly.
+    Option 2 would only make sense if a free feature ever
+    requires sign-in — unlikely given the current roadmap.
+- **Debug shortcut**: change the default in `ProController`'s
+  constructor to `?? true` (instead of `?? false`) to launch as
+  Pro during development.
 
 #### TODO
-- **TODO**: move free stat widgets above the "Pro Stats" divider
-  (or remove the divider and only show locks on premium ones).
-- **TODO**: add pro badges/locks on premium stat widgets and
-  premium features (custom colors, cloud sync, date filtering)
-  so free users see a preview with a lock icon + "Upgrade" tap.
 - **TODO**: wire up purchase infrastructure (RevenueCat or
-  `in_app_purchase`) to replace stubbed handlers in PaywallScreen.
-- **TODO**: build `ProController` (or similar) that checks
-  entitlements and gates premium features.
+  `in_app_purchase`) to replace stubbed handlers in PaywallScreen
+  and back `ProController` with real entitlements.
 - **TODO**: implement date filtering UI for stats (date range
   picker that scopes all graphs to a custom period).
 - **TODO**: build Strava integration — OAuth flow, history import,

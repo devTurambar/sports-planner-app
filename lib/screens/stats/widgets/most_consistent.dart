@@ -140,9 +140,11 @@ class _ConsistencyRow extends StatelessWidget {
           ),
         ),
         SizedBox(
-          width: 60,
+          width: 56,
           child: Text(
             entry.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: KText.bodySm.copyWith(
               fontWeight: FontWeight.w500,
               color: colors.fgPrimary,
@@ -162,7 +164,7 @@ class _ConsistencyRow extends StatelessWidget {
         ),
         const SizedBox(width: KSpace.s2),
         SizedBox(
-          width: 36,
+          width: 40,
           child: Text(
             '$pct%',
             textAlign: TextAlign.right,

@@ -12,6 +12,7 @@ import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/k_pro_lock.dart';
 import '../../widgets/k_tip_banner.dart';
 import 'stats_data.dart';
 import 'widgets/personal_records.dart';
@@ -146,35 +147,41 @@ class _StatsViewState extends State<StatsView> {
         const SizedBox(height: KSpace.s8),
         _ProSectionHeader(colors: colors),
         const SizedBox(height: KSpace.s3),
-        PersonalRecords(data: data),
-        const SizedBox(height: KSpace.s3),
-        PeriodBreakdown(data: data, startDay: startDay, today: today),
-        const SizedBox(height: KSpace.s3),
-        WeeklyActivityChart(data: data, startDay: startDay),
-        const SizedBox(height: KSpace.s3),
-        BestDayOfWeek(data: data, startDay: startDay),
-        const SizedBox(height: KSpace.s3),
-        CompletionRate(data: data),
-        const SizedBox(height: KSpace.s3),
-        MonthlyTrends(data: data),
-        const SizedBox(height: KSpace.s3),
-        ActivityVariety(data: data, startDay: startDay),
-        const SizedBox(height: KSpace.s3),
-        LongestGap(data: data),
-        const SizedBox(height: KSpace.s3),
-        MonthVsMonth(data: data),
-        const SizedBox(height: KSpace.s3),
-        MostConsistent(data: data),
-        const SizedBox(height: KSpace.s3),
-        WeeklyPatterns(data: data, startDay: startDay),
-        const SizedBox(height: KSpace.s3),
-        YearInReview(data: data),
-        const SizedBox(height: KSpace.s3),
-        FullYearHeatmap(data: data, startDay: startDay),
-        const SizedBox(height: KSpace.s3),
-        Insights(data: data, startDay: startDay),
-        const SizedBox(height: KSpace.s3),
-        ShareableRecap(data: data),
+        KProLock(
+          child: Column(
+            children: [
+              PersonalRecords(data: data),
+              const SizedBox(height: KSpace.s3),
+              PeriodBreakdown(data: data, startDay: startDay, today: today),
+              const SizedBox(height: KSpace.s3),
+              WeeklyActivityChart(data: data, startDay: startDay),
+              const SizedBox(height: KSpace.s3),
+              BestDayOfWeek(data: data, startDay: startDay),
+              const SizedBox(height: KSpace.s3),
+              CompletionRate(data: data),
+              const SizedBox(height: KSpace.s3),
+              MonthlyTrends(data: data),
+              const SizedBox(height: KSpace.s3),
+              ActivityVariety(data: data, startDay: startDay),
+              const SizedBox(height: KSpace.s3),
+              LongestGap(data: data),
+              const SizedBox(height: KSpace.s3),
+              MonthVsMonth(data: data),
+              const SizedBox(height: KSpace.s3),
+              MostConsistent(data: data),
+              const SizedBox(height: KSpace.s3),
+              WeeklyPatterns(data: data, startDay: startDay),
+              const SizedBox(height: KSpace.s3),
+              YearInReview(data: data),
+              const SizedBox(height: KSpace.s3),
+              FullYearHeatmap(data: data, startDay: startDay),
+              const SizedBox(height: KSpace.s3),
+              Insights(data: data, startDay: startDay),
+              const SizedBox(height: KSpace.s3),
+              ShareableRecap(data: data),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -591,9 +598,11 @@ class _TypeRow extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 48,
+                width: 64,
                 child: Text(
                   bucket.localizedLabel(AppLocalizations.of(context)!),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: KText.bodySm.copyWith(
                     fontWeight: FontWeight.w500,
                     color: colors.fgPrimary,

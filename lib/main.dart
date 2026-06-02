@@ -16,6 +16,7 @@ import 'state/locale_controller.dart';
 import 'state/review_service.dart';
 import 'state/goal_controller.dart';
 import 'state/tip_controller.dart';
+import 'state/pro_controller.dart';
 import 'state/type_color_controller.dart';
 
 Future<void> main() async {
@@ -39,15 +40,16 @@ Future<void> main() async {
   await CalendarService.init(prefs);
   ReviewService.init(prefs);
   final planController = await PlanController.create(prefs: prefs);
+  final authController = AuthController(
+    prefs: prefs,
+    planController: planController,
+  );
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthController>(
-          create: (_) => AuthController(
-            prefs: prefs,
-            planController: planController,
-          ),
+        ChangeNotifierProvider<AuthController>.value(
+          value: authController,
         ),
         ChangeNotifierProvider<ThemeController>(
           create: (_) => ThemeController(prefs),
@@ -63,6 +65,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<GoalController>(
           create: (_) => GoalController(prefs),
+        ),
+        ChangeNotifierProvider<ProController>(
+          create: (_) => ProController(prefs, authController: authController),
         ),
         ChangeNotifierProvider<TipController>(
           create: (_) => TipController(prefs),
