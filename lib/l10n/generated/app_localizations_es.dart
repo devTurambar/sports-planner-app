@@ -640,7 +640,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywallSupportBody => 'Tu compra ayuda a mantener Kadence vivo';
 
   @override
-  String get statsKpiSessions => 'Sesiones';
+  String get statsKpiSessions => 'Hechas';
 
   @override
   String get statsKpiStreak => 'Racha';

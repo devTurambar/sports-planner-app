@@ -640,7 +640,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paywallSupportBody => 'A tua compra ajuda a manter o Kadence vivo';
 
   @override
-  String get statsKpiSessions => 'Sessões';
+  String get statsKpiSessions => 'Feitas';
 
   @override
   String get statsKpiStreak => 'Série';
@@ -1763,7 +1763,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get paywallSupportBody => 'Sua compra ajuda a manter o Kadence vivo';
 
   @override
-  String get statsKpiSessions => 'Sessões';
+  String get statsKpiSessions => 'Feitas';
 
   @override
   String get statsKpiStreak => 'Sequência';
