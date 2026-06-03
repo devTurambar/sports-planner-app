@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../l10n/generated/app_localizations.dart';
+
 /// The planning status of a given day.
 ///
 /// A day is always in exactly one state. `today` is a convenience flag used
@@ -78,6 +80,53 @@ extension ActivityTypeLabel on ActivityType {
     }
   }
 
+  /// Locale-aware label for use in any UI surface that has a
+  /// `BuildContext`. Prefer this over [label] (which is English-only).
+  String localized(AppLocalizations loc) {
+    switch (this) {
+      case ActivityType.run:
+        return loc.typeRun;
+      case ActivityType.trailRun:
+        return loc.typeTrailRun;
+      case ActivityType.hike:
+        return loc.typeHike;
+      case ActivityType.walk:
+        return loc.typeWalk;
+      case ActivityType.cycle:
+        return loc.typeCycle;
+      case ActivityType.mtb:
+        return loc.typeMtb;
+      case ActivityType.swim:
+        return loc.typeSwim;
+      case ActivityType.gym:
+        return loc.typeGym;
+      case ActivityType.yoga:
+        return loc.typeYoga;
+      case ActivityType.hiit:
+        return loc.typeHiit;
+      case ActivityType.row:
+        return loc.typeRow;
+      case ActivityType.ski:
+        return loc.typeSki;
+      case ActivityType.surf:
+        return loc.typeSurf;
+      case ActivityType.climb:
+        return loc.typeClimb;
+      case ActivityType.tennis:
+        return loc.typeTennis;
+      case ActivityType.padel:
+        return loc.typePadel;
+      case ActivityType.dance:
+        return loc.typeDance;
+      case ActivityType.combat:
+        return loc.typeCombat;
+      case ActivityType.elliptical:
+        return loc.typeElliptical;
+      case ActivityType.other:
+        return loc.typeOther;
+    }
+  }
+
   String get dbKey => name;
 
   static ActivityType? fromDbKey(String? key) {
@@ -86,6 +135,98 @@ extension ActivityTypeLabel on ActivityType {
       if (t.name == key) return t;
     }
     return null;
+  }
+}
+
+/// Maps a stored English sub-type key (e.g. "Crossfit", "Alpine Ski")
+/// to its localized display label. Unknown values fall through
+/// unchanged so legacy data and custom strings still render.
+String localizedSubType(String key, AppLocalizations loc) {
+  switch (key) {
+    case 'Alpine Ski':
+      return loc.subtypeAlpineSki;
+    case 'Badminton':
+      return loc.subtypeBadminton;
+    case 'Canoeing':
+      return loc.subtypeCanoeing;
+    case 'Crossfit':
+      return loc.subtypeCrossfit;
+    case 'E-Bike Ride':
+      return loc.subtypeEbikeRide;
+    case 'Fencing':
+      return loc.subtypeFencing;
+    case 'Golf':
+      return loc.subtypeGolf;
+    case 'Handball':
+      return loc.subtypeHandball;
+    case 'Ice Skate':
+      return loc.subtypeIceSkate;
+    case 'Inline Skate':
+      return loc.subtypeInlineSkate;
+    case 'Kayaking':
+      return loc.subtypeKayaking;
+    case 'Kitesurf':
+      return loc.subtypeKitesurf;
+    case 'Martial Arts':
+      return loc.subtypeMartialArts;
+    case 'Pilates':
+      return loc.subtypePilates;
+    case 'Pickleball':
+      return loc.subtypePickleball;
+    case 'Racquetball':
+      return loc.subtypeRacquetball;
+    case 'Rock Climbing':
+      return loc.subtypeRockClimbing;
+    case 'Roller Ski':
+      return loc.subtypeRollerSki;
+    case 'Rowing':
+      return loc.subtypeRowing;
+    case 'Rugby':
+      return loc.subtypeRugby;
+    case 'Sailing':
+      return loc.subtypeSailing;
+    case 'Skateboarding':
+      return loc.subtypeSkateboarding;
+    case 'Snowboard':
+      return loc.subtypeSnowboard;
+    case 'Snowshoe':
+      return loc.subtypeSnowshoe;
+    case 'Soccer':
+      return loc.subtypeSoccer;
+    case 'Squash':
+      return loc.subtypeSquash;
+    case 'Stair Stepper':
+      return loc.subtypeStairStepper;
+    case 'Stand Up Paddling':
+      return loc.subtypeStandUpPaddling;
+    case 'Swimming':
+      return loc.subtypeSwimming;
+    case 'Table Tennis':
+      return loc.subtypeTableTennis;
+    case 'Trail Run':
+      return loc.subtypeTrailRun;
+    case 'Velomobile':
+      return loc.subtypeVelomobile;
+    case 'Virtual Ride':
+      return loc.subtypeVirtualRide;
+    case 'Virtual Row':
+      return loc.subtypeVirtualRow;
+    case 'Virtual Run':
+      return loc.subtypeVirtualRun;
+    case 'Volleyball':
+      return loc.subtypeVolleyball;
+    case 'Weightlifting':
+      return loc.subtypeWeightlifting;
+    case 'Wheelchair':
+      return loc.subtypeWheelchair;
+    case 'Windsurf':
+      return loc.subtypeWindsurf;
+    case 'Workout':
+      return loc.subtypeWorkout;
+    case 'Yoga':
+      return loc.subtypeYoga;
+    default:
+      return key;
   }
 }
 
@@ -140,6 +281,16 @@ class Activity {
   String get typeLabel {
     if (type == ActivityType.other && subType != null) return subType!;
     return type?.label ?? 'Other';
+  }
+
+  /// Locale-aware version of [typeLabel]. Handles both core types
+  /// (run, hike, ...) and the Strava-style sub-types stored as English
+  /// strings (Crossfit, Soccer, ...).
+  String localizedTypeLabel(AppLocalizations loc) {
+    if (type == ActivityType.other && subType != null) {
+      return localizedSubType(subType!, loc);
+    }
+    return type?.localized(loc) ?? loc.typeOther;
   }
 
   Activity copyWith({

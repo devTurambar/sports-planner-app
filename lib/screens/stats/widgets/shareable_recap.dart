@@ -2,11 +2,13 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:provider/provider.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 import '../../../state/type_color_controller.dart';
 import '../../../theme/kadence_colors.dart';
@@ -25,13 +27,14 @@ class ShareableRecap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
 
     return ProStatCard(
-      title: 'Share your progress',
+      title: loc.recapTitle,
       child: Column(
         children: [
           Text(
-            'Generate a summary card and share it with friends.',
+            loc.recapSubtitle,
             style: KText.bodySm.copyWith(color: colors.fgTertiary),
           ),
           const SizedBox(height: KSpace.s4),
@@ -39,7 +42,7 @@ class ShareableRecap extends StatelessWidget {
             children: [
               Expanded(
                 child: _ShareButton(
-                  label: 'This month',
+                  label: loc.recapThisMonth,
                   icon: LucideIcons.calendar,
                   onTap: () => _shareMonthly(context),
                 ),
@@ -47,7 +50,7 @@ class ShareableRecap extends StatelessWidget {
               const SizedBox(width: KSpace.s3),
               Expanded(
                 child: _ShareButton(
-                  label: 'This year',
+                  label: loc.recapThisYear,
                   icon: LucideIcons.trophy,
                   onTap: () => _shareYearly(context),
                 ),
@@ -60,6 +63,8 @@ class ShareableRecap extends StatelessWidget {
   }
 
   void _shareMonthly(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     final now = DateTime.now();
     final monthDone = data.allDone
         .where((a) => a.date.year == now.year && a.date.month == now.month)
@@ -68,8 +73,8 @@ class ShareableRecap extends StatelessWidget {
     final activeDays =
         monthDone.map((a) => KDate.keyFor(a.date)).toSet().length;
 
-    final topType = _topType(monthDone);
-    final headline = _monthHeadline(monthDone.length, activeDays);
+    final topType = _topType(monthDone, loc);
+    final headline = _monthHeadline(loc, monthDone.length, activeDays);
 
     final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
     final dayCells = <_MiniCell>[];
@@ -85,13 +90,13 @@ class ShareableRecap extends StatelessWidget {
 
     _showPreview(
       context,
-      period: '${now.fullMonth} ${now.year}',
+      period: DateFormat.yMMMM(localeName).format(now),
       headline: headline,
       topType: topType,
       stats: [
-        _RecapStat('Sessions', '${monthDone.length}', LucideIcons.activity),
-        _RecapStat('Active days', '$activeDays', LucideIcons.calendarCheck),
-        _RecapStat('Activities', '${types.length}', LucideIcons.shapes),
+        _RecapStat(loc.statsKpiSessions, '${monthDone.length}', LucideIcons.activity),
+        _RecapStat(loc.statsActiveDays, '$activeDays', LucideIcons.calendarCheck),
+        _RecapStat(loc.recapActivity, '${types.length}', LucideIcons.shapes),
       ],
       dayCells: dayCells,
       streak: null,
@@ -99,6 +104,7 @@ class ShareableRecap extends StatelessWidget {
   }
 
   void _shareYearly(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final year = DateTime.now().year;
     final now = DateTime.now();
     final yearDone =
@@ -106,7 +112,7 @@ class ShareableRecap extends StatelessWidget {
     final activeDays =
         yearDone.map((a) => KDate.keyFor(a.date)).toSet().length;
     final types = yearDone.map((a) => a.type).where((t) => t != null).toSet();
-    final topType = _topType(yearDone);
+    final topType = _topType(yearDone, loc);
 
     final doneByDate = <String, ActivityType?>{};
     for (final a in yearDone) {
@@ -125,31 +131,34 @@ class ShareableRecap extends StatelessWidget {
       date = date.add(const Duration(days: 1));
     }
 
-    final headline = _yearHeadline(yearDone.length, data.currentStreak);
+    final headline = _yearHeadline(loc, yearDone.length, data.currentStreak);
 
     _showPreview(
       context,
-      period: '$year Year in Review',
+      period: loc.recapYearInReviewTitle(year),
       headline: headline,
       topType: topType,
       stats: [
-        _RecapStat('Sessions', '${yearDone.length}', LucideIcons.activity),
-        _RecapStat('Active days', '$activeDays', LucideIcons.calendarCheck),
-        _RecapStat('Activities', '${types.length}', LucideIcons.shapes),
-        _RecapStat('Avg/wk', data.avgPerWeek.toStringAsFixed(1), LucideIcons.trendingUp),
+        _RecapStat(loc.statsKpiSessions, '${yearDone.length}', LucideIcons.activity),
+        _RecapStat(loc.statsActiveDays, '$activeDays', LucideIcons.calendarCheck),
+        _RecapStat(loc.recapActivity, '${types.length}', LucideIcons.shapes),
+        _RecapStat(loc.statsAvgPerWeek, data.avgPerWeek.toStringAsFixed(1), LucideIcons.trendingUp),
       ],
       dayCells: dayCells,
       streak: data.currentStreak > 0 ? data.currentStreak : null,
     );
   }
 
-  ({ActivityType type, String label})? _topType(List<Activity> done) {
+  ({ActivityType type, String label})? _topType(
+      List<Activity> done, AppLocalizations loc) {
     if (done.isEmpty) return null;
     final counts = <String, int>{};
     final typeFor = <String, ActivityType>{};
     for (final a in done) {
       if (a.type == null) continue;
-      final lbl = a.typeLabel;
+      final lbl = a.type == ActivityType.other && a.subType != null
+          ? localizedSubType(a.subType!, loc)
+          : a.type!.localized(loc);
       counts[lbl] = (counts[lbl] ?? 0) + 1;
       typeFor[lbl] = a.type!;
     }
@@ -158,23 +167,23 @@ class ShareableRecap extends StatelessWidget {
     return (type: typeFor[top.key]!, label: top.key);
   }
 
-  String _monthHeadline(int sessions, int activeDays) {
-    if (sessions == 0) return 'Getting started!';
-    if (sessions >= 20) return 'Unstoppable month!';
-    if (sessions >= 12) return 'Crushing it!';
-    if (activeDays >= 15) return 'Incredible consistency!';
-    if (sessions >= 6) return 'Strong month!';
-    return 'Building momentum!';
+  String _monthHeadline(AppLocalizations loc, int sessions, int activeDays) {
+    if (sessions == 0) return loc.recapMonthGettingStarted;
+    if (sessions >= 20) return loc.recapMonthUnstoppable;
+    if (sessions >= 12) return loc.recapMonthCrushing;
+    if (activeDays >= 15) return loc.recapMonthConsistency;
+    if (sessions >= 6) return loc.recapMonthStrong;
+    return loc.recapMonthMomentum;
   }
 
-  String _yearHeadline(int sessions, int streak) {
-    if (sessions == 0) return 'The journey begins!';
-    if (sessions >= 200) return 'Legendary year!';
-    if (sessions >= 100) return 'Triple digits!';
-    if (streak >= 10) return 'Streak machine!';
-    if (sessions >= 50) return 'Half a hundred!';
-    if (sessions >= 20) return 'Going strong!';
-    return 'Building the habit!';
+  String _yearHeadline(AppLocalizations loc, int sessions, int streak) {
+    if (sessions == 0) return loc.recapYearBegins;
+    if (sessions >= 200) return loc.recapYearLegendary;
+    if (sessions >= 100) return loc.recapYearTripleDigits;
+    if (streak >= 10) return loc.recapYearStreakMachine;
+    if (sessions >= 50) return loc.recapYearHalfHundred;
+    if (sessions >= 20) return loc.recapYearGoingStrong;
+    return loc.recapYearHabit;
   }
 
   void _showPreview(
@@ -404,7 +413,7 @@ class _RecapPreviewSheetState extends State<_RecapPreviewSheet> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Share',
+                            AppLocalizations.of(context)!.recapShare,
                             style: KText.button.copyWith(
                               color: colors.accentFg,
                             ),
@@ -502,7 +511,7 @@ class _RecapCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '$streak wk',
+                              AppLocalizations.of(context)!.recapStreakBadge(streak!),
                               style: KText.caption.copyWith(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
@@ -611,7 +620,7 @@ class _TopActivityBadge extends StatelessWidget {
           Icon(KTypeTile.iconFor(type), size: 16, color: tc.tint),
           const SizedBox(width: 8),
           Text(
-            'Top activity: $label',
+            AppLocalizations.of(context)!.recapTopActivity(label),
             style: KText.bodySm.copyWith(
               fontWeight: FontWeight.w600,
               color: colors.fgPrimary,
@@ -636,7 +645,7 @@ class _StatsGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cols = stats.length <= 3 ? 3 : 2;
-        final gap = 8.0;
+        const gap = 8.0;
         final cellWidth = (constraints.maxWidth - (cols - 1) * gap) / cols;
 
         return Wrap(
@@ -700,7 +709,7 @@ class _MiniHeatmap extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Activity',
+          AppLocalizations.of(context)!.recapActivity,
           style: KText.caption.copyWith(
             fontSize: 9,
             fontWeight: FontWeight.w600,

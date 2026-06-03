@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
-import '../../../utils/date_utils.dart';
 import '../stats_data.dart';
 import 'pro_stat_card.dart';
 
@@ -16,10 +17,12 @@ class MonthVsMonth extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final comparison = _compute();
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final comparison = _compute(localeName);
 
     return ProStatCard(
-      title: 'Month vs month',
+      title: loc.statsMonthVsMonthTitle,
       subtitle: comparison.currentLabel,
       child: Row(
         children: [
@@ -72,7 +75,7 @@ class MonthVsMonth extends StatelessWidget {
     );
   }
 
-  _Comparison _compute() {
+  _Comparison _compute(String localeName) {
     final now = DateTime.now();
     final curYear = now.year;
     final curMonth = now.month;
@@ -90,9 +93,10 @@ class MonthVsMonth extends StatelessWidget {
         .where((a) => a.date.year == prevYear && a.date.month == prevMonth)
         .toList();
 
+    final fmt = DateFormat.MMM(localeName);
     return _Comparison(
-      currentLabel: KDate.shortMonths[curMonth - 1],
-      prevLabel: KDate.shortMonths[prevMonth - 1],
+      currentLabel: fmt.format(DateTime(curYear, curMonth)),
+      prevLabel: fmt.format(DateTime(prevYear, prevMonth)),
       currentCount: curDone.length,
       prevCount: prevDone.length,
       diff: curDone.length - prevDone.length,
@@ -174,7 +178,7 @@ class _MonthColumn extends StatelessWidget {
             ),
           ),
           Text(
-            count == 1 ? 'session' : 'sessions',
+            AppLocalizations.of(context)!.statsSessionsCount(count),
             style: KText.caption.copyWith(
               fontSize: 10,
               color: colors.fgTertiary,
@@ -182,7 +186,7 @@ class _MonthColumn extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '$types ${types == 1 ? 'type' : 'types'}',
+            AppLocalizations.of(context)!.statsTypesCountShort(types),
             style: KText.caption.copyWith(
               fontSize: 10,
               color: colors.fgTertiary,

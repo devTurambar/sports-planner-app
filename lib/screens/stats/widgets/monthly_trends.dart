@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
-import '../../../utils/date_utils.dart';
 import '../stats_data.dart';
 import 'pro_stat_card.dart';
 
@@ -15,16 +16,18 @@ class MonthlyTrends extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final months = _compute();
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final months = _compute(localeName);
     if (months.isEmpty) {
       return ProStatCard(
-        title: 'Monthly trends',
-        subtitle: 'Last 12 months',
+        title: loc.statsMonthlyTrendsTitle,
+        subtitle: loc.statsLast12Months,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: KSpace.s4),
             child: Text(
-              'No data yet',
+              loc.statsNoDataYet,
               style: KText.bodySm.copyWith(color: colors.fgTertiary),
             ),
           ),
@@ -34,8 +37,8 @@ class MonthlyTrends extends StatelessWidget {
     final max = months.fold<int>(0, (m, e) => e.count > m ? e.count : m);
 
     return ProStatCard(
-      title: 'Monthly trends',
-      subtitle: 'Last 12 months',
+      title: loc.statsMonthlyTrendsTitle,
+      subtitle: loc.statsLast12Months,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(months.length, (i) {
@@ -88,8 +91,9 @@ class MonthlyTrends extends StatelessWidget {
     );
   }
 
-  List<_MonthEntry> _compute() {
+  List<_MonthEntry> _compute(String localeName) {
     final now = DateTime.now();
+    final fmt = DateFormat.MMM(localeName);
     final entries = <_MonthEntry>[];
     for (var i = 11; i >= 0; i--) {
       var year = now.year;
@@ -101,7 +105,7 @@ class MonthlyTrends extends StatelessWidget {
       final count = data.allDone.where((a) =>
           a.date.year == year && a.date.month == month).length;
       entries.add(_MonthEntry(
-        label: KDate.shortMonths[month - 1],
+        label: fmt.format(DateTime(year, month)),
         count: count,
       ));
     }

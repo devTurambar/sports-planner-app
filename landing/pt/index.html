@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kadence — Planeia a tua semana desportiva</title>
+  <meta name="description" content="Uma app calma e minimalista para planear e acompanhar as tuas atividades desportivas semanais. Vê o teu progresso, cria consistência, mantém a motivação.">
+  <meta property="og:title" content="Kadence — Planeia a tua semana desportiva">
+  <meta property="og:description" content="Uma app calma e minimalista para planear e acompanhar as tuas atividades desportivas semanais.">
+  <meta property="og:type" content="website">
+  <link rel="alternate" hreflang="en" href="../">
+  <link rel="alternate" hreflang="pt" href="./">
+  <link rel="alternate" hreflang="es" href="../es/">
+  <link rel="alternate" hreflang="fr" href="../fr/">
+  <link rel="alternate" hreflang="x-default" href="../">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">K<span>.</span></div>
+    <div class="nav-links">
+      <a href="#features" class="nav-link-text">Funcionalidades</a>
+      <a href="#pricing" class="nav-link-text">Preços</a>
+      <div class="lang-switcher">
+        <button class="lang-switcher-btn" onclick="this.nextElementSibling.classList.toggle('open')">
+          PT <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+        </button>
+        <div class="lang-menu">
+          <a href="../index.html">English</a>
+          <a href="index.html" class="active">Portugues</a>
+          <a href="../es/index.html">Espanol</a>
+          <a href="../fr/index.html">Francais</a>
+        </div>
+      </div>
+      <a href="#" class="btn btn-primary" style="padding:10px 20px; font-size:13px;">Transferir</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <h1 class="hero-title">Planeia a tua semana<br>no <span>desporto</span>.</h1>
+      <p class="hero-subtitle">Um planeador calmo e minimalista para o teu treino semanal. Regista sessões, constrói séries, acompanha o teu progresso.</p>
+      <div class="hero-cta">
+        <a href="#" class="btn btn-primary">
+          <svg class="store-icon" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+          App Store
+        </a>
+        <a href="#" class="btn btn-secondary">
+          <svg class="store-icon" viewBox="0 0 24 24"><path d="M3.61 1.814L13.793 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.61-.92zm10.893 9.476l2.56-2.56 3.48 2.015c.67.39.67 1.12 0 1.51l-3.48 2.015-2.56-2.56-.52-.42.52-.42zM5.515.69l8.985 5.2-2.56 2.56L5.515.69zM5.515 23.31l6.425-7.76 2.56 2.56-8.985 5.2z" fill="currentColor"/></svg>
+          Google Play
+        </a>
+      </div>
+      <div class="hero-mockups">
+        <div class="phone phone-side fade-in">
+          <img src="../img/screenshot-settings.png" alt="Ecrã de definições do Kadence" loading="lazy">
+        </div>
+        <div class="phone phone-center fade-in">
+          <img src="../img/screenshot-week.png" alt="Vista semanal do Kadence" loading="lazy">
+        </div>
+        <div class="phone phone-side fade-in">
+          <img src="../img/screenshot-stats.png" alt="Ecrã de estatísticas do Kadence" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header">
+        <p class="section-label">Funcionalidades</p>
+        <h2 class="section-title">Tudo o que precisas.<br>Nada que não precises.</h2>
+        <p class="section-subtitle">Feita para quem treina regularmente e quer uma forma limpa de planear, registar e rever a semana.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <h3>Vistas semanal e mensal</h3>
+          <p>Vê toda a tua semana de relance. Desliza entre semanas, toca num dia para adicionar ou rever sessões. A grelha mensal dá-te a visão geral.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Mapa de atividade</h3>
+          <p>Um mapa de calor de 26 semanas mostra o teu ritmo de treino. Cores por desporto, esmaecido para sessões planeadas. A tua consistência, visualizada.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3>Mais de 20 desportos</h3>
+          <p>Corrida, natação, ciclismo, caminhada, yoga, padel, escalada e muito mais. Cada tipo tem a sua cor. Adiciona desportos personalizados de mais de 40 categorias Strava.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3>Objetivos semanais</h3>
+          <p>Define um objetivo — 3 sessões por semana, 5, 7. Um anel de progresso acompanha as sessões concluídas. Responsabilidade simples.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Sincronização com calendário</h3>
+          <p>Sincroniza as sessões planeadas com o calendário do telemóvel automaticamente. Edita no Kadence, vê em todo o lado.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3>Integração Strava</h3>
+          <p>Importa todo o teu histórico Strava — anos de corridas, pedaladas e natação iluminam o mapa de calor instantaneamente. Novas atividades Strava marcam automaticamente as sessões planeadas como concluídas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE -->
+  <section class="showcase" id="showcase">
+    <div class="container">
+      <div class="showcase-row fade-in">
+        <div class="showcase-text">
+          <p class="section-label">Planear</p>
+          <h3>A tua semana, organizada.</h3>
+          <p>Cada dia tem um cartão. Toca para adicionar uma sessão — escolhe o desporto, define a hora, adiciona notas. Desliza para navegar entre semanas. Duplo toque para marcar como feito.</p>
+        </div>
+        <div class="showcase-phone">
+          <div class="phone">
+            <img src="../img/screenshot-week.png" alt="Vista semanal" loading="lazy">
+          </div>
+        </div>
+      </div>
+      <div class="showcase-row reverse fade-in">
+        <div class="showcase-text">
+          <p class="section-label">Rever</p>
+          <h3>Vê os teus padrões.</h3>
+          <p>O ecrã de estatísticas transforma meses de sessões numa imagem clara — séries, mapas de calor, análise por tipo. Sabe onde és consistente e onde estás a falhar.</p>
+        </div>
+        <div class="showcase-phone">
+          <div class="phone">
+            <img src="../img/screenshot-stats.png" alt="Vista de estatísticas" loading="lazy">
+          </div>
+        </div>
+      </div>
+      <div class="showcase-row fade-in">
+        <div class="showcase-text">
+          <p class="section-label">Personalizar</p>
+          <h3>Faz à tua maneira.</h3>
+          <p>Modo escuro ou claro. Escolhe a cor de destaque entre 7 paletas. Personaliza as cores dos tipos. Define o dia de início da semana. Escolhe o idioma.</p>
+        </div>
+        <div class="showcase-phone">
+          <div class="phone">
+            <img src="../img/screenshot-settings.png" alt="Definições" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="pricing-header">
+        <p class="section-label">Preços</p>
+        <h2 class="section-title">Grátis para usar. Pro para desbloquear.</h2>
+        <p class="section-subtitle">A experiência principal é completamente gratuita. Faz upgrade para Pro para estatísticas avançadas, sincronização na cloud e cores personalizadas. O Pro chega em breve — a app gratuita já está disponível.</p>
+      </div>
+      <div class="pricing-cards">
+        <div class="pricing-card fade-in">
+          <h3>Grátis</h3>
+          <p class="price"><strong>$0</strong> / para sempre</p>
+          <ul class="pricing-features">
+            <li>Vistas semanal e mensal</li>
+            <li>Mais de 20 tipos de desporto</li>
+            <li>Objetivos semanais e anel de progresso</li>
+            <li>Estatísticas básicas e mapa de calor</li>
+            <li>Sincronização com calendário</li>
+            <li>Exportar e importar backup</li>
+          </ul>
+        </div>
+        <div class="pricing-card featured fade-in">
+          <div class="pricing-badge">Em breve</div>
+          <h3>Kadence Pro</h3>
+          <p class="price">Desde <strong>&euro;9.99</strong> / ano</p>
+          <ul class="pricing-features">
+            <li>Tudo do plano Grátis</li>
+            <li>14 widgets de estatísticas avançadas</li>
+            <li>Mapa de calor anual e insights</li>
+            <li>Sincronização na cloud entre dispositivos</li>
+            <li>Cores personalizadas por tipo e tema</li>
+            <li>Importação e sincronização Strava</li>
+            <li>Cartões de resumo partilháveis</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-left">Kadence &copy; 2026</div>
+      <div class="footer-links">
+        <a href="../../privacy-policy.html">Política de Privacidade</a>
+        <a href="mailto:raphael.rvt@hotmail.com">Contacto</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.lang-switcher')) {
+        document.querySelectorAll('.lang-menu').forEach(m => m.classList.remove('open'));
+      }
+    });
+  </script>
+
+</body>
+</html>

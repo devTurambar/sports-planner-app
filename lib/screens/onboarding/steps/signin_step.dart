@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../screens/paywall/paywall_screen.dart';
 import '../../../state/auth_controller.dart';
+import '../../../state/pro_controller.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -24,6 +27,7 @@ class _SignInStepState extends State<SignInStep> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final auth = context.watch<AuthController>();
 
     if (auth.isSignedIn && !_advanced) {
@@ -57,7 +61,7 @@ class _SignInStepState extends State<SignInStep> {
                     ),
                     const SizedBox(height: KSpace.s5),
                     Text(
-                      'Keep your data safe',
+                      loc.onboardingSignInTitle,
                       textAlign: TextAlign.center,
                       style: KText.h2.copyWith(
                         fontSize: 22,
@@ -68,8 +72,7 @@ class _SignInStepState extends State<SignInStep> {
                     ),
                     const SizedBox(height: KSpace.s1 + 2),
                     Text(
-                      'Choose how you\'d like to back up your sessions.\n'
-                      'You can change this anytime in Settings.',
+                      loc.onboardingSignInBody,
                       textAlign: TextAlign.center,
                       style: KText.bodySm.copyWith(
                         color: colors.fgSecondary,
@@ -79,17 +82,15 @@ class _SignInStepState extends State<SignInStep> {
                     const SizedBox(height: KSpace.s6),
                     _OptionCard(
                       icon: LucideIcons.hardDriveDownload,
-                      title: 'Manual backup',
-                      description:
-                          'Export and import your data as a file from Settings whenever you want.',
+                      title: loc.onboardingManualTitle,
+                      description: loc.onboardingManualBody,
                       action: _ManualAction(onTap: widget.onSkip),
                     ),
                     const SizedBox(height: KSpace.s3),
                     _OptionCard(
                       icon: LucideIcons.cloud,
-                      title: 'Cloud sync',
-                      description:
-                          'Sign in with your account to sync across devices automatically.',
+                      title: loc.onboardingCloudTitle,
+                      description: loc.onboardingCloudBody,
                       action: _CloudActions(auth: auth),
                     ),
                   ],
@@ -168,6 +169,7 @@ class _ManualAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -183,7 +185,7 @@ class _ManualAction extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            'Continue without account',
+            loc.onboardingContinueWithoutAccount,
             style: KText.button.copyWith(color: colors.fgPrimary),
           ),
         ),
@@ -199,6 +201,12 @@ class _CloudActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPro = context.watch<ProController>().isPro;
+
+    if (!isPro) {
+      return _ProUpgradeButton();
+    }
+
     return Column(
       children: <Widget>[
         KOAuthButton(
@@ -213,6 +221,45 @@ class _CloudActions extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _ProUpgradeButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => PaywallScreen.show(context),
+        borderRadius: BorderRadius.circular(KRadius.lg),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: colors.accent.withValues(alpha: 0.12),
+            border: Border.all(color: colors.accent.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(KRadius.lg),
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.crown, size: 16, color: colors.accent),
+              const SizedBox(width: 8),
+              Text(
+                loc.proBadge,
+                style: KText.button.copyWith(
+                  color: colors.accent,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

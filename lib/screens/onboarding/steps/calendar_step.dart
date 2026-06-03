@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -16,6 +17,7 @@ class CalendarStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, KSpace.s8),
       child: Column(
@@ -44,7 +46,7 @@ class CalendarStep extends StatelessWidget {
                 ),
                 const SizedBox(height: KSpace.s6),
                 Text(
-                  'Calendar sync',
+                  loc.onboardingCalendarTitle,
                   textAlign: TextAlign.center,
                   style: KText.h2.copyWith(
                     fontSize: 22,
@@ -55,8 +57,7 @@ class CalendarStep extends StatelessWidget {
                 ),
                 const SizedBox(height: KSpace.s2),
                 Text(
-                  'Your planned sessions automatically sync with '
-                  'your device calendar so everything stays in one place.',
+                  loc.onboardingCalendarBody,
                   textAlign: TextAlign.center,
                   style: KText.bodySm.copyWith(
                     color: colors.fgSecondary,
@@ -66,19 +67,19 @@ class CalendarStep extends StatelessWidget {
                 const SizedBox(height: KSpace.s6),
                 _InfoRow(
                   icon: LucideIcons.calendarPlus,
-                  text: 'Activities appear on your calendar',
+                  text: loc.onboardingCalendarFeature1,
                   colors: colors,
                 ),
                 const SizedBox(height: KSpace.s2 + 2),
                 _InfoRow(
                   icon: LucideIcons.refreshCw,
-                  text: 'Edits and deletions stay in sync',
+                  text: loc.onboardingCalendarFeature2,
                   colors: colors,
                 ),
                 const SizedBox(height: KSpace.s2 + 2),
                 _InfoRow(
                   icon: LucideIcons.settings2,
-                  text: 'Choose your calendar in Settings',
+                  text: loc.onboardingCalendarFeature3,
                   colors: colors,
                 ),
               ],
@@ -86,7 +87,7 @@ class CalendarStep extends StatelessWidget {
           ),
           const ProgressDots(total: 3, current: 1),
           const SizedBox(height: KSpace.s1 + 2),
-          KButton(label: 'Continue', onPressed: onNext),
+          KButton(label: loc.actionContinue, onPressed: onNext),
         ],
       ),
     );

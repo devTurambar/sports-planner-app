@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -28,9 +29,10 @@ class ActivityVariety extends StatelessWidget {
         .toSet()
         .length;
 
+    final loc = AppLocalizations.of(context)!;
     return ProStatCard(
-      title: 'Activity variety',
-      subtitle: '$allTimeTypes types all time',
+      title: loc.statsActivityVarietyTitle,
+      subtitle: loc.statsTypesAllTime(allTimeTypes),
       child: Column(
         children: [
           Row(
@@ -82,7 +84,7 @@ class ActivityVariety extends StatelessWidget {
           Row(
             children: [
               Text(
-                'Different types per week (last 12 weeks)',
+                loc.statsDifferentTypesPerWeek,
                 style: KText.caption.copyWith(
                   fontSize: 10,
                   color: colors.fgTertiary,

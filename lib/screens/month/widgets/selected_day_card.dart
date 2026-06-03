@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
-import '../../../utils/date_utils.dart';
 import '../../../widgets/k_activity_card.dart';
 
 /// Expandable detail card that appears below the grid when the user taps a
@@ -82,8 +83,10 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final label =
-        '${date.shortWeekday.toUpperCase()} · ${date.shortMonth} ${date.day}';
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final weekday = DateFormat.E(localeName).format(date).toUpperCase();
+    final dayMonth = DateFormat.MMMd(localeName).format(date).toUpperCase();
+    final label = '$weekday · $dayMonth';
     return GestureDetector(
       onLongPress: onLongPress,
       child: Row(
@@ -139,13 +142,14 @@ class _Body extends StatelessWidget {
     final colors = context.colors;
 
     if (activities.isEmpty) {
+      final loc = AppLocalizations.of(context)!;
       return Row(
         children: <Widget>[
           _PlusIcon(background: colors.bgElevated, color: colors.fgDisabled),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Nothing planned',
+              loc.selectedDayEmpty,
               style: KText.caption.copyWith(
                 color: colors.fgTertiary,
                 fontSize: 13,
@@ -211,6 +215,7 @@ class _AddButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Material(
       color: colors.accent,
       borderRadius: BorderRadius.circular(8),
@@ -220,7 +225,7 @@ class _AddButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Text(
-            'Add',
+            loc.selectedDayAdd,
             style: KText.caption.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w600,

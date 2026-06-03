@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -27,9 +28,10 @@ class WeeklyActivityChart extends StatelessWidget {
         : weeks.fold<int>(0, (s, w) => s + w.count) / weeks.length;
     final thisWeek = weeks.isNotEmpty ? weeks.last.count : 0;
 
+    final loc = AppLocalizations.of(context)!;
     return ProStatCard(
-      title: 'Weekly activity',
-      subtitle: 'Last 12 weeks',
+      title: loc.statsWeeklyActivityTitle,
+      subtitle: loc.statsLast12Weeks,
       child: Column(
         children: [
           Row(
@@ -66,10 +68,14 @@ class WeeklyActivityChart extends StatelessWidget {
           const SizedBox(height: KSpace.s2),
           Row(
             children: [
-              _Label(label: 'Avg', value: avg.toStringAsFixed(1), suffix: '/wk'),
+              _Label(
+                label: loc.statsAvg,
+                value: avg.toStringAsFixed(1),
+                suffix: loc.statsPerWeekSuffix,
+              ),
               const Spacer(),
               _Label(
-                label: 'This week',
+                label: loc.weekThisWeek,
                 value: '$thisWeek',
                 accent: true,
               ),

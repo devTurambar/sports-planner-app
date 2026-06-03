@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
-import '../../../utils/date_utils.dart';
 import '../stats_data.dart';
 import 'pro_stat_card.dart';
 
@@ -16,14 +18,16 @@ class Insights extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final insights = _generate();
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final insights = _generate(loc, localeName);
 
     if (insights.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return ProStatCard(
-      title: 'Insights',
+      title: loc.statsInsightsTitle,
       child: Column(
         children: [
           for (var i = 0; i < insights.length; i++) ...[
@@ -35,7 +39,7 @@ class Insights extends StatelessWidget {
     );
   }
 
-  List<_Insight> _generate() {
+  List<_Insight> _generate(AppLocalizations loc, String localeName) {
     final insights = <_Insight>[];
     final done = data.allDone;
     if (done.isEmpty) return insights;
@@ -51,12 +55,18 @@ class Insights extends StatelessWidget {
     final maxDayCount = dayCounts.fold<int>(0, (m, v) => v > m ? v : m);
     if (maxDayCount > 2) {
       final bestIdx = dayCounts.indexOf(maxDayCount);
-      final dayName = startDay == DateTime.sunday
-          ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][bestIdx]
-          : KDate.fullWeekdays[bestIdx];
+      // Map bestIdx back to a weekday (1..7) and format with locale-aware
+      // full weekday name.
+      final weekday = startDay == DateTime.sunday
+          ? (bestIdx == 0 ? DateTime.sunday : bestIdx)
+          : (bestIdx + 1);
+      final fullFmt = DateFormat.EEEE(localeName);
+      final ref = DateTime(2024, 1, 1)
+          .add(Duration(days: (weekday - DateTime.monday + 7) % 7));
+      final dayName = fullFmt.format(ref);
       insights.add(_Insight(
         icon: LucideIcons.calendar,
-        text: 'You train most on ${dayName}s — $maxDayCount sessions total.',
+        text: loc.insightFavoriteDay(dayName, maxDayCount),
         color: _InsightColor.blue,
       ));
     }
@@ -77,14 +87,13 @@ class Insights extends StatelessWidget {
       if (thisMonthDone > avg * 1.2) {
         insights.add(_Insight(
           icon: LucideIcons.trendingUp,
-          text:
-              'This month is ${((thisMonthDone / avg - 1) * 100).round()}% above your average. Keep it up!',
+          text: loc.insightAboveAvg(((thisMonthDone / avg - 1) * 100).round()),
           color: _InsightColor.green,
         ));
       } else if (thisMonthDone < avg * 0.5 && now.day > 15) {
         insights.add(_Insight(
           icon: LucideIcons.trendingDown,
-          text: 'This month is quieter than usual. Still time to catch up!',
+          text: loc.insightBelowAvg,
           color: _InsightColor.amber,
         ));
       }
@@ -96,19 +105,21 @@ class Insights extends StatelessWidget {
             a.date.isAfter(now.subtract(const Duration(days: 30))) &&
             a.type != null)
         .toList();
-    final recentTypeLabels = recentDone.map((a) => a.typeLabel).toSet();
+    final recentTypeLabels = recentDone
+        .map((a) => a.type == ActivityType.other && a.subType != null
+            ? localizedSubType(a.subType!, loc)
+            : a.type!.localized(loc))
+        .toSet();
     if (recentTypeLabels.length >= 4) {
       insights.add(_Insight(
         icon: LucideIcons.shuffle,
-        text:
-            'Great variety! You did ${recentTypeLabels.length} different activities in the last 30 days.',
+        text: loc.insightVariety(recentTypeLabels.length),
         color: _InsightColor.purple,
       ));
     } else if (recentTypeLabels.length == 1 && done.length > 5) {
       insights.add(_Insight(
         icon: LucideIcons.repeat,
-        text:
-            'You\'ve been focused on ${recentTypeLabels.first} lately. Try mixing it up!',
+        text: loc.insightFocused(recentTypeLabels.first),
         color: _InsightColor.coral,
       ));
     }
@@ -118,14 +129,13 @@ class Insights extends StatelessWidget {
       if (data.currentStreak >= 4) {
         insights.add(_Insight(
           icon: LucideIcons.flame,
-          text:
-              '${data.currentStreak}-week streak! That\'s serious consistency.',
+          text: loc.insightStreakStrong(data.currentStreak),
           color: _InsightColor.coral,
         ));
       } else if (data.currentStreak == 1) {
         insights.add(_Insight(
           icon: LucideIcons.sparkles,
-          text: 'New streak started! Keep it going this week.',
+          text: loc.insightStreakNew,
           color: _InsightColor.amber,
         ));
       }
@@ -139,7 +149,7 @@ class Insights extends StatelessWidget {
       if (bestMonth.key == currentKey && thisMonthDone > 0 && now.day > 7) {
         insights.add(_Insight(
           icon: LucideIcons.trophy,
-          text: 'Best month ever with $thisMonthDone sessions so far!',
+          text: loc.insightBestMonth(thisMonthDone),
           color: _InsightColor.green,
         ));
       }

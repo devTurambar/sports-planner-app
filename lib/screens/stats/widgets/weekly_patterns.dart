@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
-import '../../../utils/date_utils.dart';
 import '../stats_data.dart';
 import 'pro_stat_card.dart';
 
@@ -21,18 +22,26 @@ class WeeklyPatterns extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final patterns = _compute();
-    final labels = KDate.orderedMinWeekdays(startDay);
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final patterns = _compute(loc);
+    final narrowFmt = DateFormat('EEEEE', localeName);
+    final monday = DateTime(2024, 1, 1);
+    final labels = List<String>.generate(7, (i) {
+      final weekday = (startDay - 1 + i) % 7 + 1;
+      final offset = (weekday - DateTime.monday + 7) % 7;
+      return narrowFmt.format(monday.add(Duration(days: offset))).toUpperCase();
+    });
 
     if (patterns.isEmpty) {
       return ProStatCard(
-        title: 'Weekly patterns',
-        subtitle: 'When you do each activity',
+        title: loc.statsWeeklyPatternsTitle,
+        subtitle: loc.statsWhenYouDo,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: KSpace.s3),
             child: Text(
-              'No data yet',
+              loc.statsNoDataYet,
               style: KText.bodySm.copyWith(color: colors.fgTertiary),
             ),
           ),
@@ -41,8 +50,8 @@ class WeeklyPatterns extends StatelessWidget {
     }
 
     return ProStatCard(
-      title: 'Weekly patterns',
-      subtitle: 'When you do each activity',
+      title: loc.statsWeeklyPatternsTitle,
+      subtitle: loc.statsWhenYouDo,
       child: Column(
         children: [
           Row(
@@ -74,7 +83,7 @@ class WeeklyPatterns extends StatelessWidget {
     );
   }
 
-  List<_TypePattern> _compute() {
+  List<_TypePattern> _compute(AppLocalizations loc) {
     final typeMap = <(ActivityType, String?), List<int>>{};
     final labels = <(ActivityType, String?), String>{};
 
@@ -82,7 +91,9 @@ class WeeklyPatterns extends StatelessWidget {
       if (a.type == null) continue;
       final key = (a.type!, a.type == ActivityType.other ? a.subType : null);
       typeMap.putIfAbsent(key, () => List<int>.filled(7, 0));
-      labels[key] = a.typeLabel;
+      labels[key] = a.type == ActivityType.other && a.subType != null
+          ? localizedSubType(a.subType!, loc)
+          : a.type!.localized(loc);
       final dayIndex = startDay == DateTime.sunday
           ? (a.date.weekday % 7)
           : (a.date.weekday - 1);

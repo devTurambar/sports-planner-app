@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/activity.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_text_styles.dart';
@@ -13,6 +14,7 @@ class KStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     late final Color bg;
     late final Color fg;
     late final String label;
@@ -22,25 +24,25 @@ class KStatusChip extends StatelessWidget {
       case DayStatus.done:
         bg = colors.statusDoneBg;
         fg = colors.statusDone;
-        label = 'Done';
+        label = loc.statusDone;
         icon = _Dot(size: 6, color: fg);
         break;
       case DayStatus.today:
         bg = colors.accentLight;
         fg = colors.accent;
-        label = 'Today';
+        label = loc.statusToday;
         icon = _Dot(size: 6, color: fg, filled: false);
         break;
       case DayStatus.planned:
         bg = colors.statusPlannedBg;
         fg = colors.fgSecondary;
-        label = 'Planned';
+        label = loc.statusPlanned;
         icon = _Dot(size: 6, color: colors.statusPlanned, filled: false);
         break;
       case DayStatus.empty:
         bg = colors.bgSubtle;
         fg = colors.fgTertiary;
-        label = 'Open';
+        label = loc.statusOpen;
         icon = _Dot(size: 6, color: fg, filled: false);
         break;
     }

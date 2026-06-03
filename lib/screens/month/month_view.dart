@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../state/theme_controller.dart';
@@ -50,13 +52,14 @@ class MonthViewState extends State<MonthView> {
       if (!mounted) return;
       final tips = context.read<TipController>();
       if (!tips.shouldShow(TipKey.monthTitleNav)) return;
-      final today = DateTime.now();
-      final hint = '${today.fullMonth} ${today.year}';
+      final loc = AppLocalizations.of(context)!;
+      final localeName = Localizations.localeOf(context).toLanguageTag();
+      final hint = DateFormat.yMMMM(localeName).format(DateTime.now());
       KTutorialOverlay.show(
         context: context,
         gesture: TutorialGesture.titleTap,
-        title: 'Tap the title to go back',
-        subtitle: 'Tap the title at the top to jump back to the current month',
+        title: loc.tipTitleNavTitle,
+        subtitle: loc.tipMonthTitleNavBody,
         animationHint: hint,
         onDismiss: () => tips.markSeen(TipKey.monthTitleNav),
       );
@@ -184,30 +187,33 @@ class MonthViewState extends State<MonthView> {
               onNext: () => _shiftMonth(1),
             ),
             const SizedBox(height: KSpace.s2),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: _StatTile(
-                    value: doneCount.toString(),
-                    label: 'Done',
+            Builder(builder: (ctx) {
+              final loc = AppLocalizations.of(ctx)!;
+              return Row(
+                children: <Widget>[
+                  Expanded(
+                    child: _StatTile(
+                      value: doneCount.toString(),
+                      label: loc.statsDone,
+                    ),
                   ),
-                ),
-                const SizedBox(width: KSpace.s2),
-                Expanded(
-                  child: _StatTile(
-                    value: plannedCount.toString(),
-                    label: 'Planned',
+                  const SizedBox(width: KSpace.s2),
+                  Expanded(
+                    child: _StatTile(
+                      value: plannedCount.toString(),
+                      label: loc.statsPlanned,
+                    ),
                   ),
-                ),
-                const SizedBox(width: KSpace.s2),
-                Expanded(
-                  child: _StatTile(
-                    value: '$onTrack%',
-                    label: 'On track',
+                  const SizedBox(width: KSpace.s2),
+                  Expanded(
+                    child: _StatTile(
+                      value: '$onTrack%',
+                      label: loc.statsOnTrack,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }),
             const SizedBox(height: KSpace.s2 + 2),
             _WeekdayHeader(colors: colors, startDay: startDay),
             const SizedBox(height: 4),
@@ -257,6 +263,7 @@ class MonthViewState extends State<MonthView> {
   void _confirmDeleteActivity(BuildContext context, Activity activity) {
     final plan = context.read<PlanController>();
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -265,7 +272,7 @@ class MonthViewState extends State<MonthView> {
           borderRadius: BorderRadius.circular(KRadius.md),
         ),
         title: Text(
-          'Delete session?',
+          loc.deleteSessionTitle,
           style: KText.h3.copyWith(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -273,14 +280,14 @@ class MonthViewState extends State<MonthView> {
           ),
         ),
         content: Text(
-          'This can\'t be undone.',
+          loc.deleteSessionBody,
           style: KText.bodySm.copyWith(color: colors.fgSecondary),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Cancel',
+              loc.actionCancel,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w500,
                 color: colors.fgSecondary,
@@ -290,7 +297,7 @@ class MonthViewState extends State<MonthView> {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Delete',
+              loc.actionDelete,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFFB5443A),
@@ -308,6 +315,7 @@ class MonthViewState extends State<MonthView> {
   void _confirmClearDay(BuildContext context, DateTime date) {
     final plan = context.read<PlanController>();
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -316,7 +324,7 @@ class MonthViewState extends State<MonthView> {
           borderRadius: BorderRadius.circular(KRadius.md),
         ),
         title: Text(
-          'Delete all sessions?',
+          loc.deleteDayTitle,
           style: KText.h3.copyWith(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -324,14 +332,14 @@ class MonthViewState extends State<MonthView> {
           ),
         ),
         content: Text(
-          'Every session on this day will be removed. This can\'t be undone.',
+          loc.deleteDayBody,
           style: KText.bodySm.copyWith(color: colors.fgSecondary),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Cancel',
+              loc.actionCancel,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w500,
                 color: colors.fgSecondary,
@@ -341,7 +349,7 @@ class MonthViewState extends State<MonthView> {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Delete',
+              loc.actionDelete,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFFB5443A),
@@ -416,6 +424,7 @@ class _MonthNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 4),
       child: Row(
@@ -425,7 +434,7 @@ class _MonthNav extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: KSpace.s2),
               child: Text(
-                '${cursor.fullMonth} ${cursor.year}',
+                DateFormat.yMMMM(localeName).format(cursor),
                 style: KText.body.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -475,18 +484,27 @@ class _WeekdayHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = KDate.orderedMinWeekdays(startDay);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final narrowFmt = DateFormat('EEEEE', localeName);
+    // A known week to pull narrow weekday names from intl (Mon=2024-01-01).
+    final monday = DateTime(2024, 1, 1);
     return Row(
-      children: List<Widget>.generate(labels.length, (i) {
+      children: List<Widget>.generate(7, (i) {
         final weekday = (startDay - 1 + i) % 7 + 1;
         final isWeekend =
             weekday == DateTime.saturday || weekday == DateTime.sunday;
+        // Build a date with the matching weekday so intl returns the right
+        // narrow label; offset from Monday baseline.
+        final daysFromMonday = (weekday - DateTime.monday + 7) % 7;
+        final label = narrowFmt
+            .format(monday.add(Duration(days: daysFromMonday)))
+            .toUpperCase();
         return Expanded(
           child: Center(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 3),
               child: Text(
-                labels[i],
+                label,
                 style: KText.caption.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,

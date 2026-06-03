@@ -22,6 +22,7 @@ sheet, Empty State, Stats, Settings.
 - `lucide_icons_flutter` for outline icons
 - `flutter_svg` for brand logo assets (Google, Apple)
 - `share_plus` + `file_picker` for export/import backup
+- `flutter_localizations` + `intl` for localization (ARB files, generated `AppLocalizations`)
 - No external charting library — stats heatmap is built with custom widgets
 
 ## Architecture at a glance
@@ -30,9 +31,10 @@ sheet, Empty State, Stats, Settings.
 lib/
   main.dart               # Initializes prefs + DB, awaits PlanController, runs KadenceApp
   app.dart                # MaterialApp + TodayScope + onboarding gate
+  l10n/                   # ARB files (app_en, app_pt, app_pt_BR, app_es, app_fr) + generated/
   theme/                  # Design tokens (colors, spacing, text, theme)
   models/                 # Activity + DayStatus + ActivityType
-  state/                  # ChangeNotifier controllers (theme, onboarding, plan, type_color, goal, tip) + ActivityDb + BackupService
+  state/                  # ChangeNotifier controllers (theme, locale, onboarding, plan, type_color, goal, tip, pro) + ActivityDb + BackupService
   utils/date_utils.dart   # KDate helpers + TodayScope (wall-clock refresh)
   widgets/                # Shared primitives (KButton, KInput, KTopBar, etc.)
   screens/
@@ -257,6 +259,69 @@ lib/
   that itself is `InkWell`-tappable, use `Material + InkWell` on both,
   not a `GestureDetector` for the inner element. Mixed
   GestureDetector/InkWell can let the outer tap win.
+- **Localization**: every visible string is in an ARB file under
+  `lib/l10n/`. Five locales ship: English (template, `app_en.arb`),
+  European Portuguese (`app_pt.arb`), Brazilian Portuguese
+  (`app_pt_BR.arb`), Spanish (`app_es.arb`), French (`app_fr.arb`).
+  - **Read strings via `AppLocalizations.of(context)!`**. The
+    generated class lives in `lib/l10n/generated/app_localizations*.dart`
+    (committed to the repo). After editing any ARB, run
+    `flutter gen-l10n` or trigger a build to regenerate.
+  - **Never concatenate translated fragments.** A full sentence is one
+    ARB key with placeholders (`{name}`, `{count}`). Concatenation
+    locks in English word order and breaks other languages. Use ICU
+    plurals for count-dependent forms — see `sessionsCount`,
+    `weeksCount`, `statsDaysAgo`, `statsTriedTypes`.
+  - **Dates and weekdays use `intl.DateFormat`** with
+    `Localizations.localeOf(context).toLanguageTag()`. Common patterns:
+    - `DateFormat.yMMMM(localeName).format(date)` → "May 2026" /
+      "maio de 2026"
+    - `DateFormat.MMMd(localeName).format(date)` → "May 4" / "4 mai"
+    - `DateFormat.E(localeName).format(date).toUpperCase()` → 3-letter
+      weekday stamp
+    - `DateFormat('EEEEE', localeName)` → narrow 1-letter weekday
+      (grid headers, week-dot cells)
+    The constants in `KDate` (`shortMonths`, `fullWeekdays`,
+    `orderedMinWeekdays`) are legacy English-only and should not appear
+    in UI code. `initializeDateFormatting()` is called once in
+    `main.dart` so intl data is available at runtime.
+  - **`LocaleController`** (`lib/state/locale_controller.dart`)
+    mirrors `ThemeController`. Persists chosen locale to
+    `kadence.locale` in SharedPreferences. A `null` locale = follow
+    system; setting `Locale('pt', 'BR')` etc. overrides it. Settings
+    has a Language row with: System default / English / Português
+    (Portugal) / Português (Brasil) / Español / Français.
+  - **Resolution**: device locale by default. Flutter resolves
+    exact-match first (pt-BR → `app_pt_BR.arb`), then language-only
+    (pt-PT → `app_pt.arb`), then the first supported locale (English)
+    as fallback. pt-BR is a *partial* override of `app_pt.arb` —
+    missing keys cascade up to European Portuguese, then to English.
+  - **Activity type labels**: `ActivityType.label` is English-only
+    (kept for serialization debugging). Use `ActivityType.localized(loc)`
+    in UI. All 21 core types have keys `typeRun`, `typeHike`, …,
+    `typeOther`.
+  - **Sub-types (the 41 Strava-style sports)**: `Activity.subType`
+    stores the canonical English string (`"Crossfit"`, `"Alpine Ski"`,
+    etc.) regardless of the user's language. Display via the top-level
+    `localizedSubType(key, loc)` from `lib/models/activity.dart`, or
+    `activity.localizedTypeLabel(loc)` which combines core + sub-type
+    in one call. Unknown keys fall through unchanged so custom or
+    legacy data still renders. The sub-type picker sheet matches
+    search queries against both the English key and the localized
+    label, so a Brazilian user typing "futebol" finds Soccer.
+  - **Adding a new key**: write it in `app_en.arb` first (template,
+    with `description` + typed placeholder metadata for translators),
+    then add the same key to every other locale file. A missing key
+    falls back to English at runtime — the build still passes, but
+    that one string will be mid-sentence English in other languages.
+  - **Adding a new locale**: create `app_xx.arb`, add `Locale('xx')` to
+    `LocaleController.supportedLocales`, add the language option to
+    `_LanguagePickerSheet` in `settings_screen.dart`, and add a
+    matching `languageXxx` key to every existing ARB file (translators
+    write their language's name in their own script).
+  - **Important `pubspec.yaml` bits**: `flutter_localizations` from
+    SDK, `intl: any`, and `flutter: generate: true` (required so the
+    build picks up `l10n.yaml`).
 - **Icons**: Lucide names are camelCase in `lucide_icons_flutter`
   (`LucideIcons.chevronLeft`). If the package version differs, the
   compile error will be obvious — adjust casing.
@@ -330,6 +395,7 @@ flutter create . --platforms=ios,android  # generate platform folders (first run
 flutter run                         # run on a connected device / simulator
 flutter test                        # run unit + widget tests
 flutter analyze                     # lint
+flutter gen-l10n                    # regenerate AppLocalizations from ARB files
 ```
 
 Lint config lives in `analysis_options.yaml`. We deliberately kept it
@@ -381,8 +447,6 @@ without discussion.
 
 ## Not done yet
 
-- No app icons / launcher assets.
-- No localization — copy is hardcoded English.
 - No integration tests; only one smoke test in `test/widget_test.dart`.
 
 ## Roadmap
@@ -636,15 +700,12 @@ without discussion.
   always consistent with the imported state.
 
 ### Strava integration (after auth)
-- **Read from Strava**: poll for completed Strava activities via
-  `GET /api/v3/athlete/activities`. Match by date + activity type
-  against planned sessions and auto-mark them as done.
-- **Write to Strava**: when a manual activity is marked done, offer
-  an optional "Send to Strava" action. Creates a manual entry via
-  `POST /api/v3/activities` (name, type, start time, duration).
-- Both directions require Strava OAuth2 (`activity:read_all` +
-  `activity:write` scopes). User authorizes once; refresh token
-  stored locally.
+- **Read from Strava** (one-way, Strava → Kadence): poll for
+  completed Strava activities via `GET /api/v3/athlete/activities`.
+  Match by date + activity type against planned sessions and
+  auto-mark them as done. Import full history to populate stats.
+- Strava OAuth2 (`activity:read_all` scope). User authorizes once;
+  refresh token stored locally.
 - Garmin Connect has no public API for individual devs — most Garmin
   users sync to Strava anyway, so Strava covers the majority of
   devices (Garmin, Apple Watch, Polar, Wahoo, etc.).
@@ -654,23 +715,23 @@ without discussion.
 Freemium model. Core app is fully usable for free; premium features
 are gated behind a one-time or subscription purchase ("Kadence Pro").
 
-#### Pricing tiers
-- **Android**: Monthly €0.99, Annual €4.99, Lifetime €12.99
-- **iOS**: Monthly €1.49, Annual €7.99, Lifetime €19.99
+#### Pricing tiers (no lifetime — recurring server costs make lifetime unsustainable)
+- **Android**: Monthly €1.99, Annual €9.99
+- **iOS**: Monthly €2.99, Annual €14.99
 - iOS prices are higher because Apple users tend to spend more on
   apps, and Apple's 30% cut is steeper (15% via Small Business
   Program). Google also takes 30% (15% automatic on first $1M/yr).
-- Prices can be increased in the future via App Store Connect /
+- Prices can be adjusted in the future via App Store Connect /
   Google Play Console — existing subscribers keep their locked-in
   price, new subscribers see the new price.
 
 #### Free features
 - Core views (week, month, day detail)
-- Basic stats: 3 KPIs, 26-week heatmap, type breakdown
+- Basic stats: 3 KPI tiles, 26-week heatmap, "By activity" type
+  breakdown (the first 3 blocks in the stats screen)
 - Export/import backup
 - Calendar sync
 - Weekly goals & progress rings (core motivational loop)
-- Most stat widgets (see free/premium split below)
 
 #### Premium features (5 pillars)
 1. **Date filtering on stats** — filter all graphs and data by
@@ -680,7 +741,8 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
    below).
 3. **Cloud sync** — Supabase-backed. Peace of mind, cross-device.
 4. **Custom colors** — custom type colors + theme color picker.
-5. **Strava integration** — the killer feature. Two directions:
+5. **Strava integration** — the killer feature (one-way, Strava →
+   Kadence):
    - **Import history**: sync all past Strava activities into
      Kadence. Instantly populates the stats screen with years of
      data — heatmaps light up, streaks appear, insights become
@@ -689,32 +751,23 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
    - **Auto-mark done**: when a Strava activity is recorded,
      auto-mark the matching planned session as done (or create it
      if it wasn't planned).
-   - **Write to Strava**: optionally send manual activities to
-     Strava when marked done.
 
-#### Free vs premium stat widget split
-**Free stat widgets** (generous free tier to drive adoption):
-- Personal records (best streak, best week, best day)
-- Weekly activity chart (12-week bars)
-- Best day of week (7 bars)
-- Completion rate (arc ring)
-- Monthly trends (12-month bars)
-- Activity variety (types per week)
-- Longest gap (break between sessions)
-- Month vs month (current vs previous)
-- Most consistent (top 5 types by completion)
-- Year in review (annual summary)
+#### Free vs premium stat split
+**Free** (always visible, the first 3 blocks in `stats_view.dart`):
+- 3 KPI tiles (total sessions, week streak, avg/week)
+- 26-week activity heatmap
+- "By activity" type breakdown with filter
 
-**Premium stat widgets** (shine with historical/Strava data):
-- Full-year heatmap — dramatically better with Strava import
-- Insights / nudges — smarter with more history
-- Shareable recap cards — social/vanity, impressive with real data
-- Weekly patterns — power-user depth (type × weekday heatmap)
+**Premium** (everything below the "Pro Stats" divider — gated):
+- All 14 pro stat widgets (personal records, weekly activity chart,
+  best day of week, completion rate, monthly trends, activity variety,
+  longest gap, month vs month, most consistent, weekly patterns,
+  year in review, full-year heatmap, insights, shareable recap)
 
 #### Paywall screen (done)
 - ✅ `PaywallScreen` (`lib/screens/paywall/paywall_screen.dart`):
-  back arrow + "Kadence Pro" title, 3 pricing tier cards
-  (Monthly/Annual/Lifetime) with radio selection, restore purchase
+  back arrow + "Kadence Pro" title, 2 pricing tier cards
+  (Monthly/Annual) with radio selection, restore purchase
   link, 6 feature rows with colored icons, "Continue" CTA pinned
   at bottom. Annual pre-selected.
 - Purchase handlers are **stubbed** (`_handlePurchase` /
@@ -767,23 +820,131 @@ Built widgets (11 chart-based + 3 experiential):
   Accent color resolved from `TypeColorController` so the card
   matches the user's chosen theme color.
 
-All stat widgets currently appear below a "Pro Stats" divider in
-`stats_view.dart`. They are **not gated yet** — visible to all
-users. The free/premium split above is the plan; gating will be
-implemented when purchase infrastructure is wired up.
+#### Pro gating (done)
+- ✅ `ProController` (`lib/state/pro_controller.dart`): simple
+  ChangeNotifier backed by SharedPreferences (`kadence.is_pro`).
+  Exposes `isPro` getter and `setPro(bool)`. Registered as
+  `ChangeNotifierProvider` in `main.dart`. Receives `AuthController`
+  in its constructor — on downgrade (`setPro(false)`) it forces
+  sign-out so cloud sync stops immediately. Currently backed by a
+  local flag — swap to RevenueCat / `in_app_purchase` entitlements
+  later without changing call sites.
+- ✅ `KProLock` (`lib/widgets/k_pro_lock.dart`): wrapper widget
+  that overlays a `BackdropFilter` blur + centered lock badge
+  ("PRO") on its child when the user is not Pro. Tapping the
+  overlay navigates to `PaywallScreen`. When Pro, renders the
+  child directly with zero overhead.
+- ✅ **Stats gating**: the stats screen has 3 free blocks at the
+  top (KPI tiles, 26-week heatmap, type breakdown). Everything
+  below the "Pro Stats" divider is wrapped in a single `KProLock`
+  — one blur overlay covering all 14 pro stat widgets. Free users
+  see the blurred preview with a lock badge; tapping opens the
+  paywall.
+- ✅ **Settings gating**: "Theme color" and "Type colors" rows
+  show a "PRO" badge and redirect to `PaywallScreen` on tap when
+  the user is not Pro. When Pro, they work normally and the badge
+  hides.
+- ✅ **Cloud sync gating (option 3 — UI gates)**: sign-in is
+  blocked at the two UI entry points when not Pro:
+  - **Settings `_AccountCard`** (signed-out state): shows a "PRO"
+    badge next to "Sign in to sync" and tapping opens the paywall
+    instead of the sign-in sheet. When Pro, works normally (no
+    badge, opens sign-in sheet).
+  - **Onboarding `_CloudActions`** (step 3, "Cloud sync" card):
+    replaces the Google/Apple OAuth buttons with a single
+    accent-colored "PRO" button (crown icon) that opens the
+    paywall. When Pro, shows the normal OAuth buttons.
+  - The sync layer (`SyncService`, `PlanController` cloud pushes,
+    `AuthController` auth state listener) is **untouched** — if
+    the user can't sign in, sync never triggers. Zero risk of
+    breaking existing flows.
+  - **Expired subscription handling**: two guards ensure a non-Pro
+    user never syncs:
+    1. **On downgrade**: `ProController.setPro(false)` forces
+       `AuthController.signOut()`, so sync stops mid-session.
+    2. **On startup**: the `ProController` constructor checks
+       `!isPro && authController.isSignedIn` and forces sign-out
+       immediately. This catches the case where the sub expired
+       between app sessions (e.g. the user was Pro, closed the
+       app, sub lapsed, reopened).
+    On re-subscription, they sign in again and `syncOnSignIn`
+    merges everything.
+  - **Why option 3 over option 2** (allow sign-in, gate sync at
+    the service layer): option 2 was considered but rejected for
+    several reasons:
+    1. All account-tied features (cloud sync + Strava) are
+       Pro-only, so sign-in has no free use case — letting users
+       sign in but blocking sync would feel broken ("I signed in
+       but nothing happened").
+    2. Option 2 requires 4-5 scattered `isPro` guards across
+       `PlanController` (save, toggleDone, delete cloud pushes),
+       `SyncService.syncOnSignIn`, `AuthController` auth state
+       listener, and `BackupService` import — more surface area
+       for bugs and easy to miss a call site.
+    3. Option 2 also needs a "trigger full sync on upgrade"
+       flow (user upgrades mid-session → push all local data),
+       which is more complexity for no benefit right now.
+    4. Option 3 gates at exactly 2 UI entry points, the sync
+       layer stays untouched (zero risk of breaking existing
+       flows), and force-sign-out-on-expiry handles the lapsed
+       subscription edge case cleanly.
+    Option 2 would only make sense if a free feature ever
+    requires sign-in — unlikely given the current roadmap.
+- **Debug shortcut**: change the default in `ProController`'s
+  constructor to `?? true` (instead of `?? false`) to launch as
+  Pro during development.
 
 #### TODO
-- **TODO**: move free stat widgets above the "Pro Stats" divider
-  (or remove the divider and only show locks on premium ones).
-- **TODO**: add pro badges/locks on premium stat widgets and
-  premium features (custom colors, cloud sync, date filtering)
-  so free users see a preview with a lock icon + "Upgrade" tap.
 - **TODO**: wire up purchase infrastructure (RevenueCat or
-  `in_app_purchase`) to replace stubbed handlers in PaywallScreen.
-- **TODO**: build `ProController` (or similar) that checks
-  entitlements and gates premium features.
+  `in_app_purchase`) to replace stubbed handlers in PaywallScreen
+  and back `ProController` with real entitlements.
 - **TODO**: implement date filtering UI for stats (date range
   picker that scopes all graphs to a custom period).
 - **TODO**: build Strava integration — OAuth flow, history import,
-  auto-mark done, optional write-back. Requires backend for
-  secure token storage.
+  auto-mark done. One-way only (Strava → Kadence). Requires
+  backend for secure token storage.
+
+### App icon (done)
+- ✅ Dark background (#0E0E0C `bgBase`) with coral (#FF7A45) K
+  monogram — matches the in-app `_LogoMark` from
+  `welcome_step.dart`. Deliberately dark to differentiate from
+  Strava's orange icon.
+- ✅ **Legacy launcher PNGs** at all 5 densities (mdpi–xxxhdpi) in
+  `android/app/src/main/res/mipmap-*/ic_launcher.png`.
+- ✅ **Adaptive icon** (Android 8+): coral K foreground on transparent
+  (`ic_launcher_foreground.png`) + dark background color via
+  `mipmap-anydpi-v26/ic_launcher.xml` referencing
+  `@color/ic_launcher_background` (#0E0E0C) in
+  `values/ic_launcher_background.xml`.
+- ✅ **Play Store icon**: 512×512 at `assets/play_store_icon.png`.
+- Generator script: `tool/generate_icons.py` (Python + Pillow). Re-run
+  to regenerate all assets if the design changes.
+
+### Landing page (done)
+- ✅ Static one-page site in `landing/`. No build step — plain HTML +
+  shared CSS (`style.css`). Designed to match the app's dark theme
+  with coral accents and Sora font.
+- ✅ **4 languages**: English (`index.html`), Portuguese (`pt/`),
+  Spanish (`es/`), French (`fr/`). Each is a full standalone page
+  sharing `style.css` and `img/`. `hreflang` meta tags on every page
+  for SEO. Language switcher dropdown in the nav.
+- ✅ **Sections**: sticky nav, hero with store buttons + 3 phone
+  mockups, 6 feature cards (week/month, heatmap, 20+ sports, weekly
+  goals, calendar sync, Strava integration), 3 showcase rows with
+  screenshots (Plan, Review, Customize), Free vs Pro pricing cards,
+  footer with privacy policy + contact links.
+- ✅ **Pricing on landing page**: Free ($0 forever) and Kadence Pro
+  (from €9.99/year, "Coming soon" badge). No lifetime tier.
+- Screenshots live in `landing/img/` — shared across all languages.
+- **Deployment**: deploy via Vercel (Root Directory → `landing`) or
+  Netlify. Same repo as the Flutter app.
+- **TODO**: replace `screenshot-settings.png` with a fresh screenshot
+  (current one has Theme color row overflow). Update store badge
+  links once published.
+
+### Play Store listing (in progress)
+- **Store name**: `Kadence Sports: Plan & Track` (27 chars)
+- **Short description**: `Plan your sports week, track sessions, and build your training rhythm.`
+- **TODO**: full description (4000 chars), screenshots, feature
+  graphic (1024×500), privacy policy URL, content rating
+  questionnaire, data safety form, signing key + release AAB.

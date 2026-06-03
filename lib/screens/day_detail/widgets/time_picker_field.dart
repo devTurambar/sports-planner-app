@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -28,13 +29,14 @@ class TimePickerField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final hasValue = value != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Time',
+          loc.timeLabel,
           style: KText.caption.copyWith(
             fontWeight: FontWeight.w500,
             color: colors.fgSecondary,
@@ -70,7 +72,7 @@ class TimePickerField extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      hasValue ? _format12h(value!) : 'Set time',
+                      hasValue ? _format12h(value!) : loc.timePlaceholder,
                       style: KText.body.copyWith(
                         color: hasValue ? colors.fgPrimary : colors.fgTertiary,
                       ),

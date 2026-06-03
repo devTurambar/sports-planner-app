@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
@@ -17,6 +18,7 @@ class PaywallScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: colors.bgBase,
@@ -33,45 +35,45 @@ class PaywallScreen extends StatelessWidget {
           const _ComingSoonBanner(),
           const SizedBox(height: KSpace.s8),
           Text(
-            "Here's what's coming:",
+            loc.paywallFeaturesHeader,
             style: KText.bodySm.copyWith(color: colors.fgSecondary),
           ),
           const SizedBox(height: KSpace.s4),
-          const _FeatureRow(
+          _FeatureRow(
             icon: LucideIcons.flame,
             color: _FeatureColor.coral,
-            title: 'Strava integration',
-            subtitle: 'Import your history and auto-mark sessions as done',
+            title: loc.paywallStravaTitle,
+            subtitle: loc.paywallStravaBody,
           ),
-          const _FeatureRow(
+          _FeatureRow(
             icon: LucideIcons.chartColumn,
             color: _FeatureColor.blue,
-            title: 'Advanced stats',
-            subtitle: 'Full-year heatmap, insights, and shareable recaps',
+            title: loc.paywallStatsTitle,
+            subtitle: loc.paywallStatsBody,
           ),
-          const _FeatureRow(
+          _FeatureRow(
             icon: LucideIcons.calendarRange,
             color: _FeatureColor.purple,
-            title: 'Date filtering',
-            subtitle: 'Filter all stats by any custom date range',
+            title: loc.paywallDateFilterTitle,
+            subtitle: loc.paywallDateFilterBody,
           ),
-          const _FeatureRow(
+          _FeatureRow(
             icon: LucideIcons.cloudUpload,
             color: _FeatureColor.teal,
-            title: 'Cloud sync',
-            subtitle: 'Back up and access your data from any device',
+            title: loc.paywallCloudTitle,
+            subtitle: loc.paywallCloudBody,
           ),
-          const _FeatureRow(
+          _FeatureRow(
             icon: LucideIcons.palette,
             color: _FeatureColor.green,
-            title: 'Custom colors',
-            subtitle: 'Personalize activity type and theme colors',
+            title: loc.paywallCustomColorsTitle,
+            subtitle: loc.paywallCustomColorsBody,
           ),
-          const _FeatureRow(
+          _FeatureRow(
             icon: LucideIcons.star,
             color: _FeatureColor.amber,
-            title: 'Support an indie developer',
-            subtitle: 'Your purchase helps keep Kadence alive',
+            title: loc.paywallSupportTitle,
+            subtitle: loc.paywallSupportBody,
           ),
         ],
       ),
@@ -140,6 +142,7 @@ class _ComingSoonBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: KSpace.s5,
@@ -169,7 +172,7 @@ class _ComingSoonBanner extends StatelessWidget {
               borderRadius: BorderRadius.circular(KRadius.full),
             ),
             child: Text(
-              'Coming soon',
+              loc.paywallComingSoonBadge,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colors.accent,
@@ -178,7 +181,7 @@ class _ComingSoonBanner extends StatelessWidget {
           ),
           const SizedBox(height: KSpace.s3),
           Text(
-            'Premium features are\non the way',
+            loc.paywallBannerTitle,
             style: KText.h3.copyWith(
               fontWeight: FontWeight.w700,
               color: colors.fgPrimary,
@@ -188,7 +191,7 @@ class _ComingSoonBanner extends StatelessWidget {
           ),
           const SizedBox(height: KSpace.s2),
           Text(
-            "We're building something special.\nStay tuned for Kadence Pro.",
+            loc.paywallBannerBody,
             style: KText.bodySm.copyWith(
               color: colors.fgSecondary,
               height: 1.5,

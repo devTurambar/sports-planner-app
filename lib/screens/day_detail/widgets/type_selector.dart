@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
@@ -24,11 +25,12 @@ class TypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Type',
+          loc.typeLabel,
           style: KText.caption.copyWith(
             fontWeight: FontWeight.w500,
             color: colors.fgSecondary,
@@ -78,13 +80,15 @@ class _TypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final tc = context.typeColor(type);
     final bg = selected ? tc.bg : colors.bgSubtle;
     final border = selected ? tc.tint : Colors.transparent;
     final fg = selected ? tc.tint : colors.fgSecondary;
 
-    final label = subTypeLabel ??
-        (type == ActivityType.other ? 'More…' : type.label);
+    final label = subTypeLabel != null
+        ? localizedSubType(subTypeLabel!, loc)
+        : (type == ActivityType.other ? loc.typeMore : type.localized(loc));
 
     return Material(
       color: bg,

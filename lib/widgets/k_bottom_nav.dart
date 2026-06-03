@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_text_styles.dart';
 
@@ -23,6 +24,7 @@ class KBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
 
     return Container(
       decoration: BoxDecoration(
@@ -35,7 +37,7 @@ class KBottomNav extends StatelessWidget {
           children: <Widget>[
             _NavItem(
               tab: HomeTab.week,
-              label: 'Week',
+              label: loc.navWeek,
               icon: LucideIcons.calendarDays,
               current: current,
               onSelect: onSelect,
@@ -43,7 +45,7 @@ class KBottomNav extends StatelessWidget {
             ),
             _NavItem(
               tab: HomeTab.month,
-              label: 'Month',
+              label: loc.navMonth,
               icon: LucideIcons.layoutGrid,
               current: current,
               onSelect: onSelect,
@@ -51,7 +53,7 @@ class KBottomNav extends StatelessWidget {
             ),
             _NavItem(
               tab: HomeTab.stats,
-              label: 'Stats',
+              label: loc.navStats,
               icon: LucideIcons.chartColumn,
               current: current,
               onSelect: onSelect,
@@ -59,7 +61,7 @@ class KBottomNav extends StatelessWidget {
             ),
             _NavItem(
               tab: HomeTab.settings,
-              label: 'Settings',
+              label: loc.navSettings,
               icon: LucideIcons.settings,
               current: current,
               onSelect: onSelect,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -20,12 +22,15 @@ class FullYearHeatmap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final cells = _compute();
     final year = DateTime.now().year;
 
     return ProStatCard(
-      title: '$year heatmap',
-      subtitle: '${cells.where((c) => c.hasActivity).length} active days',
+      title: loc.statsYearHeatmapTitle(year),
+      subtitle: loc.statsActiveDaysCount(
+        cells.where((c) => c.hasActivity).length,
+      ),
       child: Column(
         children: [
           SizedBox(
@@ -195,10 +200,12 @@ class _MonthLabelsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    const labels = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final fmt = DateFormat.MMM(localeName);
+    final labels = List<String>.generate(
+      12,
+      (i) => fmt.format(DateTime(2024, i + 1)),
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: labels

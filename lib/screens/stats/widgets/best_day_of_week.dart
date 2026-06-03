@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_text_styles.dart';
-import '../../../utils/date_utils.dart';
 import '../stats_data.dart';
 import 'pro_stat_card.dart';
 
@@ -19,13 +20,21 @@ class BestDayOfWeek extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final narrowFmt = DateFormat('EEEEE', localeName);
+    final monday = DateTime(2024, 1, 1);
     final counts = _compute();
     final max = counts.fold<int>(0, (m, v) => v > m ? v : m);
-    final labels = KDate.orderedMinWeekdays(startDay);
+    final labels = List<String>.generate(7, (i) {
+      final weekday = (startDay - 1 + i) % 7 + 1;
+      final offset = (weekday - DateTime.monday + 7) % 7;
+      return narrowFmt.format(monday.add(Duration(days: offset))).toUpperCase();
+    });
 
     return ProStatCard(
-      title: 'Best day of week',
-      subtitle: 'Done sessions',
+      title: loc.statsBestDayOfWeekTitle,
+      subtitle: loc.statsDoneSessions,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(7, (i) {

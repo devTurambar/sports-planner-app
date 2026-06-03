@@ -1,3 +1,4 @@
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../utils/date_utils.dart';
@@ -57,6 +58,16 @@ class TypeBucket {
   String get label {
     if (type == ActivityType.other && subType != null) return subType!;
     return type?.label ?? 'Other';
+  }
+
+  /// Locale-aware version of [label]. Sub-type Strava-style names are
+  /// localized via [localizedSubType] so e.g. "Crossfit" stays
+  /// "Crossfit" while "Soccer" becomes "Futebol".
+  String localizedLabel(AppLocalizations loc) {
+    if (type == ActivityType.other && subType != null) {
+      return localizedSubType(subType!, loc);
+    }
+    return type?.localized(loc) ?? loc.typeOther;
   }
 }
 
@@ -138,11 +149,13 @@ class StatsData {
       }
     }
 
-    final weeksWithData = weekStarts.where((ws) {
-      return done.any((a) => inWeek(a, ws));
-    }).length;
-    final avgPerWeek =
-        weeksWithData == 0 ? 0.0 : done.length / weeksWithData;
+    double avgPerWeek = 0.0;
+    if (done.isNotEmpty) {
+      final firstDate = done.map((a) => a.date).reduce((a, b) => a.isBefore(b) ? a : b);
+      final firstWeekStart = KDate.startOfWeek(firstDate, startDay);
+      final totalWeeks = thisWeekStart.difference(firstWeekStart).inDays ~/ 7 + 1;
+      avgPerWeek = done.length / totalWeeks;
+    }
 
     return StatsData(
       totalSessions: done.length,

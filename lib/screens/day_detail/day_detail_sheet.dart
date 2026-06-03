@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../state/plan_controller.dart';
 import '../../state/tip_controller.dart';
 import '../../theme/kadence_colors.dart';
 import '../../theme/kadence_spacing.dart';
 import '../../theme/kadence_text_styles.dart';
-import '../../utils/date_utils.dart';
 import '../../widgets/k_button.dart';
 import '../../widgets/k_input.dart';
 import 'widgets/close_button.dart';
@@ -79,12 +80,12 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
     return (n != null && n > 0) ? n : null;
   }
 
-  static String _formatDuration(int minutes) {
-    if (minutes < 60) return '$minutes min';
+  static String _formatDuration(AppLocalizations loc, int minutes) {
+    if (minutes < 60) return loc.durationMinutesWheel(minutes);
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    if (m == 0) return '$h h';
-    return '$h h $m min';
+    if (m == 0) return loc.durationHoursWheel(h);
+    return '${loc.durationHoursWheel(h)} ${loc.durationMinutesWheel(m)}';
   }
 
   static String _formatDurationForStorage(int minutes) => '$minutes min';
@@ -109,6 +110,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
 
   void _confirmDelete() {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -117,7 +119,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
           borderRadius: BorderRadius.circular(KRadius.md),
         ),
         title: Text(
-          'Delete session?',
+          loc.deleteSessionTitle,
           style: KText.h3.copyWith(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -125,14 +127,14 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
           ),
         ),
         content: Text(
-          'This can\'t be undone.',
+          loc.deleteSessionBody,
           style: KText.bodySm.copyWith(color: colors.fgSecondary),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Cancel',
+              loc.actionCancel,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w500,
                 color: colors.fgSecondary,
@@ -142,7 +144,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Delete',
+              loc.actionDelete,
               style: KText.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFFB5443A),
@@ -223,9 +225,12 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final title = _isEditable ? 'Edit session' : 'Add session';
-    final subtitle =
-        '${widget.date.shortWeekday} · ${widget.date.shortMonth} ${widget.date.day}';
+    final loc = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
+    final title = _isEditable ? loc.sheetEditTitle : loc.sheetAddTitle;
+    final weekday = DateFormat.E(localeName).format(widget.date);
+    final dayMonth = DateFormat.MMMd(localeName).format(widget.date);
+    final subtitle = '$weekday · $dayMonth';
 
     final viewInsets = MediaQuery.viewInsetsOf(context);
     final bottomSafe = MediaQuery.paddingOf(context).bottom;
@@ -304,9 +309,9 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     KInputField(
-                      label: 'Activity name',
+                      label: loc.activityNameLabel,
                       controller: _name,
-                      placeholder: 'e.g. Morning run',
+                      placeholder: loc.activityNamePlaceholder,
                     ),
                     const SizedBox(height: KSpace.s3 + 2),
                     TypeSelector(
@@ -340,7 +345,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                         Expanded(
                           child: DurationPickerField(
                             value: _durationMinutes,
-                            formatDuration: _formatDuration,
+                            formatDuration: (m) => _formatDuration(loc, m),
                             onTap: _pickDuration,
                             onClear: _durationMinutes != null
                                 ? () =>
@@ -352,9 +357,9 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                     ),
                     const SizedBox(height: KSpace.s3 + 2),
                     KInputField(
-                      label: 'Notes',
+                      label: loc.notesLabel,
                       controller: _notes,
-                      placeholder: 'Any extra details…',
+                      placeholder: loc.notesPlaceholder,
                       optional: true,
                       maxLines: 4,
                       minLines: 3,
@@ -375,7 +380,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                     ],
                     const SizedBox(height: KSpace.s4),
                     KButton(
-                      label: 'Save session',
+                      label: loc.actionSaveSession,
                       onPressed: _hasName ? _save : null,
                     ),
                     if (_isEditable) ...<Widget>[
@@ -387,7 +392,7 @@ class _DayDetailSheetState extends State<DayDetailSheet> {
                             foregroundColor: const Color(0xFFB5443A),
                           ),
                           child: Text(
-                            'Delete session',
+                            loc.actionDeleteSession,
                             style: KText.bodySm.copyWith(
                               fontWeight: FontWeight.w500,
                               color: const Color(0xFFB5443A),

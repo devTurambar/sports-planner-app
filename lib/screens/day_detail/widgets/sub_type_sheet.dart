@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../models/activity.dart';
 import '../../../theme/kadence_colors.dart';
 import '../../../theme/kadence_spacing.dart';
 import '../../../theme/kadence_text_styles.dart';
@@ -75,7 +77,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
   @override
   void initState() {
     super.initState();
-    _search.addListener(_onSearch);
+    _search.addListener(_refilter);
   }
 
   @override
@@ -84,22 +86,25 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
     super.dispose();
   }
 
-  void _onSearch() {
-    final query = _search.text.toLowerCase().trim();
-    setState(() {
-      if (query.isEmpty) {
-        _filtered = subTypes;
-      } else {
-        _filtered =
-            subTypes.where((s) => s.toLowerCase().contains(query)).toList();
-      }
-    });
-  }
+  void _refilter() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final bottomSafe = MediaQuery.paddingOf(context).bottom;
+
+    // Filter on every build so locale changes refresh the search-match set.
+    final query = _search.text.toLowerCase().trim();
+    if (query.isEmpty) {
+      _filtered = subTypes;
+    } else {
+      _filtered = subTypes.where((s) {
+        final english = s.toLowerCase();
+        final localized = localizedSubType(s, loc).toLowerCase();
+        return english.contains(query) || localized.contains(query);
+      }).toList();
+    }
 
     return Container(
       constraints: BoxConstraints(
@@ -126,7 +131,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
             child: Text(
-              'Choose activity type',
+              loc.subTypeTitle,
               style: KText.h3.copyWith(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -140,7 +145,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
               controller: _search,
               style: KText.body.copyWith(color: colors.fgPrimary),
               decoration: InputDecoration(
-                hintText: 'Search…',
+                hintText: loc.subTypeSearchPlaceholder,
                 hintStyle: KText.body.copyWith(color: colors.fgTertiary),
                 prefixIcon: Icon(
                   LucideIcons.search,
@@ -167,7 +172,7 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
                 ? Padding(
                     padding: const EdgeInsets.all(32),
                     child: Text(
-                      'No results',
+                      loc.subTypeNoResults,
                       style: KText.body.copyWith(color: colors.fgTertiary),
                     ),
                   )
@@ -175,14 +180,16 @@ class _SubTypeSheetState extends State<_SubTypeSheet> {
                     padding: EdgeInsets.only(bottom: bottomSafe + KSpace.s2),
                     itemCount: _filtered.length,
                     itemBuilder: (context, index) {
-                      final name = _filtered[index];
+                      final englishKey = _filtered[index];
                       return ListTile(
                         dense: true,
                         title: Text(
-                          name,
+                          localizedSubType(englishKey, loc),
                           style: KText.body.copyWith(color: colors.fgPrimary),
                         ),
-                        onTap: () => Navigator.of(context).pop(name),
+                        // Always return the English key so storage stays
+                        // stable across language switches.
+                        onTap: () => Navigator.of(context).pop(englishKey),
                       );
                     },
                   ),

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../theme/kadence_colors.dart';
 import '../theme/kadence_spacing.dart';
 import '../theme/kadence_text_styles.dart';
@@ -20,9 +21,9 @@ class KOAuthButton extends StatelessWidget {
   final OAuthProvider provider;
   final VoidCallback onTap;
 
-  String get _label => switch (provider) {
-        OAuthProvider.google => 'Continue with Google',
-        OAuthProvider.apple => 'Continue with Apple',
+  String _label(AppLocalizations loc) => switch (provider) {
+        OAuthProvider.google => loc.oauthContinueGoogle,
+        OAuthProvider.apple => loc.oauthContinueApple,
       };
 
   String _assetPath(bool isDark) => switch (provider) {
@@ -34,6 +35,7 @@ class KOAuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
@@ -61,7 +63,7 @@ class KOAuthButton extends StatelessWidget {
               ),
               const SizedBox(width: KSpace.s3),
               Text(
-                _label,
+                _label(loc),
                 style: KText.button.copyWith(color: colors.fgPrimary),
               ),
             ],
