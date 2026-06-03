@@ -447,7 +447,6 @@ without discussion.
 
 ## Not done yet
 
-- No app icons / launcher assets.
 - No integration tests; only one smoke test in `test/widget_test.dart`.
 
 ## Roadmap
@@ -701,15 +700,12 @@ without discussion.
   always consistent with the imported state.
 
 ### Strava integration (after auth)
-- **Read from Strava**: poll for completed Strava activities via
-  `GET /api/v3/athlete/activities`. Match by date + activity type
-  against planned sessions and auto-mark them as done.
-- **Write to Strava**: when a manual activity is marked done, offer
-  an optional "Send to Strava" action. Creates a manual entry via
-  `POST /api/v3/activities` (name, type, start time, duration).
-- Both directions require Strava OAuth2 (`activity:read_all` +
-  `activity:write` scopes). User authorizes once; refresh token
-  stored locally.
+- **Read from Strava** (one-way, Strava → Kadence): poll for
+  completed Strava activities via `GET /api/v3/athlete/activities`.
+  Match by date + activity type against planned sessions and
+  auto-mark them as done. Import full history to populate stats.
+- Strava OAuth2 (`activity:read_all` scope). User authorizes once;
+  refresh token stored locally.
 - Garmin Connect has no public API for individual devs — most Garmin
   users sync to Strava anyway, so Strava covers the majority of
   devices (Garmin, Apple Watch, Polar, Wahoo, etc.).
@@ -719,13 +715,13 @@ without discussion.
 Freemium model. Core app is fully usable for free; premium features
 are gated behind a one-time or subscription purchase ("Kadence Pro").
 
-#### Pricing tiers
-- **Android**: Monthly €0.99, Annual €4.99, Lifetime €12.99
-- **iOS**: Monthly €1.49, Annual €7.99, Lifetime €19.99
+#### Pricing tiers (no lifetime — recurring server costs make lifetime unsustainable)
+- **Android**: Monthly €1.99, Annual €9.99
+- **iOS**: Monthly €2.99, Annual €14.99
 - iOS prices are higher because Apple users tend to spend more on
   apps, and Apple's 30% cut is steeper (15% via Small Business
   Program). Google also takes 30% (15% automatic on first $1M/yr).
-- Prices can be increased in the future via App Store Connect /
+- Prices can be adjusted in the future via App Store Connect /
   Google Play Console — existing subscribers keep their locked-in
   price, new subscribers see the new price.
 
@@ -745,7 +741,8 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
    below).
 3. **Cloud sync** — Supabase-backed. Peace of mind, cross-device.
 4. **Custom colors** — custom type colors + theme color picker.
-5. **Strava integration** — the killer feature. Two directions:
+5. **Strava integration** — the killer feature (one-way, Strava →
+   Kadence):
    - **Import history**: sync all past Strava activities into
      Kadence. Instantly populates the stats screen with years of
      data — heatmaps light up, streaks appear, insights become
@@ -754,8 +751,6 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
    - **Auto-mark done**: when a Strava activity is recorded,
      auto-mark the matching planned session as done (or create it
      if it wasn't planned).
-   - **Write to Strava**: optionally send manual activities to
-     Strava when marked done.
 
 #### Free vs premium stat split
 **Free** (always visible, the first 3 blocks in `stats_view.dart`):
@@ -771,8 +766,8 @@ are gated behind a one-time or subscription purchase ("Kadence Pro").
 
 #### Paywall screen (done)
 - ✅ `PaywallScreen` (`lib/screens/paywall/paywall_screen.dart`):
-  back arrow + "Kadence Pro" title, 3 pricing tier cards
-  (Monthly/Annual/Lifetime) with radio selection, restore purchase
+  back arrow + "Kadence Pro" title, 2 pricing tier cards
+  (Monthly/Annual) with radio selection, restore purchase
   link, 6 feature rows with colored icons, "Continue" CTA pinned
   at bottom. Annual pre-selected.
 - Purchase handlers are **stubbed** (`_handlePurchase` /
@@ -906,5 +901,50 @@ Built widgets (11 chart-based + 3 experiential):
 - **TODO**: implement date filtering UI for stats (date range
   picker that scopes all graphs to a custom period).
 - **TODO**: build Strava integration — OAuth flow, history import,
-  auto-mark done, optional write-back. Requires backend for
-  secure token storage.
+  auto-mark done. One-way only (Strava → Kadence). Requires
+  backend for secure token storage.
+
+### App icon (done)
+- ✅ Dark background (#0E0E0C `bgBase`) with coral (#FF7A45) K
+  monogram — matches the in-app `_LogoMark` from
+  `welcome_step.dart`. Deliberately dark to differentiate from
+  Strava's orange icon.
+- ✅ **Legacy launcher PNGs** at all 5 densities (mdpi–xxxhdpi) in
+  `android/app/src/main/res/mipmap-*/ic_launcher.png`.
+- ✅ **Adaptive icon** (Android 8+): coral K foreground on transparent
+  (`ic_launcher_foreground.png`) + dark background color via
+  `mipmap-anydpi-v26/ic_launcher.xml` referencing
+  `@color/ic_launcher_background` (#0E0E0C) in
+  `values/ic_launcher_background.xml`.
+- ✅ **Play Store icon**: 512×512 at `assets/play_store_icon.png`.
+- Generator script: `tool/generate_icons.py` (Python + Pillow). Re-run
+  to regenerate all assets if the design changes.
+
+### Landing page (done)
+- ✅ Static one-page site in `landing/`. No build step — plain HTML +
+  shared CSS (`style.css`). Designed to match the app's dark theme
+  with coral accents and Sora font.
+- ✅ **4 languages**: English (`index.html`), Portuguese (`pt/`),
+  Spanish (`es/`), French (`fr/`). Each is a full standalone page
+  sharing `style.css` and `img/`. `hreflang` meta tags on every page
+  for SEO. Language switcher dropdown in the nav.
+- ✅ **Sections**: sticky nav, hero with store buttons + 3 phone
+  mockups, 6 feature cards (week/month, heatmap, 20+ sports, weekly
+  goals, calendar sync, Strava integration), 3 showcase rows with
+  screenshots (Plan, Review, Customize), Free vs Pro pricing cards,
+  footer with privacy policy + contact links.
+- ✅ **Pricing on landing page**: Free ($0 forever) and Kadence Pro
+  (from €9.99/year, "Coming soon" badge). No lifetime tier.
+- Screenshots live in `landing/img/` — shared across all languages.
+- **Deployment**: deploy via Vercel (Root Directory → `landing`) or
+  Netlify. Same repo as the Flutter app.
+- **TODO**: replace `screenshot-settings.png` with a fresh screenshot
+  (current one has Theme color row overflow). Update store badge
+  links once published.
+
+### Play Store listing (in progress)
+- **Store name**: `Kadence Sports: Plan & Track` (27 chars)
+- **Short description**: `Plan your sports week, track sessions, and build your training rhythm.`
+- **TODO**: full description (4000 chars), screenshots, feature
+  graphic (1024×500), privacy policy URL, content rating
+  questionnaire, data safety form, signing key + release AAB.
