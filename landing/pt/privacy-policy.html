@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kadence - Política de Privacidade</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      color: #1a1a1a;
+      line-height: 1.7;
+      background: #fafafa;
+    }
+    h1 { font-size: 28px; margin-bottom: 4px; }
+    h2 { font-size: 20px; margin-top: 32px; }
+    p, li { font-size: 15px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 32px; }
+    ul { padding-left: 20px; }
+    a { color: #E85F2C; }
+  </style>
+</head>
+<body>
+  <h1>Política de Privacidade</h1>
+  <p class="subtitle">Kadence &mdash; Última atualização: junho de 2026</p>
+
+  <h2>O que o Kadence faz</h2>
+  <p>O Kadence é uma aplicação móvel para planear e acompanhar atividades desportivas semanais. Guarda as suas sessões de treino localmente no dispositivo e, opcionalmente, sincroniza-as na nuvem quando inicia sessão.</p>
+
+  <h2>Dados que recolhemos</h2>
+  <p>O Kadence recolhe apenas os dados mínimos necessários para funcionar:</p>
+  <ul>
+    <li><strong>Informação da conta</strong> &mdash; Se optar por iniciar sessão com Google ou Apple, recebemos o seu nome, endereço de e-mail e foto de perfil do fornecedor. Estes dados são usados para identificar a sua conta e mostrar o seu nome na aplicação.</li>
+    <li><strong>Dados de atividade</strong> &mdash; As sessões de treino que cria (nome, tipo, data, hora, duração, notas e estado de conclusão). Estes dados são guardados localmente no seu dispositivo e, se tiver sessão iniciada, sincronizados com a nossa base de dados na nuvem para que possa aceder a partir de vários dispositivos.</li>
+    <li><strong>Dados de calendário</strong> &mdash; Se ativar a sincronização com o calendário, o Kadence cria, atualiza e elimina eventos de calendário correspondentes às suas sessões planeadas. O Kadence não lê nem acede a quaisquer outros eventos do calendário.</li>
+    <li><strong>Dados do Strava</strong> &mdash; Se ligar a sua conta Strava, o Kadence lê o seu histórico de atividades para associar treinos concluídos às sessões planeadas. Apenas acedemos aos dados de atividade necessários para esta funcionalidade e não guardamos as suas credenciais do Strava &mdash; a autenticação é feita através do fluxo OAuth2 do Strava.</li>
+  </ul>
+
+  <h2>Dados que não recolhemos</h2>
+  <ul>
+    <li>Não recolhemos dados analíticos ou de utilização.</li>
+    <li>Não usamos píxeis de rastreamento, identificadores de publicidade ou cookies.</li>
+    <li>Não recolhemos dados de localização.</li>
+    <li>Não vendemos, alugamos nem partilhamos os seus dados pessoais com terceiros.</li>
+  </ul>
+
+  <h2>Onde os seus dados são guardados</h2>
+  <p>Os dados de atividade são guardados localmente no seu dispositivo usando SQLite. Se iniciar sessão, os seus dados são também guardados numa base de dados na nuvem alojada pelo <a href="https://supabase.com">Supabase</a> (servidores na UE/EUA). Os dados em trânsito são encriptados via HTTPS. O acesso aos seus dados na nuvem é protegido por Row Level Security &mdash; apenas você pode ler ou modificar as suas próprias atividades.</p>
+
+  <h2>Autenticação</h2>
+  <p>O início de sessão é gerido pelo Supabase Auth usando Google e Apple como fornecedores de identidade. O Kadence nunca vê nem guarda a sua palavra-passe. Os tokens de autenticação são guardados de forma segura no seu dispositivo.</p>
+
+  <h2>Retenção e eliminação de dados</h2>
+  <p>Os seus dados são mantidos enquanto utilizar a aplicação. Pode eliminar atividades individuais a qualquer momento dentro da aplicação. Se terminar sessão, os seus dados na nuvem permanecem guardados para que possa aceder novamente mais tarde. Para eliminar permanentemente todos os seus dados e a sua conta, contacte-nos através do e-mail abaixo.</p>
+
+  <h2>Privacidade de crianças</h2>
+  <p>O Kadence não se destina a crianças com menos de 13 anos. Não recolhemos intencionalmente informação pessoal de crianças.</p>
+
+  <h2>Alterações a esta política</h2>
+  <p>Podemos atualizar esta política periodicamente. A versão mais recente estará sempre disponível neste URL. Alterações significativas serão comunicadas através da aplicação.</p>
+
+  <h2>Contacto</h2>
+  <p>Se tiver questões sobre esta política de privacidade ou quiser solicitar a eliminação de dados, contacte-nos em <a href="mailto:raphael.rvtomaz@gmail.com">raphael.rvtomaz@gmail.com</a>.</p>
+</body>
+</html>

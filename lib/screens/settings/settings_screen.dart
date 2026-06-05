@@ -2,6 +2,7 @@ import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -402,7 +403,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               iconBg: const Color(0xFF34C759),
               label: loc.settingsPrivacyPolicy,
               value: '',
-              onTap: () {},
+              onTap: () {
+                final lang = Localizations.localeOf(context).languageCode;
+                const base = 'https://sports-planner-app.vercel.app';
+                final path = switch (lang) {
+                  'pt' => '/pt/privacy-policy.html',
+                  'es' => '/es/privacy-policy.html',
+                  'fr' => '/fr/privacy-policy.html',
+                  _ => '/privacy-policy.html',
+                };
+                launchUrl(Uri.parse('$base$path'),
+                    mode: LaunchMode.externalApplication);
+              },
             ),
             _StaticRow(
               icon: LucideIcons.star,
