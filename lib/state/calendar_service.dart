@@ -19,7 +19,7 @@ class CalendarService {
   static final _plugin = DeviceCalendarPlugin();
   static SharedPreferences? _prefs;
 
-  static const _channel = MethodChannel('com.example.kadence/calendar_color');
+  static const _channel = MethodChannel('com.kadencesports.app/calendar_color');
 
   static bool get _isSupported => !kIsWeb;
   static bool get _isAndroid =>

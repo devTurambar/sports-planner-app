@@ -1,6 +1,10 @@
 # Environment
 .env
 
+# Signing
+android/key.properties
+*.jks
+
 # Miscellaneous
 *.class
 *.log

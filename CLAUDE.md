@@ -957,7 +957,21 @@ Built widgets (11 chart-based + 3 experiential):
 
 ### Play Store listing (in progress)
 - **Store name**: `Kadence Sports: Plan & Track` (27 chars)
+- **Application ID**: `com.kadencesports.app`
 - **Short description**: `Plan your sports week, track sessions, and build your training rhythm.`
-- **TODO**: full description (4000 chars), screenshots, feature
-  graphic (1024×500), privacy policy URL, content rating
-  questionnaire, data safety form, signing key + release AAB.
+- ✅ **Full description**: 2774 chars, keyword-optimized for ASO.
+  Covers: sports, workout, fitness, exercise, training plan, routine,
+  habits, schedule, rest days, health, planner, tracker, running,
+  cycling, swimming, gym, yoga, HIIT, heatmap, streak, calendar sync,
+  Strava.
+- ✅ **Signing key**: upload keystore at `~/upload-keystore.jks`,
+  referenced via `android/key.properties` (gitignored). Wired into
+  `android/app/build.gradle.kts` with release signing config.
+- ✅ **Release AAB**: `flutter build appbundle --dart-define-from-file=.env`
+  produces `build/app/outputs/bundle/release/app-release.aab`.
+- ✅ **Privacy policy URL**: `https://sports-planner-app.vercel.app/privacy-policy.html`
+- ✅ **Feature graphic**: 1024×500 at `assets/feature_graphic.png`.
+  Generator script: `tool/generate_feature_graphic.py`.
+- ✅ **Screenshots**: captured.
+- **TODO**: content rating questionnaire, data safety form.
+- **TODO**: update store badge links on landing page once published.
