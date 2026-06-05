@@ -11,7 +11,7 @@ import 'auth_controller.dart';
 class ProController extends ChangeNotifier {
   ProController(this._prefs, {required AuthController authController})
       : _authController = authController {
-    _isPro = _prefs.getBool(_key) ?? true;
+    _isPro = _prefs.getBool(_key) ?? false;
     // If not Pro but still signed in (e.g. sub expired between
     // sessions), force sign-out on startup so sync doesn't run.
     if (!_isPro && _authController.isSignedIn) {
