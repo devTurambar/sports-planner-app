@@ -26,7 +26,7 @@
   "calendarsChooseTitle": "Choisir les calendriers",
 
   "settingsTypeColors": "Couleurs par type",
-  "settingsTypeColorsValue": "Personnaliser",
+  "settingsTypeColorsValue": "Modifier",
   "typeColorsResetAll": "Tout réinitialiser",
 
   "settingsExportData": "Exporter les données",
@@ -228,7 +228,7 @@
   "paywallSupportTitle": "Soutiens un développeur indépendant",
   "paywallSupportBody": "Ton achat aide à maintenir Kadence en vie",
 
-  "statsKpiSessions": "Séances",
+  "statsKpiSessions": "Terminées",
   "statsKpiStreak": "Série",
   "statsKpiAverage": "Moyenne",
   "statsWeekSuffix": "sem",

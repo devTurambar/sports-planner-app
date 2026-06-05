@@ -1234,7 +1234,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsKpiSessions.
   ///
   /// In en, this message translates to:
-  /// **'Sessions'**
+  /// **'Done'**
   String get statsKpiSessions;
 
   /// No description provided for @statsKpiStreak.

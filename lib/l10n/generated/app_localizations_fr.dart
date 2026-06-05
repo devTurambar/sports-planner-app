@@ -77,7 +77,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsTypeColors => 'Couleurs par type';
 
   @override
-  String get settingsTypeColorsValue => 'Personnaliser';
+  String get settingsTypeColorsValue => 'Modifier';
 
   @override
   String get typeColorsResetAll => 'Tout réinitialiser';
@@ -642,7 +642,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallSupportBody => 'Ton achat aide à maintenir Kadence en vie';
 
   @override
-  String get statsKpiSessions => 'Séances';
+  String get statsKpiSessions => 'Terminées';
 
   @override
   String get statsKpiStreak => 'Série';
