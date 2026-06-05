@@ -77,7 +77,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsTypeColors => 'Couleurs par type';
 
   @override
-  String get settingsTypeColorsValue => 'Personnaliser';
+  String get settingsTypeColorsValue => 'Modifier';
 
   @override
   String get typeColorsResetAll => 'Tout réinitialiser';

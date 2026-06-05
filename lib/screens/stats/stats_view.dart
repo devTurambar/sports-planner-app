@@ -598,7 +598,7 @@ class _TypeRow extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 64,
+                width: 80,
                 child: Text(
                   bucket.localizedLabel(AppLocalizations.of(context)!),
                   maxLines: 1,
@@ -609,6 +609,7 @@ class _TypeRow extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: KSpace.s1),
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(KRadius.full),
