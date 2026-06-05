@@ -942,8 +942,17 @@ Built widgets (11 chart-based + 3 experiential):
   `{screen}_{lang}.jpeg` (settings). Hero mockups show month (left),
   week (center), stats (right). Showcase rows show week, stats,
   settings.
-- **Deployment**: deploy via Vercel (Root Directory → `landing`) or
-  Netlify. Same repo as the Flutter app.
+- ✅ **Privacy policy**: `privacy-policy.html` in root of `landing/`
+  (English), plus localized versions in `pt/`, `es/`, `fr/`. Each
+  landing page's footer links to its own language's policy. Styled
+  to match the app (light, clean, coral accent links).
+- ✅ **In-app privacy policy link**: Settings "Privacy Policy" row
+  opens the localized page in the browser via `url_launcher`. URL
+  is resolved by locale (`en` → root, `pt`/`es`/`fr` → subfolder).
+  Base URL: `https://sports-planner-app.vercel.app`.
+- **Deployment**: Vercel (Root Directory → `landing`). Live at
+  `https://sports-planner-app.vercel.app`. Same repo as the Flutter
+  app.
 - **TODO**: update store badge links once published.
 
 ### Play Store listing (in progress)
