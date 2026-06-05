@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kadence - Politique de confidentialité</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      color: #1a1a1a;
+      line-height: 1.7;
+      background: #fafafa;
+    }
+    h1 { font-size: 28px; margin-bottom: 4px; }
+    h2 { font-size: 20px; margin-top: 32px; }
+    p, li { font-size: 15px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 32px; }
+    ul { padding-left: 20px; }
+    a { color: #E85F2C; }
+  </style>
+</head>
+<body>
+  <h1>Politique de confidentialité</h1>
+  <p class="subtitle">Kadence &mdash; Dernière mise à jour : juin 2026</p>
+
+  <h2>Ce que fait Kadence</h2>
+  <p>Kadence est une application mobile pour planifier et suivre vos activités sportives hebdomadaires. Elle stocke vos séances d'entraînement localement sur votre appareil et les synchronise éventuellement dans le cloud lorsque vous vous connectez.</p>
+
+  <h2>Données que nous collectons</h2>
+  <p>Kadence collecte le minimum de données nécessaire à son fonctionnement :</p>
+  <ul>
+    <li><strong>Informations du compte</strong> &mdash; Si vous choisissez de vous connecter avec Google ou Apple, nous recevons votre nom, votre adresse e-mail et votre photo de profil du fournisseur. Ces informations servent à identifier votre compte et à afficher votre nom dans l'application.</li>
+    <li><strong>Données d'activité</strong> &mdash; Les séances d'entraînement que vous créez (nom, type, date, heure, durée, notes et statut). Ces données sont stockées localement sur votre appareil et, si vous êtes connecté, synchronisées avec notre base de données cloud pour que vous puissiez y accéder depuis plusieurs appareils.</li>
+    <li><strong>Données de calendrier</strong> &mdash; Si vous activez la synchronisation du calendrier, Kadence crée, met à jour et supprime les événements de calendrier correspondant à vos séances planifiées. Kadence ne lit ni n'accède à aucun autre événement de votre calendrier.</li>
+    <li><strong>Données Strava</strong> &mdash; Si vous connectez votre compte Strava, Kadence lit votre historique d'activités pour associer les entraînements terminés à vos séances planifiées. Nous n'accédons qu'aux données d'activité nécessaires à cette fonctionnalité et ne stockons pas vos identifiants Strava &mdash; l'authentification passe par le flux OAuth2 de Strava.</li>
+  </ul>
+
+  <h2>Données que nous ne collectons pas</h2>
+  <ul>
+    <li>Nous ne collectons pas de données analytiques ou d'utilisation.</li>
+    <li>Nous n'utilisons pas de pixels de suivi, d'identifiants publicitaires ou de cookies.</li>
+    <li>Nous ne collectons pas de données de localisation.</li>
+    <li>Nous ne vendons, ne louons ni ne partageons vos données personnelles avec des tiers.</li>
+  </ul>
+
+  <h2>Où vos données sont stockées</h2>
+  <p>Les données d'activité sont stockées localement sur votre appareil via SQLite. Si vous vous connectez, vos données sont également stockées dans une base de données cloud hébergée par <a href="https://supabase.com">Supabase</a> (serveurs situés dans l'UE/aux États-Unis). Les données en transit sont chiffrées via HTTPS. L'accès à vos données cloud est protégé par Row Level Security &mdash; vous seul pouvez lire ou modifier vos propres activités.</p>
+
+  <h2>Authentification</h2>
+  <p>La connexion est gérée par Supabase Auth via Google et Apple comme fournisseurs d'identité. Kadence ne voit ni ne stocke jamais votre mot de passe. Les jetons d'authentification sont stockés de manière sécurisée sur votre appareil.</p>
+
+  <h2>Conservation et suppression des données</h2>
+  <p>Vos données sont conservées tant que vous utilisez l'application. Vous pouvez supprimer des activités individuelles à tout moment depuis l'application. Si vous vous déconnectez, vos données cloud restent stockées pour que vous puissiez y accéder ultérieurement. Pour supprimer définitivement toutes vos données et votre compte, contactez-nous à l'adresse ci-dessous.</p>
+
+  <h2>Vie privée des enfants</h2>
+  <p>Kadence ne s'adresse pas aux enfants de moins de 13 ans. Nous ne collectons pas sciemment d'informations personnelles auprès d'enfants.</p>
+
+  <h2>Modifications de cette politique</h2>
+  <p>Nous pouvons mettre à jour cette politique de temps en temps. La version la plus récente sera toujours disponible à cette URL. Les modifications importantes seront communiquées via l'application.</p>
+
+  <h2>Contact</h2>
+  <p>Si vous avez des questions sur cette politique de confidentialité ou souhaitez demander la suppression de vos données, contactez-nous à <a href="mailto:raphael.rvtomaz@gmail.com">raphael.rvtomaz@gmail.com</a>.</p>
+</body>
+</html>
