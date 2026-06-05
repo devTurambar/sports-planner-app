@@ -935,12 +935,16 @@ Built widgets (11 chart-based + 3 experiential):
   footer with privacy policy + contact links.
 - ✅ **Pricing on landing page**: Free ($0 forever) and Kadence Pro
   (from €9.99/year, "Coming soon" badge). No lifetime tier.
-- Screenshots live in `landing/img/` — shared across all languages.
+- ✅ **Localized screenshots**: each language page uses its own
+  screenshots (e.g. `weekly_view_pt.jpg`, `stats_view_fr.jpg`).
+  4 screens × 4 languages = 16 images in `landing/img/`. Naming:
+  `{screen}_{lang}.jpg` (weekly, monthly, stats) or
+  `{screen}_{lang}.jpeg` (settings). Hero mockups show month (left),
+  week (center), stats (right). Showcase rows show week, stats,
+  settings.
 - **Deployment**: deploy via Vercel (Root Directory → `landing`) or
   Netlify. Same repo as the Flutter app.
-- **TODO**: replace `screenshot-settings.png` with a fresh screenshot
-  (current one has Theme color row overflow). Update store badge
-  links once published.
+- **TODO**: update store badge links once published.
 
 ### Play Store listing (in progress)
 - **Store name**: `Kadence Sports: Plan & Track` (27 chars)
