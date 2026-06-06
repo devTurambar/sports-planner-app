@@ -928,20 +928,25 @@ Built widgets (11 chart-based + 3 experiential):
   Spanish (`es/`), French (`fr/`). Each is a full standalone page
   sharing `style.css` and `img/`. `hreflang` meta tags on every page
   for SEO. Language switcher dropdown in the nav.
-- ✅ **Sections**: sticky nav, hero with store buttons + 3 phone
-  mockups, 6 feature cards (week/month, heatmap, 20+ sports, weekly
-  goals, calendar sync, Strava integration), 3 showcase rows with
-  screenshots (Plan, Review, Customize), Free vs Pro pricing cards,
-  footer with privacy policy + contact links.
+- ✅ **Sections**: sticky nav, hero with Google Play button + "Soon
+  on the App Store" text + 3 phone mockups (on mobile, only the stats
+  screenshot is shown), 6 feature cards (week/month, heatmap, 20+
+  sports, weekly goals, calendar sync, Strava integration), 3 showcase
+  rows with screenshots (Plan, Review, Customize), Free vs Pro pricing
+  cards, footer with privacy policy + contact links.
 - ✅ **Pricing on landing page**: Free ($0 forever) and Kadence Pro
-  (from €9.99/year, "Coming soon" badge). No lifetime tier.
+  with both annual and monthly prices ("Coming soon" badge). No
+  lifetime tier. **Platform-aware pricing**: JS detects Apple devices
+  (iOS/Mac via user agent) and shows iOS prices (€14.99/yr, €2.99/mo);
+  Android/other devices see Android prices (€9.99/yr, €1.99/mo).
 - ✅ **Localized screenshots**: each language page uses its own
   screenshots (e.g. `weekly_view_pt.jpg`, `stats_view_fr.jpg`).
   4 screens × 4 languages = 16 images in `landing/img/`. Naming:
   `{screen}_{lang}.jpg` (weekly, monthly, stats) or
-  `{screen}_{lang}.jpeg` (settings). Hero mockups show month (left),
-  week (center), stats (right). Showcase rows show week, stats,
-  settings.
+  `{screen}_{lang}.jpeg` (settings). Desktop hero mockups show month
+  (left), week (center), stats (right). On mobile (< 768px), only the
+  stats screenshot is shown via a separate `phone-mobile` div.
+  Showcase rows show week, stats, settings.
 - ✅ **Privacy policy**: `privacy-policy.html` in root of `landing/`
   (English), plus localized versions in `pt/`, `es/`, `fr/`. Each
   landing page's footer links to its own language's policy. Styled
@@ -957,7 +962,21 @@ Built widgets (11 chart-based + 3 experiential):
 
 ### Play Store listing (in progress)
 - **Store name**: `Kadence Sports: Plan & Track` (27 chars)
+- **Application ID**: `com.kadencesports.app`
 - **Short description**: `Plan your sports week, track sessions, and build your training rhythm.`
-- **TODO**: full description (4000 chars), screenshots, feature
-  graphic (1024×500), privacy policy URL, content rating
-  questionnaire, data safety form, signing key + release AAB.
+- ✅ **Full description**: 2774 chars, keyword-optimized for ASO.
+  Covers: sports, workout, fitness, exercise, training plan, routine,
+  habits, schedule, rest days, health, planner, tracker, running,
+  cycling, swimming, gym, yoga, HIIT, heatmap, streak, calendar sync,
+  Strava.
+- ✅ **Signing key**: upload keystore at `~/upload-keystore.jks`,
+  referenced via `android/key.properties` (gitignored). Wired into
+  `android/app/build.gradle.kts` with release signing config.
+- ✅ **Release AAB**: `flutter build appbundle --dart-define-from-file=.env`
+  produces `build/app/outputs/bundle/release/app-release.aab`.
+- ✅ **Privacy policy URL**: `https://sports-planner-app.vercel.app/privacy-policy.html`
+- ✅ **Feature graphic**: 1024×500 at `assets/feature_graphic.png`.
+  Generator script: `tool/generate_feature_graphic.py`.
+- ✅ **Screenshots**: captured.
+- **TODO**: content rating questionnaire, data safety form.
+- **TODO**: update store badge links on landing page once published.

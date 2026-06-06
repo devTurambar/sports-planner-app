@@ -1,4 +1,4 @@
-package com.example.kadence
+package com.kadencesports.app
 
 import android.content.ContentUris
 import android.content.ContentValues
@@ -10,7 +10,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.kadence/calendar_color")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.kadencesports.app/calendar_color")
             .setMethodCallHandler { call, result ->
                 if (call.method == "setEventColor") {
                     val eventId = call.argument<String>("eventId")

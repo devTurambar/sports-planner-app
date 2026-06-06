@@ -190,6 +190,27 @@ section { padding: 100px 24px; }
   fill: currentColor;
 }
 
+.store-soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--bg-elevated);
+}
+.store-soon .store-icon { fill: var(--text-secondary); }
+
+.price-monthly {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
 /* ---- PHONE MOCKUP ---- */
 .hero-mockups {
   margin-top: 64px;
@@ -217,6 +238,7 @@ section { padding: 100px 24px; }
   transform: translateY(-16px);
 }
 .phone-side { opacity: 0.7; }
+.phone-mobile { display: none; }
 
 /* ---- FEATURES ---- */
 .features { background: var(--bg); }
@@ -417,7 +439,8 @@ footer {
   .hero { padding-top: 120px; }
   .hero-mockups { gap: 12px; }
   .phone-side { display: none; }
-  .phone-center { transform: none; width: clamp(220px, 60vw, 280px); }
+  .phone-center { display: none; }
+  .phone-mobile { display: block !important; width: clamp(220px, 60vw, 280px); }
   .showcase-row, .showcase-row.reverse {
     flex-direction: column;
     gap: 32px;

@@ -84,11 +84,12 @@ class _LogoMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       width: 72,
       height: 72,
       decoration: BoxDecoration(
-        color: color,
+        color: colors.bgCard,
         borderRadius: BorderRadius.circular(KRadius.xl),
         boxShadow: <BoxShadow>[
           BoxShadow(
@@ -98,31 +99,51 @@ class _LogoMark extends StatelessWidget {
           ),
         ],
       ),
-      child: CustomPaint(size: const Size(72, 72), painter: _KGlyphPainter()),
+      child: CustomPaint(
+        size: const Size(72, 72),
+        painter: _KGlyphPainter(color: color),
+      ),
     );
   }
 }
 
-/// Paints the "K" monogram in white strokes inside the accent square.
+/// Paints the "K." monogram — bold filled K with a dot, in accent color.
 class _KGlyphPainter extends CustomPainter {
+  _KGlyphPainter({required this.color});
+
+  final Color color;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 2.8
+      ..color = color
+      ..strokeWidth = size.width * 0.085
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    final mid = size.height / 2;
-    final left = size.width * 0.31;
-    final right = size.width * 0.72;
-    final top = size.height * 0.20;
-    final bottom = size.height * 0.80;
+    final left = size.width * 0.26;
+    final right = size.width * 0.68;
+    final top = size.height * 0.22;
+    final bottom = size.height * 0.78;
+    final mid = size.height * 0.48;
 
-    canvas
-      ..drawLine(Offset(left, top), Offset(left, bottom), paint)
-      ..drawLine(Offset(left, mid), Offset(right, top), paint)
-      ..drawLine(Offset(left, mid), Offset(right, bottom), paint);
+    // Vertical stem
+    canvas.drawLine(Offset(left, top), Offset(left, bottom), paint);
+    // Upper diagonal
+    canvas.drawLine(Offset(left, mid), Offset(right, top), paint);
+    // Lower diagonal
+    canvas.drawLine(Offset(left, mid), Offset(right, bottom), paint);
+
+    // Dot
+    final dotPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final dotR = size.width * 0.044;
+    canvas.drawCircle(
+      Offset(size.width * 0.80, bottom),
+      dotR,
+      dotPaint,
+    );
   }
 
   @override
