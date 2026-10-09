@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the Play Store feature graphic (1024×500).
+"""Generate the Play Store feature graphic (1024×500) for all languages.
 
 Dark background with coral K logo, app name, tagline, and phone mockup.
 Matches the Kadence dark theme aesthetic.
@@ -18,10 +18,28 @@ PHONE_BEZEL = (0x2A, 0x2A, 0x26)
 
 PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONT_PATH = "/tmp/Sora.ttf"
-SCREENSHOT_PATH = os.path.join(PROJECT, "landing", "img", "weekly_view_en.jpg")
 
 WIDTH = 1024
 HEIGHT = 500
+
+LANGUAGES = {
+    "en": {
+        "tagline": "Plan & Track Your Training",
+        "screenshot": "weekly_view_en.jpg",
+    },
+    "pt": {
+        "tagline": "Planeia e Acompanha os Teus Treinos",
+        "screenshot": "weekly_view_pt.jpg",
+    },
+    "es": {
+        "tagline": "Planifica y Sigue Tus Entrenamientos",
+        "screenshot": "weekly_view_es.jpg",
+    },
+    "fr": {
+        "tagline": "Planifiez et Suivez Vos Entraînements",
+        "screenshot": "weekly_view_fr.jpg",
+    },
+}
 
 
 def draw_k_glyph(draw, cx, cy, size, stroke_width, color=CORAL):
@@ -61,7 +79,6 @@ def create_phone_mockup(screenshot_path, phone_height):
     screenshot = Image.open(screenshot_path)
     ss_w, ss_h = screenshot.size
 
-    # Phone proportions
     bezel = 8
     corner_r = 20
     screen_h = phone_height - bezel * 2
@@ -69,45 +86,34 @@ def create_phone_mockup(screenshot_path, phone_height):
     phone_w = screen_w + bezel * 2
     phone_h = phone_height
 
-    # Create phone frame with rounded corners
     phone = Image.new("RGBA", (phone_w, phone_h), (0, 0, 0, 0))
     phone_draw = ImageDraw.Draw(phone)
 
-    # Bezel (rounded rect)
     draw_rounded_rect(phone_draw, [0, 0, phone_w, phone_h], corner_r, PHONE_BEZEL)
 
-    # Screen area (rounded rect, slightly smaller radius)
     inner_r = max(corner_r - bezel, 4)
     draw_rounded_rect(phone_draw,
                       [bezel, bezel, phone_w - bezel, phone_h - bezel],
                       inner_r, (0, 0, 0, 255))
 
-    # Resize screenshot to fit screen
     resized = screenshot.resize((screen_w, screen_h), Image.LANCZOS)
 
-    # Create a mask for rounded corners on the screenshot
     mask = Image.new("L", (screen_w, screen_h), 0)
     mask_draw = ImageDraw.Draw(mask)
     mask_draw.rounded_rectangle([0, 0, screen_w, screen_h], inner_r, fill=255)
 
-    # Paste screenshot into the phone
     phone.paste(resized, (bezel, bezel), mask)
-
     return phone
 
 
-def main():
+def generate(lang, tagline, screenshot_filename):
     img = Image.new("RGB", (WIDTH, HEIGHT), BG_DARK)
     draw = ImageDraw.Draw(img)
 
-    draw = ImageDraw.Draw(img)
-
-    # Left side: logo + text
     logo_size = 100
     logo_x = 180
     logo_y = HEIGHT // 2
 
-    # Fonts
     try:
         font_name = ImageFont.truetype(FONT_PATH, 44)
         font_tagline = ImageFont.truetype(FONT_PATH, 20)
@@ -118,21 +124,22 @@ def main():
     rect_size = logo_size
     text_x = logo_x + rect_size // 2 + 30
 
-    # Measure title text width to compute bg rect right edge
     title_bbox = font_name.getbbox("Kadence Sports")
     title_w = title_bbox[2] - title_bbox[0]
 
-    # Background rect: left padding from logo = right padding from text
+    tagline_bbox = font_tagline.getbbox(tagline)
+    tagline_w = tagline_bbox[2] - tagline_bbox[0]
+    content_w = max(title_w, tagline_w)
+
     bg_rect_padding = 40
     bg_rect_x0 = logo_x - logo_size // 2 - bg_rect_padding
     bg_rect_y0 = logo_y - logo_size // 2 - bg_rect_padding
-    bg_rect_x1 = text_x + title_w + bg_rect_padding
+    bg_rect_x1 = text_x + content_w + bg_rect_padding
     bg_rect_y1 = logo_y + logo_size // 2 + bg_rect_padding
     draw_rounded_rect(draw,
                       [bg_rect_x0, bg_rect_y0, bg_rect_x1, bg_rect_y1],
                       20, (0x1F, 0x14, 0x0F))
 
-    # Draw dark rounded rect behind the K
     rect_radius = int(rect_size * 0.22)
     draw_rounded_rect(
         draw,
@@ -141,36 +148,37 @@ def main():
         rect_radius, BG_SUBTLE
     )
 
-    # Draw K glyph
     draw_k_glyph(draw, logo_x, logo_y, logo_size, stroke_width=4)
 
-    # Text
     logo_top = logo_y - rect_size // 2
     logo_bottom = logo_y + rect_size // 2
 
     draw.text((text_x, logo_top), "Kadence Sports", fill=FG_PRIMARY,
               font=font_name, anchor="lt")
-    draw.text((text_x, logo_bottom), "Plan & Track Your Training",
+    draw.text((text_x, logo_bottom), tagline,
               fill=FG_SECONDARY, font=font_tagline, anchor="lb")
 
-    # Right side: phone mockup
+    screenshot_path = os.path.join(PROJECT, "landing", "img", screenshot_filename)
     phone_h = int(HEIGHT * 0.76)
-    phone = create_phone_mockup(SCREENSHOT_PATH, phone_h)
+    phone = create_phone_mockup(screenshot_path, phone_h)
     phone_w = phone.width
 
-    # Position: right side, vertically centered, within 100px safe zone
     phone_x = WIDTH - phone_w - 110
     phone_y = (HEIGHT - phone_h) // 2
 
-    # Paste phone onto main image
     img_rgba = img.convert("RGBA")
     img_rgba.paste(phone, (phone_x, phone_y), phone)
     img = img_rgba.convert("RGB")
 
-    # Save
-    out_path = os.path.join(PROJECT, "assets", "feature_graphic.png")
+    suffix = f"_{lang}" if lang != "en" else ""
+    out_path = os.path.join(PROJECT, "assets", f"feature_graphic{suffix}.png")
     img.save(out_path, "PNG")
     print(f"  {out_path} ({WIDTH}×{HEIGHT})")
+
+
+def main():
+    for lang, cfg in LANGUAGES.items():
+        generate(lang, cfg["tagline"], cfg["screenshot"])
     print("Done!")
 
 
