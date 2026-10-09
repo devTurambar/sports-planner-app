@@ -81,6 +81,9 @@ class CalendarService {
 
   static Future<List<Calendar>> getWritableCalendars() async {
     if (!_isSupported) return const [];
+    var granted = await hasPermission();
+    if (!granted) granted = await requestPermission();
+    if (!granted) return const [];
     final result = await _plugin.retrieveCalendars();
     if (!result.isSuccess || result.data == null) return const [];
     return result.data!

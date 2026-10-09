@@ -24,6 +24,7 @@
   "calendarsOff": "Desactivado",
   "calendarsLoading": "…",
   "calendarsChooseTitle": "Elegir calendarios",
+  "calendarsAccessError": "No se pudo acceder a tus calendarios. Comprueba el permiso de calendario en los ajustes del dispositivo.",
 
   "settingsTypeColors": "Colores por tipo",
   "settingsTypeColorsValue": "Personalizar",

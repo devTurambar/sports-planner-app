@@ -59,7 +59,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _toggleCalendarSync(bool value) async {
     if (value) {
       final granted = await CalendarService.requestPermission();
-      if (!granted) return;
+      if (!granted) {
+        if (!mounted) return;
+        final loc = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.calendarsAccessError)),
+        );
+        return;
+      }
       await CalendarService.setSyncEnabled(true);
       setState(() => _calendarSync = true);
       await _loadCalendars();
@@ -75,7 +82,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _pickCalendars() async {
-    if (_calendars.isEmpty) return;
+    if (_calendars.isEmpty) {
+      await _loadCalendars();
+      if (!mounted) return;
+      if (_calendars.isEmpty) {
+        final loc = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.calendarsAccessError)),
+        );
+        return;
+      }
+    }
     final colors = context.colors;
     final result = await showModalBottomSheet<Set<String>>(
       context: context,

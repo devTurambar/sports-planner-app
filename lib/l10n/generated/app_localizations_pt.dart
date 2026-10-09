@@ -73,6 +73,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get calendarsChooseTitle => 'Escolher calendários';
 
   @override
+  String get calendarsAccessError =>
+      'Não foi possível aceder aos seus calendários. Verifique a permissão de calendário nas definições do dispositivo.';
+
+  @override
   String get settingsTypeColors => 'Cores por tipo';
 
   @override
@@ -1194,6 +1198,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get calendarsChooseTitle => 'Escolher calendários';
+
+  @override
+  String get calendarsAccessError =>
+      'Não foi possível acessar seus calendários. Verifique a permissão de calendário nas configurações do dispositivo.';
 
   @override
   String get settingsTypeColors => 'Cores por tipo';

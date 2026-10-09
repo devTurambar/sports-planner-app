@@ -223,6 +223,12 @@ abstract class AppLocalizations {
   /// **'Choose calendars'**
   String get calendarsChooseTitle;
 
+  /// No description provided for @calendarsAccessError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t access your calendars. Check calendar permission in your device settings.'**
+  String get calendarsAccessError;
+
   /// No description provided for @settingsTypeColors.
   ///
   /// In en, this message translates to:

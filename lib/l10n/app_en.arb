@@ -37,6 +37,7 @@
   "calendarsOff": "Off",
   "calendarsLoading": "…",
   "calendarsChooseTitle": "Choose calendars",
+  "calendarsAccessError": "Couldn't access your calendars. Check calendar permission in your device settings.",
 
   "settingsTypeColors": "Type colors",
   "settingsTypeColorsValue": "Customize",

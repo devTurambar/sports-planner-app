@@ -24,6 +24,7 @@
   "calendarsOff": "Désactivée",
   "calendarsLoading": "…",
   "calendarsChooseTitle": "Choisir les calendriers",
+  "calendarsAccessError": "Impossible d'accéder à vos calendriers. Vérifiez l'autorisation de calendrier dans les réglages de l'appareil.",
 
   "settingsTypeColors": "Couleurs par type",
   "settingsTypeColorsValue": "Modifier",

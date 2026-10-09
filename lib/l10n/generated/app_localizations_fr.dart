@@ -74,6 +74,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get calendarsChooseTitle => 'Choisir les calendriers';
 
   @override
+  String get calendarsAccessError =>
+      'Impossible d\'accéder à vos calendriers. Vérifiez l\'autorisation de calendrier dans les réglages de l\'appareil.';
+
+  @override
   String get settingsTypeColors => 'Couleurs par type';
 
   @override
