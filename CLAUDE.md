@@ -699,16 +699,35 @@ without discussion.
   be pushed on next sign-in (signed out). The ownership tag is
   always consistent with the imported state.
 
-### Strava integration (after auth)
-- **Read from Strava** (one-way, Strava → Kadence): poll for
-  completed Strava activities via `GET /api/v3/athlete/activities`.
-  Match by date + activity type against planned sessions and
-  auto-mark them as done. Import full history to populate stats.
-- Strava OAuth2 (`activity:read_all` scope). User authorizes once;
-  refresh token stored locally.
+### Strava integration (built — needs backend deploy + device test)
+- **One-way, Strava → Kadence.** Pro + signed-in only (tokens live
+  server-side, keyed by Supabase `user_id`).
+- **Backend**: `supabase/migrations/*_strava_tokens.sql` (table + RLS),
+  edge functions `strava-auth` (code → tokens, stores them) and
+  `strava-token` (returns a fresh access token, refreshing if needed).
+  `STRAVA_CLIENT_SECRET` only exists as a Supabase function secret.
+- **Client**: `StravaService` (`lib/state/strava_service.dart`) —
+  OAuth via `/oauth/mobile/authorize` with `state` check, redirect
+  `io.supabase.kadence://strava-callback/`. Settings → Data → Strava
+  row opens `StravaSheet` (`lib/screens/settings/widgets/strava_sheet.dart`).
+- **Deep links are routed manually in `main.dart`** (`login-callback`
+  → `getSessionFromUrl`, `strava-callback` → Strava).
+  `detectSessionInUri` is **off** because Supabase's PKCE detector
+  would otherwise grab Strava's `?code=` callback as its own.
+- **Merge rules** (`_merge`, additive, never deletes): already imported
+  → skip; planned not-done session of same type that day → mark done;
+  else add a done activity with id `s<stravaId>`, time + duration from
+  Strava. Strava IDs that ticked off a planned session are stored in
+  `kadence.strava_matched_ids`. Writes go through
+  `PlanController.mergeExternal()` (one batch, no calendar events, no
+  review prompt).
+- **Auto-sync**: on startup and app resume, if connected and last sync
+  > 15 min ago; re-scans the last 30 days to catch late uploads. Full
+  history import runs right after connecting.
+- Type mapping in `lib/state/strava_type_mapping.dart` (uses Strava
+  `sport_type`, falls back to `type`).
 - Garmin Connect has no public API for individual devs — most Garmin
-  users sync to Strava anyway, so Strava covers the majority of
-  devices (Garmin, Apple Watch, Polar, Wahoo, etc.).
+  users sync to Strava anyway.
 
 ### Monetization — Kadence Pro (in progress)
 
@@ -900,9 +919,8 @@ Built widgets (11 chart-based + 3 experiential):
   and back `ProController` with real entitlements.
 - **TODO**: implement date filtering UI for stats (date range
   picker that scopes all graphs to a custom period).
-- **TODO**: build Strava integration — OAuth flow, history import,
-  auto-mark done. One-way only (Strava → Kadence). Requires
-  backend for secure token storage.
+- **TODO**: Strava — deploy backend, apply for Strava API athlete
+  capacity increase before launch (new apps are capped at 1 athlete).
 
 ### App icon (done)
 - ✅ Dark background (#0E0E0C `bgBase`) with coral (#FF7A45) K

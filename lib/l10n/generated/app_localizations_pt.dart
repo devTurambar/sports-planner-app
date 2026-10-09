@@ -610,6 +610,83 @@ class AppLocalizationsPt extends AppLocalizations {
       'Importa o teu histórico e marca as sessões como feitas automaticamente';
 
   @override
+  String get settingsStrava => 'Strava';
+
+  @override
+  String get stravaConnect => 'Ligar';
+
+  @override
+  String get stravaConnected => 'Ligado';
+
+  @override
+  String get stravaSheetBody =>
+      'Importa as tuas atividades do Strava. As sessões planeadas correspondentes são marcadas como feitas; o resto é adicionado como concluído.';
+
+  @override
+  String get stravaConnectButton => 'Ligar ao Strava';
+
+  @override
+  String get stravaSyncNow => 'Sincronizar agora';
+
+  @override
+  String get stravaDisconnect => 'Desligar';
+
+  @override
+  String get stravaSyncing => 'A sincronizar…';
+
+  @override
+  String get stravaNeverSynced => 'Ainda não sincronizado';
+
+  @override
+  String stravaLastSync(String time) {
+    return 'Última sincronização: $time';
+  }
+
+  @override
+  String stravaResultAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count atividades novas importadas',
+      one: '1 atividade nova importada',
+      zero: 'Sem atividades novas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String stravaResultMatched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessões planeadas marcadas como feitas',
+      one: '1 sessão planeada marcada como feita',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stravaSignInRequired => 'Inicia sessão para ligar o Strava.';
+
+  @override
+  String get stravaErrorDenied => 'O acesso ao Strava foi recusado.';
+
+  @override
+  String get stravaErrorScope =>
+      'O Kadence precisa de permissão para ler as tuas atividades. Permite-a ao ligar.';
+
+  @override
+  String get stravaErrorRateLimited =>
+      'O Strava está ocupado. Tenta novamente daqui a 15 minutos.';
+
+  @override
+  String get stravaErrorFailed =>
+      'Não foi possível contactar o Strava. Tenta mais tarde.';
+
+  @override
+  String get stravaPoweredBy => 'Powered by Strava';
+
+  @override
   String get paywallStatsTitle => 'Estatísticas avançadas';
 
   @override
@@ -1735,6 +1812,52 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get paywallStravaBody =>
       'Importe seu histórico e marque sessões como feitas automaticamente';
+
+  @override
+  String get stravaConnect => 'Conectar';
+
+  @override
+  String get stravaConnected => 'Conectado';
+
+  @override
+  String get stravaSheetBody =>
+      'Importe suas atividades do Strava. Sessões planejadas correspondentes são marcadas como feitas; o resto é adicionado como concluído.';
+
+  @override
+  String get stravaConnectButton => 'Conectar com o Strava';
+
+  @override
+  String get stravaDisconnect => 'Desconectar';
+
+  @override
+  String get stravaSyncing => 'Sincronizando…';
+
+  @override
+  String stravaResultMatched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessões planejadas marcadas como feitas',
+      one: '1 sessão planejada marcada como feita',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stravaSignInRequired =>
+      'Entre na sua conta para conectar o Strava.';
+
+  @override
+  String get stravaErrorScope =>
+      'O Kadence precisa de permissão para ler suas atividades. Permita ao conectar.';
+
+  @override
+  String get stravaErrorRateLimited =>
+      'O Strava está ocupado. Tente novamente em 15 minutos.';
+
+  @override
+  String get stravaErrorFailed =>
+      'Não foi possível acessar o Strava. Tente mais tarde.';
 
   @override
   String get paywallStatsTitle => 'Estatísticas avançadas';

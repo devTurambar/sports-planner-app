@@ -60,6 +60,41 @@ class PlanController extends ChangeNotifier {
     }
   }
 
+  /// Bulk-merge activities from an external source (e.g. Strava).
+  /// [added] are inserted as-is (caller supplies id + status) and
+  /// [markDoneIds] flips existing activities to done. One DB batch, one
+  /// cloud upsert, one notify — no calendar events or review prompts,
+  /// since a history import can be hundreds of entries.
+  void mergeExternal({
+    List<Activity> added = const [],
+    Set<String> markDoneIds = const {},
+  }) {
+    final changed = <Activity>[];
+    for (final list in _byDate.values) {
+      for (var i = 0; i < list.length; i++) {
+        if (markDoneIds.contains(list[i].id) &&
+            list[i].status != DayStatus.done) {
+          list[i] = list[i].copyWith(status: DayStatus.done);
+          changed.add(list[i]);
+        }
+      }
+    }
+    for (final a in added) {
+      _byDate.putIfAbsent(KDate.keyFor(a.date), () => <Activity>[]).add(a);
+      changed.add(a);
+    }
+    if (changed.isEmpty) return;
+    ActivityDb.upsertAll(changed);
+    if (_userId != null) {
+      SyncService.pushAll({'external': changed}, _userId!).catchError((_) {});
+    }
+    notifyListeners();
+  }
+
+  /// Whether any stored activity has this id.
+  bool containsId(String id) =>
+      _byDate.values.any((list) => list.any((a) => a.id == id));
+
   /// Expose internal map for sync reads.
   Map<String, List<Activity>> get byDate =>
       Map<String, List<Activity>>.unmodifiable(_byDate);
