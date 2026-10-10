@@ -468,6 +468,17 @@ without discussion.
   ensures cloud rows have the correct calendar reference so that
   activities synced back from cloud (e.g. after account switching)
   can still delete their linked device calendar events.
+- **BUG (open)**: calendar sync did **not** work in the build installed
+  from the Play Store test link, though it works with `flutter run`.
+  Store builds are release builds, so **always re-test calendar in
+  release mode** (`flutter run --release --dart-define-from-file=.env`
+  or the store test track), not just debug. Prime suspect: R8 code
+  shrinking (on by default for Flutter release builds) obfuscating
+  `device_calendar`'s model classes — fix would be a
+  `-keep class com.builttoroam.devicecalendar.** { *; }` rule in
+  `android/app/proguard-rules.pro`, referenced from the release block
+  of `android/app/build.gradle.kts`. Reproduce in release mode first
+  to confirm.
 - **TODO**: multi-select calendar picker (checkboxes instead of
   single-select / all).
 - **TODO**: consider optional "keep on calendar?" prompt when deleting
@@ -702,10 +713,16 @@ without discussion.
 ### Strava integration (built — needs backend deploy + device test)
 - **One-way, Strava → Kadence.** Pro + signed-in only (tokens live
   server-side, keyed by Supabase `user_id`).
-- **Backend**: `supabase/migrations/*_strava_tokens.sql` (table + RLS),
-  edge functions `strava-auth` (code → tokens, stores them) and
-  `strava-token` (returns a fresh access token, refreshing if needed).
-  `STRAVA_CLIENT_SECRET` only exists as a Supabase function secret.
+- **Backend**: `strava_tokens` table is **server-only** (RLS on, no
+  client policies, grants revoked — see
+  `supabase/migrations/20261010_strava_tokens_server_only.sql`). Only
+  the edge functions touch it, via the service role:
+  `strava-auth` (code → tokens, stores them), `strava-token` (returns a
+  fresh access token, refreshing if needed), `strava-disconnect`
+  (revokes on Strava + deletes the row). Shared helpers (session →
+  user, token refresh) in `supabase/functions/_shared/strava.ts`.
+  `STRAVA_CLIENT_SECRET` only exists as a Supabase function secret; the
+  refresh token never leaves the server.
 - **Client**: `StravaService` (`lib/state/strava_service.dart`) —
   OAuth via `/oauth/mobile/authorize` with `state` check, redirect
   `io.supabase.kadence://strava-callback/`. Settings → Data → Strava
