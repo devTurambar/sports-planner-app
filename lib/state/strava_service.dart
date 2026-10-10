@@ -124,18 +124,8 @@ class StravaService extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> disconnect() async {
     try {
-      // Revoke on Strava's side too, then drop our stored tokens.
-      final token = await _accessToken();
-      if (token != null) {
-        final req = await HttpClient().postUrl(
-          Uri.https('www.strava.com', '/oauth/deauthorize'),
-        );
-        req.headers.set('Authorization', 'Bearer $token');
-        await (await req.close()).drain<void>();
-      }
-      if (_userId != null) {
-        await _client.from('strava_tokens').delete().eq('user_id', _userId!);
-      }
+      // Server revokes access on Strava and deletes the stored tokens.
+      await _client.functions.invoke('strava-disconnect');
     } catch (e) {
       debugPrint('Strava disconnect: $e');
     }
