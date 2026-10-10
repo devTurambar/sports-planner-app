@@ -223,6 +223,12 @@ abstract class AppLocalizations {
   /// **'Choose calendars'**
   String get calendarsChooseTitle;
 
+  /// No description provided for @calendarsAccessError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t access your calendars. Check calendar permission in your device settings.'**
+  String get calendarsAccessError;
+
   /// No description provided for @settingsTypeColors.
   ///
   /// In en, this message translates to:
@@ -1170,6 +1176,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import your history and auto-mark sessions as done'**
   String get paywallStravaBody;
+
+  /// No description provided for @settingsStrava.
+  ///
+  /// In en, this message translates to:
+  /// **'Strava'**
+  String get settingsStrava;
+
+  /// No description provided for @stravaConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get stravaConnect;
+
+  /// No description provided for @stravaConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get stravaConnected;
+
+  /// No description provided for @stravaSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Import your Strava activities. Planned sessions that match are marked done; everything else is added as completed.'**
+  String get stravaSheetBody;
+
+  /// No description provided for @stravaConnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect with Strava'**
+  String get stravaConnectButton;
+
+  /// No description provided for @stravaSyncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get stravaSyncNow;
+
+  /// No description provided for @stravaDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get stravaDisconnect;
+
+  /// No description provided for @stravaSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get stravaSyncing;
+
+  /// No description provided for @stravaNeverSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet'**
+  String get stravaNeverSynced;
+
+  /// Last Strava sync timestamp
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {time}'**
+  String stravaLastSync(String time);
+
+  /// Number of new activities imported from Strava
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No new activities} =1{1 new activity imported} other{{count} new activities imported}}'**
+  String stravaResultAdded(int count);
+
+  /// Number of planned sessions auto-marked done by Strava
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 planned session marked done} other{{count} planned sessions marked done}}'**
+  String stravaResultMatched(int count);
+
+  /// No description provided for @stravaSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to connect Strava.'**
+  String get stravaSignInRequired;
+
+  /// No description provided for @stravaErrorDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Strava access was declined.'**
+  String get stravaErrorDenied;
+
+  /// No description provided for @stravaErrorScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Kadence needs permission to read your activities. Allow it when connecting.'**
+  String get stravaErrorScope;
+
+  /// No description provided for @stravaErrorRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Strava is busy right now. Try again in 15 minutes.'**
+  String get stravaErrorRateLimited;
+
+  /// No description provided for @stravaErrorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach Strava. Try again later.'**
+  String get stravaErrorFailed;
+
+  /// No description provided for @stravaPoweredBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Powered by Strava'**
+  String get stravaPoweredBy;
 
   /// No description provided for @paywallStatsTitle.
   ///

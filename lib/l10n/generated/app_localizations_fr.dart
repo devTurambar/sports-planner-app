@@ -74,6 +74,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get calendarsChooseTitle => 'Choisir les calendriers';
 
   @override
+  String get calendarsAccessError =>
+      'Impossible d\'accéder à vos calendriers. Vérifiez l\'autorisation de calendrier dans les réglages de l\'appareil.';
+
+  @override
   String get settingsTypeColors => 'Couleurs par type';
 
   @override
@@ -606,6 +610,83 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get paywallStravaBody =>
       'Importe ton historique et marque les séances comme faites automatiquement';
+
+  @override
+  String get settingsStrava => 'Strava';
+
+  @override
+  String get stravaConnect => 'Connecter';
+
+  @override
+  String get stravaConnected => 'Connecté';
+
+  @override
+  String get stravaSheetBody =>
+      'Importe tes activités Strava. Les séances planifiées correspondantes sont marquées comme faites ; le reste est ajouté comme terminé.';
+
+  @override
+  String get stravaConnectButton => 'Se connecter avec Strava';
+
+  @override
+  String get stravaSyncNow => 'Synchroniser';
+
+  @override
+  String get stravaDisconnect => 'Déconnecter';
+
+  @override
+  String get stravaSyncing => 'Synchronisation…';
+
+  @override
+  String get stravaNeverSynced => 'Pas encore synchronisé';
+
+  @override
+  String stravaLastSync(String time) {
+    return 'Dernière synchro : $time';
+  }
+
+  @override
+  String stravaResultAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nouvelles activités importées',
+      one: '1 nouvelle activité importée',
+      zero: 'Aucune nouvelle activité',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String stravaResultMatched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances planifiées marquées comme faites',
+      one: '1 séance planifiée marquée comme faite',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stravaSignInRequired => 'Connecte-toi pour lier Strava.';
+
+  @override
+  String get stravaErrorDenied => 'L\'accès à Strava a été refusé.';
+
+  @override
+  String get stravaErrorScope =>
+      'Kadence a besoin de l\'autorisation de lire tes activités. Autorise-la lors de la connexion.';
+
+  @override
+  String get stravaErrorRateLimited =>
+      'Strava est occupé. Réessaie dans 15 minutes.';
+
+  @override
+  String get stravaErrorFailed =>
+      'Impossible de joindre Strava. Réessaie plus tard.';
+
+  @override
+  String get stravaPoweredBy => 'Powered by Strava';
 
   @override
   String get paywallStatsTitle => 'Statistiques avancées';

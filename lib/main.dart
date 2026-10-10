@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -11,6 +12,7 @@ import 'state/auth_controller.dart';
 import 'state/calendar_service.dart';
 import 'state/onboarding_controller.dart';
 import 'state/plan_controller.dart';
+import 'state/strava_service.dart';
 import 'state/theme_controller.dart';
 import 'state/locale_controller.dart';
 import 'state/review_service.dart';
@@ -32,6 +34,9 @@ Future<void> main() async {
   await Supabase.initialize(
     url: const String.fromEnvironment('SUPABASE_URL'),
     anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+    // Deep links are routed manually below: Supabase's own detector treats
+    // any `?code=` link as its PKCE callback, which would swallow Strava's.
+    authOptions: const FlutterAuthClientOptions(detectSessionInUri: false),
   );
 
   tz.initializeTimeZones();
@@ -44,6 +49,25 @@ Future<void> main() async {
     prefs: prefs,
     planController: planController,
   );
+  final stravaService = StravaService(
+    prefs: prefs,
+    planController: planController,
+  );
+
+  // OAuth callback deep links (emits the cold-start link too).
+  AppLinks().uriLinkStream.listen((uri) async {
+    switch (uri.host) {
+      case 'login-callback':
+        try {
+          await Supabase.instance.client.auth.getSessionFromUrl(uri);
+        } catch (e) {
+          debugPrint('Auth callback failed: $e');
+        }
+      case 'strava-callback':
+        stravaService.handleCallback(uri);
+    }
+  });
+  stravaService.autoSync();
 
   runApp(
     MultiProvider(
@@ -74,6 +98,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<PlanController>.value(
           value: planController,
+        ),
+        ChangeNotifierProvider<StravaService>.value(
+          value: stravaService,
         ),
       ],
       child: const KadenceApp(),

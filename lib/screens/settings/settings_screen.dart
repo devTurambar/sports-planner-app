@@ -15,6 +15,7 @@ import '../../state/locale_controller.dart';
 import '../../state/onboarding_controller.dart';
 import '../../state/plan_controller.dart';
 import '../../state/pro_controller.dart';
+import '../../state/strava_service.dart';
 import '../../state/sync_service.dart';
 import '../../state/theme_controller.dart';
 import '../../state/type_color_controller.dart';
@@ -26,6 +27,7 @@ import '../../widgets/k_type_tile.dart';
 import '../../state/activity_db.dart';
 import '../../state/goal_controller.dart';
 import '../paywall/paywall_screen.dart';
+import 'widgets/strava_sheet.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -59,7 +61,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _toggleCalendarSync(bool value) async {
     if (value) {
       final granted = await CalendarService.requestPermission();
-      if (!granted) return;
+      if (!granted) {
+        if (!mounted) return;
+        final loc = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.calendarsAccessError)),
+        );
+        return;
+      }
       await CalendarService.setSyncEnabled(true);
       setState(() => _calendarSync = true);
       await _loadCalendars();
@@ -75,7 +84,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _pickCalendars() async {
-    if (_calendars.isEmpty) return;
+    if (_calendars.isEmpty) {
+      await _loadCalendars();
+      if (!mounted) return;
+      if (_calendars.isEmpty) {
+        final loc = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.calendarsAccessError)),
+        );
+        return;
+      }
+    }
     final colors = context.colors;
     final result = await showModalBottomSheet<Set<String>>(
       context: context,
@@ -277,6 +296,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final goalCtrl = context.watch<GoalController>();
     final localeCtrl = context.watch<LocaleController>();
     final pro = context.watch<ProController>();
+    final strava = context.watch<StravaService>();
     final loc = AppLocalizations.of(context)!;
 
     return ListView(
@@ -368,6 +388,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _Group(
           rows: <Widget>[
             _StaticRow(
+              icon: LucideIcons.activity,
+              iconBg: stravaOrange,
+              label: loc.settingsStrava,
+              value: strava.isConnected
+                  ? loc.stravaConnected
+                  : loc.stravaConnect,
+              onTap: () => _openStrava(pro.isPro, auth.isSignedIn),
+              proBadge: !pro.isPro,
+            ),
+            _StaticRow(
               icon: LucideIcons.upload,
               iconBg: const Color(0xFF007AFF),
               label: loc.settingsExportData,
@@ -437,6 +467,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ],
     );
+  }
+
+  /// Strava needs Pro (paywall) and an account (tokens live server-side).
+  void _openStrava(bool isPro, bool isSignedIn) {
+    if (!isPro) {
+      PaywallScreen.show(context);
+    } else if (!isSignedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.stravaSignInRequired),
+        ),
+      );
+    } else {
+      showStravaSheet(context);
+    }
   }
 
   String _languageLabel(AppLocalizations loc, LocaleController ctrl) {

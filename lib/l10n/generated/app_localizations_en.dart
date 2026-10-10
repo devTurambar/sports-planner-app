@@ -74,6 +74,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendarsChooseTitle => 'Choose calendars';
 
   @override
+  String get calendarsAccessError =>
+      'Couldn\'t access your calendars. Check calendar permission in your device settings.';
+
+  @override
   String get settingsTypeColors => 'Type colors';
 
   @override
@@ -597,6 +601,82 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get paywallStravaBody =>
       'Import your history and auto-mark sessions as done';
+
+  @override
+  String get settingsStrava => 'Strava';
+
+  @override
+  String get stravaConnect => 'Connect';
+
+  @override
+  String get stravaConnected => 'Connected';
+
+  @override
+  String get stravaSheetBody =>
+      'Import your Strava activities. Planned sessions that match are marked done; everything else is added as completed.';
+
+  @override
+  String get stravaConnectButton => 'Connect with Strava';
+
+  @override
+  String get stravaSyncNow => 'Sync now';
+
+  @override
+  String get stravaDisconnect => 'Disconnect';
+
+  @override
+  String get stravaSyncing => 'Syncing…';
+
+  @override
+  String get stravaNeverSynced => 'Not synced yet';
+
+  @override
+  String stravaLastSync(String time) {
+    return 'Last synced $time';
+  }
+
+  @override
+  String stravaResultAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new activities imported',
+      one: '1 new activity imported',
+      zero: 'No new activities',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String stravaResultMatched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count planned sessions marked done',
+      one: '1 planned session marked done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stravaSignInRequired => 'Sign in to connect Strava.';
+
+  @override
+  String get stravaErrorDenied => 'Strava access was declined.';
+
+  @override
+  String get stravaErrorScope =>
+      'Kadence needs permission to read your activities. Allow it when connecting.';
+
+  @override
+  String get stravaErrorRateLimited =>
+      'Strava is busy right now. Try again in 15 minutes.';
+
+  @override
+  String get stravaErrorFailed => 'Couldn\'t reach Strava. Try again later.';
+
+  @override
+  String get stravaPoweredBy => 'Powered by Strava';
 
   @override
   String get paywallStatsTitle => 'Advanced stats';
